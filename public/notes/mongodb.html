@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MongoDB — the complete database · Sheryians</title>
+<meta name="description" content="MongoDB from zero to production — document model, CRUD, queries, relationships, validation, transactions, replication, sharding, GridFS, and MERN integration.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:17ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Backend · Database · MERN</div>
+  <h1><em>MongoDB</em> — the rest of the database</h1>
+  <p class="hero-desc">Everything you need to actually use MongoDB in production — the document model, CRUD, queries, relationships, validation, transactions, replication, sharding, and how it fits a MERN stack. Indexing and the aggregation pipeline live in their own notes.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Document model</span>
+    <span class="hero-tag">CRUD</span>
+    <span class="hero-tag">Queries</span>
+    <span class="hero-tag">Schema design</span>
+    <span class="hero-tag">Transactions</span>
+    <span class="hero-tag">Replication</span>
+    <span class="hero-tag">Sharding</span>
+    <span class="hero-tag">MERN integration</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · WHAT ═══ -->
+<section class="section-block" id="what">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">What MongoDB is (and isn't)</h2>
+      <p class="section-subtitle">document store · NoSQL · ACID · where it fits</p>
+    </div>
+  </div>
+
+  <p class="lead">MongoDB is a <b>document database</b>. Instead of tables and rows, it stores <b>documents</b> — self-contained JSON-like objects — grouped into <b>collections</b>. A document can nest other objects and arrays, so one read returns a full, connected structure rather than requiring joins across tables.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Relational (MySQL / Postgres)</th><th>MongoDB</th></tr></thead>
+      <tbody>
+        <tr><td>Database</td><td>Database</td></tr>
+        <tr><td>Table</td><td>Collection</td></tr>
+        <tr><td>Row</td><td>Document</td></tr>
+        <tr><td>Column</td><td>Field</td></tr>
+        <tr><td>Index</td><td>Index</td></tr>
+        <tr><td>Foreign key</td><td>Reference (<code>ObjectId</code>) or embedded document</td></tr>
+        <tr><td>JOIN</td><td><code>$lookup</code> in aggregation, or two queries in code</td></tr>
+        <tr><td>Schema enforced by DB</td><td>Schema optional; can be enforced with validators or Mongoose</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What MongoDB does well</h3>
+  <ul>
+    <li><b>Flexible schema.</b> Add a field without migrations — every document can differ.</li>
+    <li><b>Hierarchical data in one document.</b> Orders with line items, blog posts with comments, users with preferences.</li>
+    <li><b>Horizontal scale.</b> Native sharding across a cluster.</li>
+    <li><b>Fast development loop.</b> JSON in, JSON out. Same shape as your API and UI.</li>
+    <li><b>ACID transactions</b> since 4.0 (multi-document, replica sets required).</li>
+  </ul>
+
+  <h3>What MongoDB does <em>not</em> do well</h3>
+  <ul>
+    <li><b>Complex relational joins at scale.</b> If your data is deeply relational, use Postgres.</li>
+    <li><b>Strict schema at the database level by default.</b> You can enforce it — but it's opt-in.</li>
+    <li><b>Atomic multi-document operations without transactions.</b> Single-document operations are atomic; multi-document aren't, unless you use a transaction.</li>
+    <li><b>Ad-hoc analytical queries.</b> Its aggregation pipeline is strong but not a warehouse.</li>
+  </ul>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The mental model</div>
+    <div class="concept-box-text"><p>A MongoDB document is <b>one JSON object</b>. It has a primary key <code>_id</code> (auto-generated <code>ObjectId</code> if you don't set one), it lives in a <b>collection</b>, collections live in a <b>database</b>, and each server (or shard) can hold many databases. There is no cross-collection foreign-key enforcement.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-what-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">A MongoDB document is closest to which SQL concept?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-what-1', this, false)"><span class="opt-letter">A</span>A table.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-what-1', this, true)"><span class="opt-letter">B</span>A row — but with arbitrarily nested fields.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-what-1-feedback"></div>
+    <div class="quiz-explain hidden">A document is one row's worth of data, but it can contain nested objects and arrays — which in SQL would be spread across multiple related tables.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · DOCUMENT MODEL ═══ -->
+<section class="section-block" id="model">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">The document model &amp; BSON types</h2>
+      <p class="section-subtitle">BSON · ObjectId · nested objects · arrays · type ordering</p>
+    </div>
+  </div>
+
+  <p>MongoDB stores documents in <b>BSON</b> (Binary JSON) — a binary encoding that supports types JSON does not: dates, binary data, <code>ObjectId</code>, <code>Decimal128</code> for money, 64-bit integers, regex, and so on.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">a document</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>{
+  _id: ObjectId(<span class="tok-str">"6712a8c9e1f4b2d3a4e5f6a7"</span>),
+  name: <span class="tok-str">"Aarav Sharma"</span>,
+  email: <span class="tok-str">"aarav@x.com"</span>,
+  age: <span class="tok-num">22</span>,
+  active: <span class="tok-key">true</span>,
+  createdAt: ISODate(<span class="tok-str">"2024-10-18T09:15:00Z"</span>),
+
+  address: {                         <span class="tok-com">// nested object</span>
+    city: <span class="tok-str">"Indore"</span>,
+    pin: <span class="tok-str">"452001"</span>,
+  },
+
+  tags: [<span class="tok-str">"student"</span>, <span class="tok-str">"backend"</span>],           <span class="tok-com">// array of strings</span>
+
+  orders: [                           <span class="tok-com">// array of objects</span>
+    { orderId: <span class="tok-str">"ORD-1"</span>, amount: <span class="tok-num">299</span> },
+    { orderId: <span class="tok-str">"ORD-2"</span>, amount: <span class="tok-num">199</span> },
+  ],
+}</code></pre>
+  </div>
+
+  <h3>ObjectId — the default primary key</h3>
+  <p>Every document has an <code>_id</code>. If you don't supply one, MongoDB generates an <code>ObjectId</code> — a 12-byte value composed of a timestamp, a machine identifier, a process id, and a counter. That means ObjectIds are <b>roughly sortable by creation time</b>, and unique without coordination.</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Why ObjectIds are not UUIDs</div>
+    <div class="concept-box-text"><p>ObjectIds are <b>12 bytes</b>, sortable by time, and generated client-side or server-side without conflict. UUIDs are larger and typically random — fine for privacy, but they lose the time-ordering you get for free with ObjectIds, which affects how efficiently inserts distribute across a sharded cluster.</p></div>
+  </div>
+
+  <h3>BSON type ordering</h3>
+  <p>When sorting or comparing across different types, MongoDB uses a fixed type order:</p>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Rank</th><th>Type</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>MinKey</td></tr>
+        <tr><td>2</td><td>Null</td></tr>
+        <tr><td>3</td><td>Numbers (int, long, double, decimal)</td></tr>
+        <tr><td>4</td><td>String / Symbol</td></tr>
+        <tr><td>5</td><td>Object</td></tr>
+        <tr><td>6</td><td>Array</td></tr>
+        <tr><td>7</td><td>BinData</td></tr>
+        <tr><td>8</td><td>ObjectId</td></tr>
+        <tr><td>9</td><td>Boolean</td></tr>
+        <tr><td>10</td><td>Date</td></tr>
+        <tr><td>11</td><td>Timestamp</td></tr>
+        <tr><td>12</td><td>MaxKey</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>That's why a field mixing numbers and strings will sort all numbers first. It's also why <code>find({ age: '22' })</code> doesn't match documents where age is the number <code>22</code>.</p>
+
+  <div class="quiz-box" id="q-model-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">You have a field with mixed types: some documents have <code>score: 42</code> (number), some have <code>score: "42"</code> (string). When you sort, which comes first?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-model-1', this, true)"><span class="opt-letter">A</span>All numbers first, then all strings — BSON type order.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-model-1', this, false)"><span class="opt-letter">B</span>They interleave, comparing value first.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-model-1-feedback"></div>
+    <div class="quiz-explain hidden">MongoDB sorts by BSON type first, then by value within the type. Numbers always come before strings regardless of value.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · CRUD ═══ -->
+<section class="section-block" id="crud">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">CRUD — the four things you do</h2>
+      <p class="section-subtitle">insert · find · update · delete · result shapes</p>
+    </div>
+  </div>
+
+  <h3>Create</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">mongosh</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// one document</span>
+db.users.<span class="tok-cmd">insertOne</span>({ name: <span class="tok-str">'Aarav'</span>, age: <span class="tok-num">22</span> });
+
+<span class="tok-com">// many at once</span>
+db.users.<span class="tok-cmd">insertMany</span>([
+  { name: <span class="tok-str">'Priya'</span>, age: <span class="tok-num">20</span> },
+  { name: <span class="tok-str">'Karan'</span>, age: <span class="tok-num">31</span> },
+]);
+
+<span class="tok-com">// insertOne returns { acknowledged: true, insertedId: ObjectId(...) }</span>
+<span class="tok-com">// insertMany returns { acknowledged: true, insertedIds: { 0: ObjectId, 1: ObjectId } }</span></code></pre>
+  </div>
+
+  <h3>Read</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">mongosh</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>db.users.<span class="tok-cmd">find</span>({ age: { <span class="tok-op">$gte</span>: <span class="tok-num">20</span> } });         <span class="tok-com">// cursor</span>
+db.users.<span class="tok-cmd">findOne</span>({ name: <span class="tok-str">'Aarav'</span> });          <span class="tok-com">// single doc or null</span>
+db.users.<span class="tok-cmd">find</span>().<span class="tok-cmd">countDocuments</span>();              <span class="tok-com">// count (accurate)</span>
+db.users.<span class="tok-cmd">find</span>().<span class="tok-cmd">limit</span>(<span class="tok-num">5</span>).<span class="tok-cmd">skip</span>(<span class="tok-num">10</span>);           <span class="tok-com">// pagination</span>
+db.users.<span class="tok-cmd">find</span>().<span class="tok-cmd">sort</span>({ age: -<span class="tok-num">1</span> });            <span class="tok-com">// descending</span>
+
+<span class="tok-com">// projection — only these fields come back</span>
+db.users.<span class="tok-cmd">find</span>({}, { name: <span class="tok-num">1</span>, age: <span class="tok-num">1</span>, _id: <span class="tok-num">0</span> });</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong><code>find()</code> returns a cursor, not an array.</strong> The shell auto-iterates it, but in drivers you often call <code>.toArray()</code> — which loads everything into memory. For large result sets, iterate in batches. The default batch is 101 documents then 16 MB per batch.</div>
+  </div>
+
+  <h3>Update</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">mongosh</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// one document, field update (use $set!)</span>
+db.users.<span class="tok-cmd">updateOne</span>(
+  { name: <span class="tok-str">'Aarav'</span> },
+  { <span class="tok-op">$set</span>: { age: <span class="tok-num">23</span> } }
+);
+
+<span class="tok-com">// many documents</span>
+db.users.<span class="tok-cmd">updateMany</span>(
+  { active: <span class="tok-key">false</span> },
+  { <span class="tok-op">$set</span>: { archived: <span class="tok-key">true</span> } }
+);
+
+<span class="tok-com">// add to an array</span>
+db.posts.<span class="tok-cmd">updateOne</span>(
+  { _id: someId },
+  { <span class="tok-op">$push</span>: { tags: <span class="tok-str">'mongodb'</span> } }
+);
+
+<span class="tok-com">// remove from an array</span>
+db.posts.<span class="tok-cmd">updateOne</span>(
+  { _id: someId },
+  { <span class="tok-op">$pull</span>: { tags: <span class="tok-str">'mongodb'</span> } }
+);</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Always use operators.</strong> <code>updateOne(filter, { age: 30 })</code> replaces the entire document with <code>{ age: 30 }</code> — every other field is lost. You almost always want <code>$set</code>, <code>$unset</code>, <code>$inc</code>, <code>$push</code>, or <code>$pull</code>.</div>
+  </div>
+
+  <h3>The update operators you'll actually use</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Operator</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>$set</code></td><td>Set a field to a value (creates it if missing)</td></tr>
+        <tr><td><code>$unset</code></td><td>Remove a field</td></tr>
+        <tr><td><code>$inc</code> / <code>$mul</code></td><td>Increment / multiply a number</td></tr>
+        <tr><td><code>$push</code> / <code>$pull</code></td><td>Add to / remove from an array</td></tr>
+        <tr><td><code>$addToSet</code></td><td>Add to an array only if not already present</td></tr>
+        <tr><td><code>$pop</code></td><td>Remove the first or last array element</td></tr>
+        <tr><td><code>$rename</code></td><td>Rename a field</td></tr>
+        <tr><td><code>$min</code> / <code>$max</code></td><td>Set only if lower / higher than current</td></tr>
+        <tr><td><code>$currentDate</code></td><td>Set to current date</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Delete</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">mongosh</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>db.users.<span class="tok-cmd">deleteOne</span>({ _id: someId });
+db.users.<span class="tok-cmd">deleteMany</span>({ active: <span class="tok-key">false</span> });
+db.users.<span class="tok-cmd">deleteMany</span>({});              <span class="tok-com">// deletes ALL docs — keep it empty unless you mean it</span></code></pre>
+  </div>
+
+  <h3>Result shapes (read them, don't ignore them)</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Operation</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td><code>insertOne</code></td><td><code>{ acknowledged, insertedId }</code></td></tr>
+        <tr><td><code>insertMany</code></td><td><code>{ acknowledged, insertedIds }</code></td></tr>
+        <tr><td><code>updateOne</code> / <code>updateMany</code></td><td><code>{ acknowledged, matchedCount, modifiedCount, upsertedId }</code></td></tr>
+        <tr><td><code>deleteOne</code> / <code>deleteMany</code></td><td><code>{ acknowledged, deletedCount }</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-crud-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">What does <code>db.users.updateOne({ name: 'Aarav' }, { age: 30 })</code> actually do?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-crud-1', this, false)"><span class="opt-letter">A</span>Sets <code>age</code> to 30 on that user.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-crud-1', this, true)"><span class="opt-letter">B</span>Replaces the entire document with <code>{ age: 30 }</code> — every other field is lost.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-crud-1-feedback"></div>
+    <div class="quiz-explain hidden">Without an update operator, MongoDB treats the object as a full replacement. Use <code>{ $set: { age: 30 } }</code> to change just the field.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · QUERIES ═══ -->
+<section class="section-block" id="queries">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Query operators</h2>
+      <p class="section-subtitle">comparison · logical · element · array · evaluation</p>
+    </div>
+  </div>
+
+  <h3>Comparison</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">comparison.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>{ age: { <span class="tok-op">$eq</span>: <span class="tok-num">22</span> } }        <span class="tok-com">// same as { age: 22 }</span>
+{ age: { <span class="tok-op">$ne</span>: <span class="tok-num">22</span> } }        <span class="tok-com">// not equal</span>
+{ age: { <span class="tok-op">$gt</span>: <span class="tok-num">18</span> } }         <span class="tok-com">// greater than</span>
+{ age: { <span class="tok-op">$gte</span>: <span class="tok-num">18</span>, <span class="tok-op">$lt</span>: <span class="tok-num">30</span> } }  <span class="tok-com">// range</span>
+{ age: { <span class="tok-op">$in</span>: [<span class="tok-num">18</span>, <span class="tok-num">22</span>, <span class="tok-num">30</span>] } }   <span class="tok-com">// any of these</span>
+{ age: { <span class="tok-op">$nin</span>: [<span class="tok-num">18</span>, <span class="tok-num">22</span>] } }      <span class="tok-com">// none of these</span></code></pre>
+  </div>
+
+  <h3>Logical</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">logical.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// implicit AND: fields listed together</span>
+{ age: <span class="tok-num">22</span>, city: <span class="tok-str">'Indore'</span> }
+
+<span class="tok-com">// explicit AND (for same-field conditions you can't express otherwise)</span>
+{ <span class="tok-op">$and</span>: [{ age: { <span class="tok-op">$gt</span>: <span class="tok-num">18</span> } }, { age: { <span class="tok-op">$lt</span>: <span class="tok-num">30</span> } }] }
+
+<span class="tok-com">// OR</span>
+{ <span class="tok-op">$or</span>: [{ city: <span class="tok-str">'Indore'</span> }, { city: <span class="tok-str">'Bhopal'</span> }] }
+
+<span class="tok-com">// NOT</span>
+{ age: { <span class="tok-op">$not</span>: { <span class="tok-op">$gt</span>: <span class="tok-num">30</span> } } }
+
+<span class="tok-com">// NOR</span>
+{ <span class="tok-op">$nor</span>: [{ active: <span class="tok-key">true</span> }, { verified: <span class="tok-key">true</span> }] }</code></pre>
+  </div>
+
+  <h3>Element and existence</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">element.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// has this field (even if null)</span>
+{ phone: { <span class="tok-op">$exists</span>: <span class="tok-key">true</span> } }
+
+<span class="tok-com">// matches null OR missing — dangerous!</span>
+{ phone: <span class="tok-key">null</span> }
+
+<span class="tok-com">// type check</span>
+{ age: { <span class="tok-op">$type</span>: <span class="tok-str">'number'</span> } }</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>{ field: null }</code> matches missing fields too.</strong> If you want "the field exists and is null", write <code>{ field: { $type: 'null' } }</code>. If you want "the field is missing", use <code>{ field: { $exists: false } }</code>.</div>
+  </div>
+
+  <h3>Arrays</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">arrays.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// array CONTAINS this value</span>
+{ tags: <span class="tok-str">'node'</span> }
+
+<span class="tok-com">// array contains ALL of these</span>
+{ tags: { <span class="tok-op">$all</span>: [<span class="tok-str">'node'</span>, <span class="tok-str">'js'</span>] } }
+
+<span class="tok-com">// array has exactly 3 elements</span>
+{ tags: { <span class="tok-op">$size</span>: <span class="tok-num">3</span> } }
+
+<span class="tok-com">// match by index</span>
+{ <span class="tok-str">'tags.0'</span>: <span class="tok-str">'node'</span> }
+
+<span class="tok-com">// array of embedded documents — $elemMatch when multiple fields must match SAME element</span>
+{ items: { <span class="tok-op">$elemMatch</span>: { sku: <span class="tok-str">'A1'</span>, qty: { <span class="tok-op">$gt</span>: <span class="tok-num">2</span> } } } }</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The $elemMatch trap</div>
+    <div class="concept-box-text"><p><code>{ items: { $elemMatch: { sku: 'A1', qty: { $gt: 2 } } } }</code> matches documents where <b>one item</b> has both properties.<br><code>{ 'items.sku': 'A1', 'items.qty': { $gt: 2 } }</code> matches documents where <b>some</b> item has sku A1 and <b>some</b> item (maybe different) has qty &gt; 2. Big difference in arrays of objects.</p></div>
+  </div>
+
+  <h3>Evaluation</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">eval.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// regex — anchored is faster with an index</span>
+{ name: { <span class="tok-op">$regex</span>: <span class="tok-str">'^A'</span> } }
+{ name: /^A/ }                        <span class="tok-com">// same thing</span>
+
+<span class="tok-com">// JSON Schema validator embedded in a query</span>
+{ <span class="tok-op">$jsonSchema</span>: { required: [<span class="tok-str">'name'</span>] } }
+
+<span class="tok-com">// modulo</span>
+{ qty: { <span class="tok-op">$mod</span>: [<span class="tok-num">2</span>, <span class="tok-num">0</span>] } }              <span class="tok-com">// even qty</span></code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-query-1">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">What does <code>{ phone: null }</code> match?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-query-1', this, true)"><span class="opt-letter">A</span>Documents where <code>phone</code> is <code>null</code> <em>and</em> documents missing <code>phone</code> entirely.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-query-1', this, false)"><span class="opt-letter">B</span>Only documents where <code>phone</code> is explicitly <code>null</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-query-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>null</code> is special in MongoDB — it matches both null and missing. For strict matching use <code>{ $type: 'null' }</code> or <code>{ $exists: false }</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · SCHEMA DESIGN ═══ -->
+<section class="section-block" id="design">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Schema design &amp; data modelling</h2>
+      <p class="section-subtitle">embed vs reference · the 16 MB limit · 1:1, 1:N, N:N</p>
+    </div>
+  </div>
+
+  <p class="lead">In SQL, you normalise to eliminate duplication, then join to reconstruct. In MongoDB, the question is <b>what does one read need?</b> — and the answer usually drives you to <em>embed</em> what is always read together, and <em>reference</em> what is independent.</p>
+
+  <h3>Embed vs reference — the decision table</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Factor</th><th>Embed</th><th>Reference</th></tr></thead>
+      <tbody>
+        <tr><td>Access pattern</td><td>Child is almost always read with the parent</td><td>Child is often queried independently</td></tr>
+        <tr><td>Cardinality</td><td>Bounded (a few items, an address, a profile)</td><td>Unbounded (millions of orders, posts, logs)</td></tr>
+        <tr><td>Updates</td><td>Child rarely changes; duplicated data is acceptable</td><td>Child changes often and is shared</td></tr>
+        <tr><td>Size</td><td>Fits comfortably in one document</td><td>Would push the document near 16 MB</td></tr>
+        <tr><td>Ownership</td><td>Child belongs to exactly one parent</td><td>Many parents can reference the same child</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>16 MB is the hard cap per document.</strong> If your embedded array could grow unbounded — comments on a viral post, line items on a large order, logs per user — reference it in a separate collection. Unbounded arrays are the most common cause of "my writes stopped working" errors in MongoDB.</div>
+  </div>
+
+  <h3>1:1 relationships</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">1:1 embedded</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Embedded: the profile is only ever read with the user</span>
+{
+  _id: ObjectId(...),
+  name: <span class="tok-str">'Aarav'</span>,
+  profile: {
+    bio: <span class="tok-str">'Backend dev'</span>,
+    avatarUrl: <span class="tok-str">'...'</span>,
+  },
+}</code></pre>
+  </div>
+
+  <h3>1:N relationships</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">1:N — embed when N is small and always read together</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// A user's addresses — bounded, always read with the user</span>
+{
+  _id: ObjectId(...),
+  name: <span class="tok-str">'Aarav'</span>,
+  addresses: [
+    { line1: <span class="tok-str">'12 MG Road'</span>, city: <span class="tok-str">'Indore'</span>, pin: <span class="tok-str">'452001'</span> },
+    { line1: <span class="tok-str">'45 Ring Rd'</span>, city: <span class="tok-str">'Bhopal'</span>, pin: <span class="tok-str">'462001'</span> },
+  ],
+}</code></pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">1:N — reference when N is unbounded</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Posts by a user — could be thousands; separate collection</span>
+<span class="tok-com">// users</span>
+{ _id: ObjectId(<span class="tok-str">'u1'</span>), name: <span class="tok-str">'Aarav'</span> }
+
+<span class="tok-com">// posts (each references its author)</span>
+{ _id: ObjectId(...), title: <span class="tok-str">'...'</span>, authorId: ObjectId(<span class="tok-str">'u1'</span>), createdAt: ISODate(...) }</code></pre>
+  </div>
+
+  <h3>N:N relationships</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">N:N</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Students ↔ Courses — two-sided references</span>
+<span class="tok-com">// students</span>
+{ _id: ObjectId(<span class="tok-str">'s1'</span>), name: <span class="tok-str">'Priya'</span>, courseIds: [ObjectId(<span class="tok-str">'c1'</span>), ObjectId(<span class="tok-str">'c2'</span>)] }
+
+<span class="tok-com">// courses</span>
+{ _id: ObjectId(<span class="tok-str">'c1'</span>), name: <span class="tok-str">'DBMS'</span>, studentIds: [ObjectId(<span class="tok-str">'s1'</span>)] }</code></pre>
+  </div>
+
+  <h3>Two ways to reference</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pattern</th><th>Child stores</th><th>Parent stores</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td><b>Child reference</b></td><td><code>parentId</code></td><td>nothing extra</td><td>The unbounded side (posts of a user, comments of a post)</td></tr>
+        <tr><td><b>Parent reference</b></td><td>nothing</td><td><code>[childIds]</code></td><td>The bounded side (course list of a student)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-design-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">A user has a shopping cart that could hold hundreds of items over time. Should the cart be embedded in the user document or its own collection?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-design-1', this, false)"><span class="opt-letter">A</span>Embed — one read gets the whole cart.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-design-1', this, true)"><span class="opt-letter">B</span>Own collection (or a bounded "current cart" embedded field) — unbounded growth will hit the 16 MB limit.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-design-1-feedback"></div>
+    <div class="quiz-explain hidden">An ever-growing array will eventually break writes. Either keep only the <em>current</em> cart embedded (small, bounded) and archive completed carts separately, or put carts in their own collection with a <code>userId</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · VALIDATION ═══ -->
+<section class="section-block" id="validation">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Data validation</h2>
+      <p class="section-subtitle">schema validators · Mongoose · when to enforce what</p>
+    </div>
+  </div>
+
+  <p>MongoDB is schema-flexible by default — but you can enforce structure. Two places to do it:</p>
+  <ul>
+    <li><b>Database-level</b> with <code>$jsonSchema</code> validators — enforced regardless of which app or driver writes.</li>
+    <li><b>Application-level</b> with Mongoose — enforced only in the Node process that uses your model.</li>
+  </ul>
+
+  <h3>Database validator</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">mongosh</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>db.<span class="tok-cmd">createCollection</span>(<span class="tok-str">'users'</span>, {
+  <span class="tok-cmd">validator</span>: {
+    <span class="tok-op">$jsonSchema</span>: {
+      <span class="tok-cmd">bsonType</span>: <span class="tok-str">'object'</span>,
+      <span class="tok-cmd">required</span>: [<span class="tok-str">'name'</span>, <span class="tok-str">'email'</span>, <span class="tok-str">'age'</span>],
+      <span class="tok-cmd">properties</span>: {
+        name:  { <span class="tok-cmd">bsonType</span>: <span class="tok-str">'string'</span>, <span class="tok-cmd">minLength</span>: <span class="tok-num">1</span> },
+        email: { <span class="tok-cmd">bsonType</span>: <span class="tok-str">'string'</span>, <span class="tok-cmd">pattern</span>: <span class="tok-str">'^.+@.+$'</span> },
+        age:   { <span class="tok-cmd">bsonType</span>: <span class="tok-str">'int'</span>, <span class="tok-cmd">minimum</span>: <span class="tok-num">0</span>, <span class="tok-cmd">maximum</span>: <span class="tok-num">150</span> },
+      },
+    },
+  },
+  <span class="tok-cmd">validationAction</span>: <span class="tok-str">'error'</span>,       <span class="tok-com">// 'warn' logs instead</span>
+  <span class="tok-cmd">validationLevel</span>: <span class="tok-str">'strict'</span>,     <span class="tok-com">// 'moderate' skips existing invalid docs</span>
+});</code></pre>
+  </div>
+
+  <h3>Mongoose schema</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">models/User.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> mongoose <span class="tok-key">from</span> <span class="tok-str">'mongoose'</span>;
+
+<span class="tok-key">const</span> userSchema = <span class="tok-key">new</span> mongoose.<span class="tok-cmd">Schema</span>({
+  name: {
+    type: String,
+    required: <span class="tok-key">true</span>,
+    trim: <span class="tok-key">true</span>,
+    minlength: <span class="tok-num">1</span>,
+    maxlength: <span class="tok-num">80</span>,
+  },
+  email: {
+    type: String,
+    required: <span class="tok-key">true</span>,
+    unique: <span class="tok-key">true</span>,
+    lowercase: <span class="tok-key">true</span>,
+    match: /^.+@.+$/,
+  },
+  age: {
+    type: Number,
+    min: <span class="tok-num">0</span>,
+    max: <span class="tok-num">150</span>,
+  },
+}, { timestamps: <span class="tok-key">true</span> });
+
+<span class="tok-key">export default</span> mongoose.<span class="tok-cmd">model</span>(<span class="tok-str">'User'</span>, userSchema);</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Database vs app validators</div>
+    <div class="concept-box-text"><p><b>Mongoose validators</b> run in Node before the insert. They're great for fast feedback and custom logic (e.g. cross-field checks). <b>Database validators</b> run inside MongoDB — they protect against bulk imports, other services, and direct shell writes. For anything you can't afford to see corrupted, use both.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-val-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">You add a <code>required: true</code> validator in Mongoose but someone imports data directly with the <code>mongosh</code> shell. Does the validator catch it?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-val-1', this, false)"><span class="opt-letter">A</span>Yes — Mongoose validators are enforced by MongoDB.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-val-1', this, true)"><span class="opt-letter">B</span>No — Mongoose validators only run in the Node process. The shell bypasses them entirely.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-val-1-feedback"></div>
+    <div class="quiz-explain hidden">Mongoose is a driver-side layer. It validates before sending to the DB. Direct shell writes skip it entirely. Use <code>$jsonSchema</code> validators if you want a hard guarantee.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · RELATIONSHIPS ═══ -->
+<section class="section-block" id="populate">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">populate vs $lookup</h2>
+      <p class="section-subtitle">application-level join · database-level join · trade-offs</p>
+    </div>
+  </div>
+
+  <p>MongoDB has no foreign-key joins. Two ways to "join" reference-based data:</p>
+
+  <h3>populate — the Mongoose way</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">populate.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// schema — authorId references users collection</span>
+<span class="tok-key">const</span> postSchema = <span class="tok-key">new</span> mongoose.<span class="tok-cmd">Schema</span>({
+  title: String,
+  author: { type: mongoose.Schema.Types.ObjectId, <span class="tok-cmd">ref</span>: <span class="tok-str">'User'</span> },
+});
+
+<span class="tok-com">// query — two round trips under the hood (find posts, then find users)</span>
+<span class="tok-key">const</span> posts = <span class="tok-key">await</span> Post.<span class="tok-cmd">find</span>().<span class="tok-cmd">populate</span>(<span class="tok-str">'author'</span>, <span class="tok-str">'name email'</span>);
+<span class="tok-com">// posts[i].author is now { _id, name, email }</span></code></pre>
+  </div>
+
+  <h3>$lookup — the aggregation way</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">lookup.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">await</span> Post.<span class="tok-cmd">aggregate</span>([
+  {
+    <span class="tok-op">$lookup</span>: {
+      <span class="tok-cmd">from</span>: <span class="tok-str">'users'</span>,
+      <span class="tok-cmd">localField</span>: <span class="tok-str">'author'</span>,
+      <span class="tok-cmd">foreignField</span>: <span class="tok-str">'_id'</span>,
+      <span class="tok-cmd">as</span>: <span class="tok-str">'authorDoc'</span>,
+    },
+  },
+  { <span class="tok-op">$unwind</span>: <span class="tok-str">'$authorDoc'</span> },
+  { <span class="tok-op">$project</span>: { title: <span class="tok-num">1</span>, <span class="tok-str">'authorDoc.name'</span>: <span class="tok-num">1</span> } },
+]);</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>populate</th><th>$lookup</th></tr></thead>
+      <tbody>
+        <tr><td>Runs in</td><td>Application (Node)</td><td>MongoDB server</td></tr>
+        <tr><td>Round trips</td><td>At least 2 (one per populated path)</td><td>1</td></tr>
+        <tr><td>Access to filtering/aggregation</td><td>Limited — can filter on populated fields, but post-hoc</td><td>Full pipeline, project, unwind, sort, group</td></tr>
+        <tr><td>Works without Mongoose</td><td>No</td><td>Yes — it's part of MongoDB</td></tr>
+        <tr><td>Best for</td><td>Simple "get the referenced doc" cases</td><td>Complex joins, shaping, filtered aggregation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-pop-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">You need posts with their author's <em>name only</em>, filtered by the author's city. Which approach is the better fit?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-pop-1', this, true)"><span class="opt-letter">A</span><code>$lookup</code> — you need to filter on the joined collection's field.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-pop-1', this, false)"><span class="opt-letter">B</span><code>populate</code> — it's simpler.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-pop-1-feedback"></div>
+    <div class="quiz-explain hidden">Filtering on fields of the joined collection is much cleaner with <code>$lookup</code> + <code>$match</code>, because the join happens server-side before the filter. With <code>populate</code>, you'd fetch posts first and filter in JS — inefficient and often incorrect.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · TRANSACTIONS ═══ -->
+<section class="section-block" id="transactions">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Transactions</h2>
+      <p class="section-subtitle">ACID · sessions · when you actually need them</p>
+    </div>
+  </div>
+
+  <p>Every single-document operation in MongoDB is atomic. But when you need to update <em>multiple documents or collections</em> and all-or-nothing matters, you use a transaction — since MongoDB 4.0 in replica sets, and 4.2 in sharded clusters.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">transaction.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> mongoose <span class="tok-key">from</span> <span class="tok-str">'mongoose'</span>;
+
+<span class="tok-key">async function</span> <span class="tok-cmd">transfer</span>(fromId, toId, amount) {
+  <span class="tok-key">const</span> session = <span class="tok-key">await</span> mongoose.<span class="tok-cmd">startSession</span>();
+  session.<span class="tok-cmd">startTransaction</span>();
+
+  <span class="tok-key">try</span> {
+    <span class="tok-key">await</span> Account.<span class="tok-cmd">updateOne</span>(
+      { _id: fromId },
+      { <span class="tok-op">$inc</span>: { balance: -amount } },
+      { session }
+    );
+    <span class="tok-key">await</span> Account.<span class="tok-cmd">updateOne</span>(
+      { _id: toId },
+      { <span class="tok-op">$inc</span>: { balance: amount } },
+      { session }
+    );
+    <span class="tok-key">await</span> session.<span class="tok-cmd">commitTransaction</span>();
+  } <span class="tok-key">catch</span> (err) {
+    <span class="tok-key">await</span> session.<span class="tok-cmd">abortTransaction</span>();
+    <span class="tok-key">throw</span> err;
+  } <span class="tok-key">finally</span> {
+    <span class="tok-key">await</span> session.<span class="tok-cmd">endSession</span>();
+  }
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Transactions need a replica set.</strong> A standalone <code>mongod</code> (like a default local install) cannot do multi-document transactions. Atlas gives you a replica set by default; for local dev, run <code>mongod --replSet rs0</code> and initiate the set once.</div>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Don't reach for transactions first</div>
+    <div class="concept-box-text"><p>Multi-document transactions are slower and lock more. If your design embeds what should be updated together, single-document atomicity does the job. Reach for a transaction when two collections genuinely must change together — order creation + inventory decrement + user points, for example.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-tx-1">
+    <div class="quiz-label">Quick check · 08</div>
+    <div class="quiz-question">Is a single-document <code>updateOne</code> atomic in MongoDB?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-tx-1', this, true)"><span class="opt-letter">A</span>Yes — every single-document operation is atomic, no transaction required.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-tx-1', this, false)"><span class="opt-letter">B</span>No — you always need a transaction.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-tx-1-feedback"></div>
+    <div class="quiz-explain hidden">Single-document writes are atomic in MongoDB — a document is written or it isn't. You only need transactions when a logical operation spans <em>multiple</em> documents or collections.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · REPLICATION ═══ -->
+<section class="section-block" id="replication">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Replication</h2>
+      <p class="section-subtitle">replica sets · primary · secondaries · failover · read preferences</p>
+    </div>
+  </div>
+
+  <p>A production MongoDB deployment is a <b>replica set</b>: one <b>primary</b> and two or more <b>secondaries</b>. All writes go to the primary and are replicated to the secondaries. If the primary dies, an election picks a new one — automatically, in seconds.</p>
+
+  <div class="stepper" data-stepper="repl" data-steps="6">
+    <div class="stepper-head"><span class="stepper-title">A write in a 3-node replica set</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">nodes</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1-5"><div class="stat-label">node 1</div><div class="stat-value" style="font-size:14px"><span data-txt='{"1":"primary","6":"secondary"}'>primary</span></div></div>
+            <div class="stat" data-show="1-6"><div class="stat-label">node 2</div><div class="stat-value" style="font-size:14px">secondary</div></div>
+            <div class="stat" data-show="1-6"><div class="stat-label">node 3</div><div class="stat-value" style="font-size:14px">secondary</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">where is the write?</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="2-6"><div class="stat-label">node 1</div><div class="stat-value" style="font-size:14px"><span data-txt='{"2":"applied","3":"applied + oplog","4":"acked"}'>applied</span></div></div>
+            <div class="stat" data-show="3-6"><div class="stat-label">node 2</div><div class="stat-value" style="font-size:14px">copying…</div></div>
+            <div class="stat" data-show="4-6"><div class="stat-label">node 3</div><div class="stat-value" style="font-size:14px">copying…</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>A client connects to the replica set. It doesn't have to know which node is primary — the driver discovers the topology and routes writes to the current primary.</li>
+      <li>The primary applies the write to its local data and records the change in its <b>oplog</b> (operations log) — an ordered, capped log of every write.</li>
+      <li>Each secondary continuously tails the primary's oplog and applies the same operations in order. This is how replication stays consistent.</li>
+      <li>Depending on the <b>write concern</b>, the primary returns "write acknowledged" after applying locally (<code>w: 1</code>) or after N secondaries have applied it (<code>w: majority</code>, the default). <code>w: majority</code> is what you want in production.</li>
+      <li>All three nodes now hold the same data. If the primary crashes, the remaining nodes elect a new primary from among the secondaries with the most up-to-date oplog.</li>
+      <li>The old primary comes back, discovers a new primary already exists, and rejoins as a secondary — it catches up from the new primary's oplog. This is <b>failover</b>, and it's what replication is really for: <b>availability</b>.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 6</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>Read preferences</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Mode</th><th>Reads from</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td><code>primary</code> (default)</td><td>Only the primary</td><td>You need the latest write immediately</td></tr>
+        <tr><td><code>primaryPreferred</code></td><td>Primary, or a secondary if primary is down</td><td>Availability over freshness</td></tr>
+        <tr><td><code>secondary</code></td><td>Only secondaries</td><td>Reporting, analytics, heavy reads</td></tr>
+        <tr><td><code>secondaryPreferred</code></td><td>Secondaries, or primary if none available</td><td>Read distribution off the primary</td></tr>
+        <tr><td><code>nearest</code></td><td>Lowest-latency node</td><td>Multi-region deployments</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-repl-1">
+    <div class="quiz-label">Quick check · 09</div>
+    <div class="quiz-question">What is the primary benefit of a replica set?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-repl-1', this, false)"><span class="opt-letter">A</span>Horizontal write scaling — writes go to every node.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-repl-1', this, true)"><span class="opt-letter">B</span>High availability — if the primary dies, a secondary takes over automatically.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-repl-1-feedback"></div>
+    <div class="quiz-explain hidden">Replication is for availability and durability, not write scaling — all writes still go through the single primary. Write scaling is what sharding (the next section) solves.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · SHARDING ═══ -->
+<section class="section-block" id="sharding">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Sharding</h2>
+      <p class="section-subtitle">shard key · chunks · mongos · hot spots</p>
+    </div>
+  </div>
+
+  <p>Sharding is MongoDB's answer to <b>horizontal scaling</b>. Data is split across multiple replica sets (called shards) based on a <b>shard key</b>. Applications talk to <code>mongos</code> routers, which send queries to the shard(s) that have the data.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">enable sharding</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// choose a hashed shard key on a monotonically increasing field</span>
+sh.<span class="tok-cmd">shardCollection</span>(<span class="tok-str">'app.users'</span>, { _id: <span class="tok-str">'hashed'</span> });
+
+<span class="tok-com">// or a compound shard key that has high cardinality</span>
+sh.<span class="tok-cmd">shardCollection</span>(<span class="tok-str">'app.orders'</span>, { userId: <span class="tok-str">'hashed'</span>, createdAt: <span class="tok-num">1</span> });</code></pre>
+  </div>
+
+  <h3>What makes a good shard key</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Property</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>High cardinality</td><td>Many distinct values → data spreads evenly</td></tr>
+        <tr><td>Even write distribution</td><td>No single shard takes most writes</td></tr>
+        <tr><td>Query alignment</td><td>Common queries include the shard key, so they hit one shard instead of all</td></tr>
+        <tr><td>Non-monotonic</td><td>Monotonic keys (<code>_id</code>, timestamps) pile inserts onto the last shard</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The monotonic-key trap</div>
+    <div class="concept-box-text"><p>If your shard key is <code>_id</code> and ObjectIds are time-sortable, every new insert has a higher <code>_id</code> than the last — so every new document goes to the <em>last</em> chunk, landing on one shard. That's a <b>hot shard</b>. Fix: use a <b>hashed</b> shard key, or make the shard key compound with a high-cardinality field (<code>{ tenantId: 'hashed', _id: 1 }</code>).</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-shard-1">
+    <div class="quiz-label">Quick check · 10</div>
+    <div class="quiz-question">Why might you choose a hashed shard key instead of the natural <code>_id</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-shard-1', this, true)"><span class="opt-letter">A</span>ObjectIds are monotonic, so new inserts all go to the "last" chunk. Hashing spreads them.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-shard-1', this, false)"><span class="opt-letter">B</span>Hashed keys compress data better.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-shard-1-feedback"></div>
+    <div class="quiz-explain hidden">A hashed shard key destroys the ordering but creates even distribution — exactly what you want for write throughput. Range queries on the shard key become less efficient, so hash only the fields you don't need to range-query.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · CHANGE STREAMS ═══ -->
+<section class="section-block" id="change-streams">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Change streams</h2>
+      <p class="section-subtitle">real-time listeners · resumability · MERN real-time APIs</p>
+    </div>
+  </div>
+
+  <p>A <b>change stream</b> is a tailable cursor over the oplog (via the <code>$changeStream</code> aggregation stage) that emits events for <code>insert</code>, <code>update</code>, <code>replace</code>, <code>delete</code>, and other operations. It is the official way to build real-time features on top of MongoDB — better than polling.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">watch.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// watch the whole collection</span>
+<span class="tok-key">const</span> stream = User.<span class="tok-cmd">watch</span>();
+
+<span class="tok-com">// filter to just insert events</span>
+<span class="tok-key">const</span> stream = User.<span class="tok-cmd">watch</span>([
+  { <span class="tok-op">$match</span>: { operationType: <span class="tok-str">'insert'</span> } }
+]);
+
+stream.<span class="tok-cmd">on</span>(<span class="tok-str">'change'</span>, (change) =&gt; {
+  console.<span class="tok-cmd">log</span>(change.operationType);  <span class="tok-com">// 'insert' | 'update' | 'delete' ...</span>
+  console.<span class="tok-cmd">log</span>(change.fullDocument);  <span class="tok-com">// the new document (for inserts)</span>
+});
+
+<span class="tok-com">// resumable: store the resume token, restart from it after a crash</span>
+<span class="tok-key">const</span> token = change._id;
+<span class="tok-key">const</span> resumed = User.<span class="tok-cmd">watch</span>([], { resumeAfter: token });</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Change streams require a replica set</strong> — because they read from the oplog. If you're running a standalone <code>mongod</code> locally, either start it as a single-node replica set or use Atlas for development when you're building real-time features.</div>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Change streams + Express + WebSockets</div>
+    <div class="concept-box-text"><p>The typical MERN real-time architecture: MongoDB → change stream watcher in your Express server → forward each event to connected Socket.IO clients. The database is the source of truth; the change stream turns it into a push stream; the WebSocket layer distributes it to browsers.</p></div>
+  </div>
+</section>
+
+<!-- ═══ 12 · GRIDFS & BINARY ═══ -->
+<section class="section-block" id="gridfs">
+  <div class="section-header">
+    <div class="section-num-big">12</div>
+    <div>
+      <h2 class="section-title">Binary data &amp; GridFS</h2>
+      <p class="section-subtitle">when to store files in the database · GridFS chunks</p>
+    </div>
+  </div>
+
+  <p>The <b>16 MB document limit</b> rules out storing most real files inline. MongoDB's answer for large binary data is <b>GridFS</b>: it splits the file into chunks (default 255 KB) stored as documents in a <code>fs.chunks</code> collection, with metadata in <code>fs.files</code>.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">gridfs.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { GridFSBucket } <span class="tok-key">from</span> <span class="tok-str">'mongodb'</span>;
+<span class="tok-key">import</span> mongoose <span class="tok-key">from</span> <span class="tok-str">'mongoose'</span>;
+
+<span class="tok-key">const</span> bucket = <span class="tok-key">new</span> <span class="tok-cmd">GridFSBucket</span>(mongoose.connection.db);
+
+<span class="tok-com">// upload — pipe a stream from multer or fs</span>
+<span class="tok-key">const</span> uploadStream = bucket.<span class="tok-cmd">openUploadStream</span>(<span class="tok-str">'resume.pdf'</span>);
+req.<span class="tok-cmd">pipe</span>(uploadStream);
+
+<span class="tok-com">// download</span>
+bucket.<span class="tok-cmd">openDownloadStreamByName</span>(<span class="tok-str">'resume.pdf'</span>).<span class="tok-cmd">pipe</span>(res);</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>GridFS is not always the right answer.</strong> For most file storage (images, videos, PDFs), an object store like <b>S3</b> or Cloudinary is a better fit — cheaper, faster, CDN-backed, and not competing with your database for I/O. Use GridFS when you need files to be transactional with your data, when you can't use an external store, or when you need change streams on the metadata.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · BACKUP & MONITORING ═══ -->
+<section class="section-block" id="ops">
+  <div class="section-header">
+    <div class="section-num-big">13</div>
+    <div>
+      <h2 class="section-title">Backup, restore &amp; monitoring</h2>
+      <p class="section-subtitle">mongodump · mongorestore · profiler · slowms</p>
+    </div>
+  </div>
+
+  <h3>Backup with mongodump</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com"># full database dump</span>
+mongodump --uri=<span class="tok-str">"mongodb://localhost:27017/app"</span> --out=./backup
+
+<span class="tok-com"># one collection</span>
+mongodump --uri=<span class="tok-str">"mongodb://localhost:27017/app"</span> --collection=users --out=./backup
+
+<span class="tok-com"># restore</span>
+mongorestore --uri=<span class="tok-str">"mongodb://localhost:27017/app"</span> ./backup/app</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Atlas does continuous backups for you.</strong> If you're on Atlas, use the built-in Cloud Backup / Point-in-Time Recovery instead of managing mongodump scripts — you get snapshots with second-level granularity, and restoring is a click. For self-hosted, schedule mongodump with a cron job and store backups off the database host.</div>
+  </div>
+
+  <h3>Profiling slow queries</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">mongosh</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// log any operation slower than 100ms</span>
+db.<span class="tok-cmd">setProfilingLevel</span>(<span class="tok-num">1</span>, { slowms: <span class="tok-num">100</span> });
+
+<span class="tok-com">// read the log</span>
+db.system.profile.<span class="tok-cmd">find</span>().<span class="tok-cmd">sort</span>({ millis: -<span class="tok-num">1</span> }).<span class="tok-cmd">limit</span>(<span class="tok-num">10</span>);
+
+<span class="tok-com">// turn it off (level 0)</span>
+db.<span class="tok-cmd">setProfilingLevel</span>(<span class="tok-num">0</span>);</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Metric</th><th>What it tells you</th></tr></thead>
+      <tbody>
+        <tr><td><code>db.serverStatus()</code></td><td>Connections, memory, opcounters, replication lag</td></tr>
+        <tr><td><code>db.currentOp()</code></td><td>What's running right now — find long-running queries</td></tr>
+        <tr><td><code>db.stats()</code></td><td>Data and index size per database</td></tr>
+        <tr><td><code>db.coll.stats()</code></td><td>Size, count, index sizes per collection</td></tr>
+        <tr><td>Profiler (<code>system.profile</code>)</td><td>Slow operations, with duration and examined docs</td></tr>
+        <tr><td>Atlas metrics</td><td>Charts for CPU, IOPS, connections, replication lag</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 14 · MERN ═══ -->
+<section class="section-block" id="mern">
+  <div class="section-header">
+    <div class="section-num-big">14</div>
+    <div>
+      <h2 class="section-title">How it fits a MERN app</h2>
+      <p class="section-subtitle">Mongoose models · Express routes · API shape</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Layer</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><b>MongoDB</b></td><td>Persists documents; enforces database validators, indexes, TTL</td></tr>
+        <tr><td><b>Mongoose (Node)</b></td><td>Schema + model; application-level validation; <code>populate</code>; transaction helpers</td></tr>
+        <tr><td><b>Express</b></td><td>Routes; receives requests, calls models, returns JSON</td></tr>
+        <tr><td><b>React + TanStack Query</b></td><td>Fetches the JSON; owns the browser cache</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>A typical MERN slice</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">routes/users.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> express <span class="tok-key">from</span> <span class="tok-str">'express'</span>;
+<span class="tok-key">import</span> User <span class="tok-key">from</span> <span class="tok-str">'../models/User'</span>;
+
+<span class="tok-key">const</span> router = express.<span class="tok-cmd">Router</span>();
+
+router.<span class="tok-cmd">get</span>(<span class="tok-str">'/'</span>, <span class="tok-key">async</span> (req, res) =&gt; {
+  <span class="tok-key">const</span> users = <span class="tok-key">await</span> User.<span class="tok-cmd">find</span>().<span class="tok-cmd">select</span>(<span class="tok-str">'-password'</span>);
+  res.<span class="tok-cmd">json</span>(users);
+});
+
+router.<span class="tok-cmd">post</span>(<span class="tok-str">'/'</span>, <span class="tok-key">async</span> (req, res) =&gt; {
+  <span class="tok-key">try</span> {
+    <span class="tok-key">const</span> user = <span class="tok-key">await</span> User.<span class="tok-cmd">create</span>(req.body);   <span class="tok-com">// schema validates</span>
+    res.<span class="tok-cmd">status</span>(<span class="tok-num">201</span>).<span class="tok-cmd">json</span>(user);
+  } <span class="tok-key">catch</span> (err) {
+    res.<span class="tok-cmd">status</span>(<span class="tok-num">400</span>).<span class="tok-cmd">json</span>({ message: err.message });
+  }
+});
+
+<span class="tok-key">export default</span> router;</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The idiomatic split</div>
+    <div class="concept-box-text"><p>React never talks to MongoDB directly. Express is the boundary. Validate inputs on Express (<code>express-validator</code> or <code>zod</code>), let Mongoose enforce schema shape, and let the database enforce anything that must survive direct writes. Indexes exist at the database level; the API exposes endpoints the client queries.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-mern-1">
+    <div class="quiz-label">Quick check · 11</div>
+    <div class="quiz-question">Where would you enforce "email must be a valid email address"?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-mern-1', this, true)"><span class="opt-letter">A</span>At all three layers: input validation in Express (fast feedback), Mongoose schema (defence in depth), and a <code>$jsonSchema</code> validator (survives direct writes).</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-mern-1', this, false)"><span class="opt-letter">B</span>Only in React — the client should never send invalid data.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-mern-1-feedback"></div>
+    <div class="quiz-explain hidden">Client-side validation is for UX, not security. Any of your API routes can be called from a non-browser tool. Defence in depth: Express catches most cases, Mongoose catches the rest, and the database validator catches whatever bypasses both.</div>
+  </div>
+</section>
+
+<!-- ═══ 15 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">15</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Updating without operators</td><td>Whole document replaced; fields lost</td><td>Use <code>$set</code>, <code>$inc</code>, <code>$push</code>, etc.</td></tr>
+        <tr><td><code>{ field: null }</code> when you mean "exists and is null"</td><td>Also matches missing fields</td><td><code>{ field: { $type: 'null' } }</code></td></tr>
+        <tr><td>Unbounded arrays embedded</td><td>Hits 16 MB document limit; writes fail</td><td>Reference the unbounded side</td></tr>
+        <tr><td>Trusting Mongoose validators as sole protection</td><td>Bulk imports or shell writes skip them</td><td>Also add a database <code>$jsonSchema</code> validator</td></tr>
+        <tr><td>Monotonic shard keys</td><td>All writes hit one shard ("hot shard")</td><td>Hashed shard key, or compound key with high-cardinality field</td></tr>
+        <tr><td>Reads from secondaries without understanding staleness</td><td>Reads may be seconds behind the primary</td><td>Read from primary for critical fresh reads</td></tr>
+        <tr><td>Transactions on a standalone server</td><td>"Transaction numbers are only allowed on a replica set"</td><td>Use a replica set locally (or Atlas)</td></tr>
+        <tr><td>Files stored directly in documents</td><td>16 MB limit; slow reads</td><td>Use GridFS or (better) an object store like S3</td></tr>
+        <tr><td>No indexes on foreign-key fields</td><td>Joins and reverse lookups scan</td><td>Index the <code>authorId</code> / <code>userId</code> fields</td></tr>
+        <tr><td>Ignoring <code>modifiedCount</code></td><td>Updates silently no-op when the filter doesn't match</td><td>Check the result and handle "not found"</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Everything is mutable.</strong> MongoDB won't stop you from mixing types in a field, or from shipping a document with no shape at all. That's the flexibility that makes it fast to develop — and the exact reason production MongoDB schemas need discipline (Mongoose models + validators + indexes) to stay coherent.</div>
+  </div>
+</section>
+
+<!-- ═══ 16 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">16</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is MongoDB, and when would you pick it over a relational database?</span></summary><div class="qa-body"><p>MongoDB is a document-oriented NoSQL database. Pick it when the data is hierarchical or has an evolving schema (catalogues, user profiles with nested preferences, content with mixed shapes), when you need to scale writes horizontally, or when the JSON shape of the data matches what your API and UI already use. Stick with relational databases when the data is deeply relational, joins are common at scale, or the schema is stable and enforced strictly.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>What is the difference between a MongoDB document and a SQL row?</span></summary><div class="qa-body"><p>A document is a BSON (binary JSON) object that can contain nested objects, arrays, dates, and other rich types. A SQL row is a flat set of columns with fixed types, defined by the table. To model hierarchy in SQL you use additional tables and joins; in MongoDB you often embed it.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>Embedded documents vs referenced documents — when do you use which?</span></summary><div class="qa-body"><p><b>Embed</b> when the child is always read with the parent, the number of children is bounded (a few addresses, a small list of tags), and the child isn't shared. <b>Reference</b> when the child is queried independently, the number of children is unbounded (posts, orders, logs), or the child is shared between multiple parents. The 16 MB document size limit is the hard ceiling that forces a reference when an embedded array could grow.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>How would you model a 1:N relationship?</span></summary><div class="qa-body"><p>Two valid patterns. <b>Child reference</b>: put a <code>parentId</code> field on the child documents (the unbounded side) — best when N is large, because the child collection can be indexed and paginated. <b>Parent reference</b>: put an array of child <code>_id</code>s on the parent — best when N is small and bounded, and you always read the children with the parent.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>Are MongoDB transactions ACID?</span></summary><div class="qa-body"><p>Yes, since MongoDB 4.0 on replica sets (and 4.2 on sharded clusters), multi-document transactions are ACID. Single-document operations were always atomic. The caveat: transactions require a replica set (a standalone <code>mongod</code> doesn't support them), and they're slower than non-transactional writes, so reach for them only when two or more documents must change together.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>What's the difference between replication and sharding?</span></summary><div class="qa-body"><p><b>Replication</b> = the same data on multiple servers, for high availability and durability. If the primary dies, a secondary takes over. It doesn't help write throughput because writes go through one primary.<br><b>Sharding</b> = different data on different servers, for horizontal scale. Data is partitioned by a shard key across multiple shards, so writes and storage spread. You need both at scale: each shard is itself a replica set.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What is a change stream?</span></summary><div class="qa-body"><p>A cursor that emits events (<code>insert</code>, <code>update</code>, <code>delete</code>, <code>replace</code>) as documents change in a collection, database, or deployment. It's built on the replica set's oplog and requires a replica set. Use it for real-time features (push updates to WebSocket clients, sync with other services, trigger workflows). Change streams are resumable — save the <code>_id</code> of the last change and restart with <code>resumeAfter</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>How do you ensure data validation in MongoDB?</span></summary><div class="qa-body"><p>Two layers. At the database level, a <code>$jsonSchema</code> validator on a collection (via <code>createCollection</code> or <code>collMod</code>) enforces shape regardless of which application writes. At the application level, Mongoose schema options (<code>required</code>, <code>min</code>, <code>max</code>, <code>match</code>, custom validators) provide fast feedback and richer logic before the write is sent. Use both for anything that must survive bulk imports, other services, or shell access.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>What's the difference between populate and $lookup?</span></summary><div class="qa-body"><p><code>populate</code> is a Mongoose-level feature — it does extra queries in Node to replace reference IDs with full documents. Easy to use, but multiple round trips and no aggregation. <code>$lookup</code> is a MongoDB aggregation stage — the join happens server-side, in one round trip, and gives you full pipeline access (filter, sort, project the joined data). Use <code>populate</code> for simple "fetch the referenced doc", <code>$lookup</code> when you need to filter on the joined collection's fields or shape the result.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>How would you design a shard key?</span></summary><div class="qa-body"><p>A good shard key has <b>high cardinality</b> (many distinct values), <b>even write distribution</b> (no single shard takes most writes), and <b>query alignment</b> (your common queries include the shard key so they hit one shard instead of all). Avoid monotonic keys like <code>_id</code> or pure timestamps, which concentrate writes on the last chunk. Common choices: <code>{ tenantId: 'hashed' }</code>, <code>{ userId: 'hashed' }</code>, or a compound <code>{ tenantId: 'hashed', _id: 1 }</code> when you need both even distribution and range queries within a tenant.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>What is GridFS, and when would you use it?</span></summary><div class="qa-body"><p>GridFS is MongoDB's protocol for storing files larger than the 16 MB document limit. It chunks the file into ~255 KB pieces in <code>fs.chunks</code>, with metadata in <code>fs.files</code>. Use it when you need files to live inside the database — for transactional guarantees with related data, for change streams on the metadata, or when you can't use an external store. For most production use cases (images, videos, PDFs), an object store like S3 or Cloudinary is cheaper and faster.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>How do you back up and monitor a MongoDB database in production?</span></summary><div class="qa-body"><p><b>Backup</b>: on Atlas, use Cloud Backup / Point-in-Time Recovery — no scripts needed. Self-hosted: <code>mongodump</code> scheduled via cron, stored off-host (S3, another server). <b>Monitoring</b>: <code>db.serverStatus()</code> for connections, memory, opcounters; <code>db.currentOp()</code> for live slow queries; the profiler (<code>setProfilingLevel(1, { slowms: 100 })</code>) for anything above a threshold; and Atlas metrics for visual dashboards. Add application-level metrics — request latency, error rate — and alert on them.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Backend · MongoDB</span>
+  <span>Documents · CRUD · queries · replication · sharding · MERN</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls],[data-txt]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+      if (el.hasAttribute('data-txt')) { var x = sticky(el.getAttribute('data-txt'), s); if (x !== null) el.textContent = x; }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>100 Essential Interview Questions — MERN Developers · Sheryians</title>
+<meta name="description" content="Sheryians Coding School — 100 essential MERN interview questions across MongoDB, Express, React, Node.js and System Design.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14;
+  --paper:#F5F2EB;
+  --paper2:#EDE9DF;
+  --paper3:#E4DFD3;
+  --rule:#D4CEBC;
+  --muted:#6B6455;
+  --accent:#C84B1F;
+  --accent2:#1A6B4A;
+  --accent3:#1B4587;
+  --gold:#B8860B;
+  --code-bg:#1A1C24;
+  --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC;
+  --note-border:#EDD97A;
+  --note-text:#5C4A00;
+  --note-strong:#3D3000;
+  --shadow:0 1px 0 rgba(14,15,20,.04);
+  --surface-ink:#0E0F14;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB;
+    --paper:#15161C;
+    --paper2:#1C1E26;
+    --paper3:#262833;
+    --rule:#343644;
+    --muted:#A39C8C;
+    --accent:#E0663A;
+    --accent2:#43B083;
+    --accent3:#7BA3EA;
+    --gold:#D9A93F;
+    --code-bg:#1A1C24;
+    --code-text:#E2DCCC;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511;
+    --note-border:#5E4F1B;
+    --note-text:#EBDDA4;
+    --note-strong:#F8EBBE;
+    --surface-ink:#0A0B0F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB;
+  --paper:#15161C;
+  --paper2:#1C1E26;
+  --paper3:#262833;
+  --rule:#343644;
+  --muted:#A39C8C;
+  --accent:#E0663A;
+  --accent2:#43B083;
+  --accent3:#7BA3EA;
+  --gold:#D9A93F;
+  --code-bg:#1A1C24;
+  --code-text:#E2DCCC;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511;
+  --note-border:#5E4F1B;
+  --note-text:#EBDDA4;
+  --note-strong:#F8EBBE;
+  --surface-ink:#0A0B0F;
+  color-scheme: dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:980px;margin:0 auto;padding:56px 40px 120px}
+
+/* ─── hero ─── */
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(36px,6vw,64px);font-weight:900;line-height:1;letter-spacing:-.025em;margin:0 0 18px;max-width:16ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:600px;margin:0 0 24px;line-height:1.55}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
+/* ─── progress ─── */
+.progress-card{margin:32px 0 40px;padding:18px 22px;background:var(--paper2);border:1px solid var(--rule);border-radius:10px;display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between}
+.progress-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.progress-value{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1}
+.progress-value small{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:400;color:var(--muted);margin-left:6px}
+.progress-bar{flex:1;min-width:180px;height:4px;background:var(--paper3);border-radius:2px;overflow:hidden;position:relative}
+.progress-bar-fill{height:100%;background:var(--accent);width:0%;transition:width .4s ease}
+
+/* ─── search / controls ─── */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 40px;padding:14px 16px;background:var(--paper2);border:1px solid var(--rule);border-radius:10px}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap input{width:100%;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;padding:10px 14px 10px 38px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap::before{content:'⌕';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;pointer-events:none}
+.btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:9px 14px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ─── domain jumps ─── */
+.jumps{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 48px}
+.jump{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:1px solid var(--rule);border-radius:999px;color:var(--muted);text-decoration:none;transition:all .2s;background:var(--paper)}
+.jump:hover{border-color:var(--accent);color:var(--accent)}
+.jump strong{color:var(--ink);font-weight:600;margin-right:4px}
+
+/* ─── sections ─── */
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em}
+
+/* ─── question cards ─── */
+.q-list{display:flex;flex-direction:column;gap:8px}
+.q{border:1px solid var(--rule);border-radius:8px;background:var(--paper);transition:border-color .2s,background .2s}
+.q:hover{border-color:var(--ink)}
+.q[open]{border-color:var(--ink);background:var(--paper2)}
+.q[open] .q-num{color:var(--accent)}
+.q summary{list-style:none;cursor:pointer;display:flex;gap:14px;align-items:flex-start;padding:14px 18px;outline:none}
+.q summary::-webkit-details-marker{display:none}
+.q-num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;letter-spacing:.04em;padding-top:3px;min-width:26px;transition:color .2s}
+.q-text{font-size:14.5px;line-height:1.55;color:var(--ink);flex:1}
+.q-chevron{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--muted);flex-shrink:0;transition:transform .2s;padding-top:3px}
+.q[open] .q-chevron{transform:rotate(90deg);color:var(--accent)}
+.q-body{padding:0 18px 16px 58px;font-size:13.5px;color:var(--muted);line-height:1.6}
+.q-body p{margin:0 0 10px}
+.q-body p:last-child{margin-bottom:0}
+.q-body .study-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:var(--muted);border-left:2px solid var(--rule);padding-left:10px;font-style:italic}
+
+/* studied state */
+.q.studied{border-color:var(--accent2);background:rgba(26,107,74,.05)}
+.q.studied .q-num{color:var(--accent2)}
+.q.studied summary::before{content:'✓';font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent2);font-weight:600;position:absolute;left:-20px;top:17px}
+.q.studied{position:relative}
+.q .mark-studied{margin-top:10px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--muted);cursor:pointer;transition:all .2s}
+.q .mark-studied:hover{border-color:var(--accent2);color:var(--accent2)}
+.q.studied .mark-studied{border-color:var(--accent2);color:var(--accent2);background:transparent}
+
+/* hidden by search */
+.q.hidden{display:none}
+
+/* ─── footer ─── */
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+/* ─── responsive ─── */
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .progress-value{font-size:22px}
+  .q summary{padding:12px 14px}
+  .q-body{padding:0 14px 14px 46px}
+  .q-num{min-width:22px}
+}
+@media print{
+  .controls,.jumps,.progress-card,.q-chevron,.mark-studied{display:none!important}
+  .q[open] .q-body,.q .q-body{display:block!important}
+  body{font-size:11px}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+  <header class="hero">
+    <div class="hero-eyebrow">Sheryians Cohort 1.0 · Parting gift</div>
+    <h1>100 Essential Interview Questions for <em>MERN</em> Developers</h1>
+    <p class="hero-desc">Every question that showed up on the Sheryians MERN interview list — MongoDB, Express, React, Node.js, and system design. Open one to test yourself, close it when you're done.</p>
+    <div class="hero-meta">
+      <span>100 questions</span>
+      <span>·</span>
+      <span>5 domains</span>
+      <span>·</span>
+      <span>self-test format</span>
+    </div>
+  </header>
+
+  <div class="progress-card">
+    <div>
+      <div class="progress-label">Studied</div>
+      <div class="progress-value" id="progress-value">0<small>/ 100</small></div>
+    </div>
+    <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <input type="search" id="search" placeholder="Search 100 questions…" autocomplete="off">
+    </div>
+    <button class="btn" id="collapse-all">Collapse all</button>
+    <button class="btn" id="reveal-all">Reveal all</button>
+    <button class="btn" id="reset-progress">Reset progress</button>
+  </div>
+
+  <nav class="jumps">
+    <a class="jump" href="#mongodb"><strong>01</strong>MongoDB</a>
+    <a class="jump" href="#express"><strong>02</strong>Express</a>
+    <a class="jump" href="#react"><strong>03</strong>React</a>
+    <a class="jump" href="#node"><strong>04</strong>Node.js</a>
+    <a class="jump" href="#system-design"><strong>05</strong>System Design</a>
+  </nav>
+
+  <!-- ════════════════ 01 · MONGODB ════════════════ -->
+  <section class="section-block" id="mongodb">
+    <div class="section-header">
+      <div class="section-num-big">01</div>
+      <div>
+        <h2 class="section-title">MongoDB</h2>
+        <p class="section-subtitle">20 questions · aggregation, indexing, schema, scaling</p>
+      </div>
+    </div>
+    <div class="q-list">
+
+      <details class="q" data-q="m1">
+        <summary><span class="q-num">Q01</span><span class="q-text">Explain the aggregation pipeline and its stages.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body">
+          <p class="study-hint">Try answering before you look anything up.</p>
+          <button class="mark-studied" type="button">Mark as studied</button>
+        </div>
+      </details>
+
+      <details class="q" data-q="m2">
+        <summary><span class="q-num">Q02</span><span class="q-text">How does indexing work in MongoDB, and what are compound indexes?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body">
+          <p class="study-hint">See the <em>Indexing in MongoDB</em> note for the deep dive.</p>
+          <button class="mark-studied" type="button">Mark as studied</button>
+        </div>
+      </details>
+
+      <details class="q" data-q="m3">
+        <summary><span class="q-num">Q03</span><span class="q-text">What's the difference between find(), findOne(), and aggregate()?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m4">
+        <summary><span class="q-num">Q04</span><span class="q-text">How do you optimize MongoDB queries for performance?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m5">
+        <summary><span class="q-num">Q05</span><span class="q-text">What is schema design and how do you model relationships in MongoDB (1:1, 1:N, N:N)?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m6">
+        <summary><span class="q-num">Q06</span><span class="q-text">Explain data validation and how to enforce it in MongoDB.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m7">
+        <summary><span class="q-num">Q07</span><span class="q-text">What are transactions in MongoDB and when would you use them?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m8">
+        <summary><span class="q-num">Q08</span><span class="q-text">What is a capped collection?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m9">
+        <summary><span class="q-num">Q09</span><span class="q-text">How does MongoDB handle concurrency?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m10">
+        <summary><span class="q-num">Q10</span><span class="q-text">Explain change streams in MongoDB.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m11">
+        <summary><span class="q-num">Q11</span><span class="q-text">What's the difference between populate() and $lookup?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m12">
+        <summary><span class="q-num">Q12</span><span class="q-text">How do you perform pagination in MongoDB efficiently?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m13">
+        <summary><span class="q-num">Q13</span><span class="q-text">What is the use of the $facet stage?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m14">
+        <summary><span class="q-num">Q14</span><span class="q-text">How does MongoDB handle horizontal scaling?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m15">
+        <summary><span class="q-num">Q15</span><span class="q-text">Difference between embedded documents vs. referenced documents.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m16">
+        <summary><span class="q-num">Q16</span><span class="q-text">How do you back up and restore a MongoDB database?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m17">
+        <summary><span class="q-num">Q17</span><span class="q-text">How can you enforce uniqueness on a field?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m18">
+        <summary><span class="q-num">Q18</span><span class="q-text">What are MongoDB Atlas Triggers?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m19">
+        <summary><span class="q-num">Q19</span><span class="q-text">What is TTL indexing and when would you use it?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="m20">
+        <summary><span class="q-num">Q20</span><span class="q-text">How do you monitor and profile MongoDB queries?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ════════════════ 02 · EXPRESS ════════════════ -->
+  <section class="section-block" id="express">
+    <div class="section-header">
+      <div class="section-num-big">02</div>
+      <div>
+        <h2 class="section-title">Express</h2>
+        <p class="section-subtitle">20 questions · middleware, error handling, security, structure</p>
+      </div>
+    </div>
+    <div class="q-list">
+
+      <details class="q" data-q="e1">
+        <summary><span class="q-num">Q01</span><span class="q-text">Explain middleware and the types of middleware in Express.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e2">
+        <summary><span class="q-num">Q02</span><span class="q-text">How does request and response flow in Express?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e3">
+        <summary><span class="q-num">Q03</span><span class="q-text">What is the use of next() in Express?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e4">
+        <summary><span class="q-num">Q04</span><span class="q-text">How do you implement global error handling?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e5">
+        <summary><span class="q-num">Q05</span><span class="q-text">How do you structure a scalable Express application?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e6">
+        <summary><span class="q-num">Q06</span><span class="q-text">How do you secure an Express API (rate limiting, headers)?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e7">
+        <summary><span class="q-num">Q07</span><span class="q-text">Explain route parameter vs. query parameter.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e8">
+        <summary><span class="q-num">Q08</span><span class="q-text">What's the role of CORS in Express and how to configure it?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e9">
+        <summary><span class="q-num">Q09</span><span class="q-text">How do you handle file uploads?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e10">
+        <summary><span class="q-num">Q10</span><span class="q-text">How would you implement logging in Express?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e11">
+        <summary><span class="q-num">Q11</span><span class="q-text">What is the use of express-validator?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e12">
+        <summary><span class="q-num">Q12</span><span class="q-text">How do you prevent SQL/NoSQL injection in Express?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e13">
+        <summary><span class="q-num">Q13</span><span class="q-text">What is Helmet and how does it help with security?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e14">
+        <summary><span class="q-num">Q14</span><span class="q-text">How do you handle role-based authorization in Express?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e15">
+        <summary><span class="q-num">Q15</span><span class="q-text">What are virtual routes and when are they useful?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e16">
+        <summary><span class="q-num">Q16</span><span class="q-text">Difference between synchronous and asynchronous middleware.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e17">
+        <summary><span class="q-num">Q17</span><span class="q-text">How do you optimize performance in Express apps?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e18">
+        <summary><span class="q-num">Q18</span><span class="q-text">What is a proxy in Express and how to set it?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e19">
+        <summary><span class="q-num">Q19</span><span class="q-text">What is the use of app.locals and res.locals?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="e20">
+        <summary><span class="q-num">Q20</span><span class="q-text">How can you implement request tracing in Express?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ════════════════ 03 · REACT ════════════════ -->
+  <section class="section-block" id="react">
+    <div class="section-header">
+      <div class="section-num-big">03</div>
+      <div>
+        <h2 class="section-title">React</h2>
+        <p class="section-subtitle">30 questions · reconciliation, hooks, performance, patterns</p>
+      </div>
+    </div>
+    <div class="q-list">
+
+      <details class="q" data-q="r1">
+        <summary><span class="q-num">Q01</span><span class="q-text">Explain the React reconciliation algorithm.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r2">
+        <summary><span class="q-num">Q02</span><span class="q-text">What are controlled vs. uncontrolled components?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r3">
+        <summary><span class="q-num">Q03</span><span class="q-text">How does React handle context and why use it?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r4">
+        <summary><span class="q-num">Q04</span><span class="q-text">What are the common performance optimization techniques in React?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r5">
+        <summary><span class="q-num">Q05</span><span class="q-text">How does memoization work in React (React.memo, useMemo)?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r6">
+        <summary><span class="q-num">Q06</span><span class="q-text">How does React handle batching of state updates?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r7">
+        <summary><span class="q-num">Q07</span><span class="q-text">What are custom hooks and when would you use them?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r8">
+        <summary><span class="q-num">Q08</span><span class="q-text">Explain lazy loading and code splitting in React.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r9">
+        <summary><span class="q-num">Q09</span><span class="q-text">What's the difference between useEffect and useLayoutEffect?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r10">
+        <summary><span class="q-num">Q10</span><span class="q-text">How does React's concurrent mode work?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r11">
+        <summary><span class="q-num">Q11</span><span class="q-text">What is the virtual DOM and how does React use it?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r12">
+        <summary><span class="q-num">Q12</span><span class="q-text">How do you implement SSR (Server-Side Rendering) with React?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r13">
+        <summary><span class="q-num">Q13</span><span class="q-text">Difference between lifting state and prop drilling.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r14">
+        <summary><span class="q-num">Q14</span><span class="q-text">What is suspense in React?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r15">
+        <summary><span class="q-num">Q15</span><span class="q-text">How do you manage state in large applications (Redux, Context, Zustand)?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r16">
+        <summary><span class="q-num">Q16</span><span class="q-text">How does hydration work in React with SSR?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r17">
+        <summary><span class="q-num">Q17</span><span class="q-text">How do you secure a React frontend?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r18">
+        <summary><span class="q-num">Q18</span><span class="q-text">Explain error boundaries in React.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r19">
+        <summary><span class="q-num">Q19</span><span class="q-text">How does React Router handle dynamic routes?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r20">
+        <summary><span class="q-num">Q20</span><span class="q-text">How do you handle access control (auth-guard) in React?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r21">
+        <summary><span class="q-num">Q21</span><span class="q-text">How do you use useReducer and what is it best for?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r22">
+        <summary><span class="q-num">Q22</span><span class="q-text">How do you handle WebSocket or real-time data in React?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r23">
+        <summary><span class="q-num">Q23</span><span class="q-text">What is the role of key in React lists?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r24">
+        <summary><span class="q-num">Q24</span><span class="q-text">Explain compound components pattern.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r25">
+        <summary><span class="q-num">Q25</span><span class="q-text">How does React DevTools work under the hood?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r26">
+        <summary><span class="q-num">Q26</span><span class="q-text">What is the StrictMode in React and why use it?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r27">
+        <summary><span class="q-num">Q27</span><span class="q-text">How would you implement theme switching in React?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r28">
+        <summary><span class="q-num">Q28</span><span class="q-text">How do you test React components (Jest, RTL)?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r29">
+        <summary><span class="q-num">Q29</span><span class="q-text">How do you implement HOC (Higher-Order Components)?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="r30">
+        <summary><span class="q-num">Q30</span><span class="q-text">What is the role of forwardRef in React?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ════════════════ 04 · NODE.JS ════════════════ -->
+  <section class="section-block" id="node">
+    <div class="section-header">
+      <div class="section-num-big">04</div>
+      <div>
+        <h2 class="section-title">Node.js</h2>
+        <p class="section-subtitle">20 questions · event loop, streams, clustering, memory</p>
+      </div>
+    </div>
+    <div class="q-list">
+
+      <details class="q" data-q="n1">
+        <summary><span class="q-num">Q01</span><span class="q-text">What is the event loop in Node.js and how does it work?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n2">
+        <summary><span class="q-num">Q02</span><span class="q-text">Explain the difference between process.nextTick() and setImmediate().</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n3">
+        <summary><span class="q-num">Q03</span><span class="q-text">How does Node.js handle asynchronous I/O?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n4">
+        <summary><span class="q-num">Q04</span><span class="q-text">What are streams and how do you use them?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n5">
+        <summary><span class="q-num">Q05</span><span class="q-text">How does clustering work in Node.js?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n6">
+        <summary><span class="q-num">Q06</span><span class="q-text">Explain how you'd implement a caching layer in Node.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n7">
+        <summary><span class="q-num">Q07</span><span class="q-text">How do you handle large file uploads efficiently?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n8">
+        <summary><span class="q-num">Q08</span><span class="q-text">What are child processes and how are they used?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n9">
+        <summary><span class="q-num">Q09</span><span class="q-text">What is the role of buffers in Node.js?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n10">
+        <summary><span class="q-num">Q10</span><span class="q-text">How do you monitor and debug Node.js performance?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n11">
+        <summary><span class="q-num">Q11</span><span class="q-text">What are worker threads and when would you use them?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n12">
+        <summary><span class="q-num">Q12</span><span class="q-text">Explain how you'd secure a Node.js application.</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n13">
+        <summary><span class="q-num">Q13</span><span class="q-text">How do you manage environment variables securely?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n14">
+        <summary><span class="q-num">Q14</span><span class="q-text">What's the difference between CommonJS and ES modules?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n15">
+        <summary><span class="q-num">Q15</span><span class="q-text">How do you handle rate limiting in Node.js?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n16">
+        <summary><span class="q-num">Q16</span><span class="q-text">How do you implement JWT authentication in Node.js?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n17">
+        <summary><span class="q-num">Q17</span><span class="q-text">How does dependency injection work in Node?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n18">
+        <summary><span class="q-num">Q18</span><span class="q-text">What is the role of fs/promises in Node?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n19">
+        <summary><span class="q-num">Q19</span><span class="q-text">How can you prevent memory leaks?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="n20">
+        <summary><span class="q-num">Q20</span><span class="q-text">How would you implement logging and metrics?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ════════════════ 05 · SYSTEM DESIGN ════════════════ -->
+  <section class="section-block" id="system-design">
+    <div class="section-header">
+      <div class="section-num-big">05</div>
+      <div>
+        <h2 class="section-title">System Design</h2>
+        <p class="section-subtitle">10 questions · architecture, deployment, scaling</p>
+      </div>
+    </div>
+    <div class="q-list">
+
+      <details class="q" data-q="s1">
+        <summary><span class="q-num">Q01</span><span class="q-text">How would you design a scalable MERN-based e-commerce platform?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s2">
+        <summary><span class="q-num">Q02</span><span class="q-text">How do you deploy a MERN app on cloud platforms (e.g., Vercel, Heroku, AWS)?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s3">
+        <summary><span class="q-num">Q03</span><span class="q-text">What is CI/CD and how would you implement it for a MERN app?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s4">
+        <summary><span class="q-num">Q04</span><span class="q-text">How do you manage environment configurations for different environments?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s5">
+        <summary><span class="q-num">Q05</span><span class="q-text">What's your approach to logging and monitoring in production?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s6">
+        <summary><span class="q-num">Q06</span><span class="q-text">How would you implement role-based access control (RBAC)?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s7">
+        <summary><span class="q-num">Q07</span><span class="q-text">How do you ensure your REST APIs are RESTful?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s8">
+        <summary><span class="q-num">Q08</span><span class="q-text">What is the difference between monolithic and microservice architectures?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s9">
+        <summary><span class="q-num">Q09</span><span class="q-text">How would you handle versioning in your APIs?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+      <details class="q" data-q="s10">
+        <summary><span class="q-num">Q10</span><span class="q-text">How do you handle scaling a database with growing user base?</span><span class="q-chevron">›</span></summary>
+        <div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div>
+      </details>
+
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <span>Sheryians Coding School · Cohort 1.0 · Parting gift</span>
+    <span>100 questions · MERN interview list</span>
+  </footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var STORAGE_KEY = 'sheryians-interview-studied-v1';
+
+  /* ── studied state (per-session + persisted) ── */
+  var studied = {};
+  try { studied = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { studied = {}; }
+
+  var allQs = Array.prototype.slice.call(document.querySelectorAll('.q'));
+  var total = allQs.length;             // should be 100
+  var progressValue = document.getElementById('progress-value');
+  var progressFill  = document.getElementById('progress-fill');
+
+  function saveStudied(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(studied)); } catch(e) {}
+  }
+
+  function updateProgress(){
+    var count = 0;
+    allQs.forEach(function(q){
+      if (q.classList.contains('studied')) count++;
+    });
+    progressValue.innerHTML = count + '<small>/ ' + total + '</small>';
+    progressFill.style.width = (total ? (100 * count / total) : 0) + '%';
+  }
+
+  /* apply stored state */
+  allQs.forEach(function(q){
+    var id = q.getAttribute('data-q');
+    if (studied[id]) q.classList.add('studied');
+    var btn = q.querySelector('.mark-studied');
+    if (btn) {
+      if (studied[id]) btn.textContent = '✓ Studied';
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var isStudied = q.classList.toggle('studied');
+        if (isStudied) { studied[id] = true; btn.textContent = '✓ Studied'; }
+        else { delete studied[id]; btn.textContent = 'Mark as studied'; }
+        saveStudied();
+        updateProgress();
+      });
+    }
+  });
+  updateProgress();
+
+  /* ── search ── */
+  var search = document.getElementById('search');
+  function runSearch(){
+    var term = (search.value || '').trim().toLowerCase();
+    allQs.forEach(function(q){
+      var text = q.querySelector('.q-text').textContent.toLowerCase();
+      var hit = !term || text.indexOf(term) !== -1;
+      q.classList.toggle('hidden', !hit);
+      if (term && hit) q.open = true;
+    });
+    /* hide empty sections */
+    document.querySelectorAll('.section-block').forEach(function(sec){
+      var anyVisible = sec.querySelectorAll('.q:not(.hidden)').length > 0;
+      sec.style.display = anyVisible ? '' : 'none';
+    });
+  }
+  if (search) search.addEventListener('input', runSearch);
+
+  /* ── collapse / reveal all ── */
+  var collapseBtn = document.getElementById('collapse-all');
+  if (collapseBtn) collapseBtn.addEventListener('click', function(){
+    allQs.forEach(function(q){ q.open = false; });
+  });
+  var revealBtn = document.getElementById('reveal-all');
+  if (revealBtn) revealBtn.addEventListener('click', function(){
+    allQs.forEach(function(q){ if (!q.classList.contains('hidden')) q.open = true; });
+  });
+
+  /* ── reset progress ── */
+  var resetBtn = document.getElementById('reset-progress');
+  if (resetBtn) resetBtn.addEventListener('click', function(){
+    if (!confirm('Reset all studied marks? This cannot be undone.')) return;
+    studied = {};
+    saveStudied();
+    allQs.forEach(function(q){
+      q.classList.remove('studied');
+      var btn = q.querySelector('.mark-studied');
+      if (btn) btn.textContent = 'Mark as studied';
+    });
+    updateProgress();
+  });
+
+  /* ── smooth jump + close open drawer on mobile ── */
+  document.querySelectorAll('.jump').forEach(function(a){
+    a.addEventListener('click', function(){
+      /* let the browser do the smooth scroll, nothing else needed */
+    });
+  });
+
+  /* ── keyboard shortcut: "/" to focus search ── */
+  document.addEventListener('keydown', function(e){
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      if (search) search.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>

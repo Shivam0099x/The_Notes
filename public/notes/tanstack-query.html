@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TanStack Query for MERN · Sheryians</title>
+<meta name="description" content="TanStack Query (React Query) from zero to production — queries, mutations, caching, staleTime vs gcTime, invalidation, optimistic updates, and MERN integration.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:17ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+.state-pill{display:inline-block;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.06em}
+.state-fresh{background:rgba(26,107,74,.15);color:var(--accent2);border:1px solid var(--accent2)}
+.state-stale{background:rgba(184,134,11,.15);color:var(--gold);border:1px solid var(--gold)}
+.state-fetching{background:rgba(27,69,135,.12);color:var(--accent3);border:1px solid var(--accent3)}
+.state-inactive{background:rgba(200,75,31,.10);color:var(--accent);border:1px solid var(--accent)}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Backend · Frontend State · MERN</div>
+  <h1>TanStack <em>Query</em></h1>
+  <p class="hero-desc">The missing piece between your React frontend and your Express API. Queries, mutations, caching, invalidation, and optimistic updates — the way production apps actually do it.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">useQuery</span>
+    <span class="hero-tag">useMutation</span>
+    <span class="hero-tag">staleTime &amp; gcTime</span>
+    <span class="hero-tag">invalidation</span>
+    <span class="hero-tag">optimistic updates</span>
+    <span class="hero-tag">MERN integration</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · WHY ═══ -->
+<section class="section-block" id="why">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">Why TanStack Query exists</h2>
+      <p class="section-subtitle">client state vs server state · the problem it solves</p>
+    </div>
+  </div>
+
+  <p class="lead">React has tools for managing <em>client state</em> — modal toggles, form drafts, tab indices. But most of the state in a real app is <em>server state</em>: data you don't own, that lives in your Express + MongoDB backend, that can change without you, and that you only have a cached copy of. React has no built-in answer for that. TanStack Query (formerly React Query) is that answer.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>Client state</th><th>Server state</th></tr></thead>
+      <tbody>
+        <tr><td>Examples</td><td>Modal open, dark mode, form input</td><td>Users list, product catalogue, cart items from DB</td></tr>
+        <tr><td>Who owns it</td><td>The frontend</td><td>The backend — you only mirror it</td></tr>
+        <tr><td>Can it change without you?</td><td>No</td><td>Yes — another user could edit it right now</td></tr>
+        <tr><td>Is your copy fresh?</td><td>Always</td><td>No — it may be stale the second you receive it</td></tr>
+        <tr><td>Best tool</td><td><code>useState</code>, Context, Zustand</td><td><b>TanStack Query</b>, Redux Toolkit Query, SWR</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What people did before TanStack Query</h3>
+  <p>Hand-rolled <code>useEffect</code> + <code>useState</code> for every API call:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">the old pain</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-cmd">useEffect</span>(() =&gt; {
+  <span class="tok-key">let</span> ignore = <span class="tok-key">false</span>;
+  <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/users'</span>)
+    .<span class="tok-cmd">then</span>(r =&gt; r.<span class="tok-cmd">json</span>())
+    .<span class="tok-cmd">then</span>(data =&gt; { <span class="tok-key">if</span> (!ignore) <span class="tok-cmd">setUsers</span>(data); })
+    .<span class="tok-cmd">catch</span>(e =&gt; <span class="tok-cmd">setError</span>(e));
+  <span class="tok-key">return</span> () =&gt; { ignore = <span class="tok-key">true</span>; };
+}, []);</code></pre>
+  </div>
+
+  <p>Then, once it works, you realise you also want: loading state, error state, retry on failure, refetch on window focus, a cache so navigating back doesn't reload, deduplication when two components ask for the same data, cancellation on unmount, and a way to invalidate after a mutation. Each of those is another bug waiting to happen. TanStack Query gives you all of them out of the box.</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The mental model</div>
+    <div class="concept-box-text"><p>TanStack Query is a <b>cache manager</b>, not a data fetcher. It doesn't know or care <em>how</em> you fetch — <code>fetch</code>, <code>axios</code>, GraphQL, GraphQL, your own wrapper. It takes the promise your function returns, caches the result under a <b>query key</b>, and manages everything about the lifecycle of that cached value: freshness, refetching, invalidation, garbage collection.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-why-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">Which of these is "server state" that TanStack Query should own?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-why-1', this, false)"><span class="opt-letter">A</span>Whether a side drawer is open.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-why-1', this, true)"><span class="opt-letter">B</span>The list of users fetched from <code>GET /api/users</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-why-1-feedback"></div>
+    <div class="quiz-explain hidden">Server state is data <em>you don't own</em> — the backend does. It can change without you, may be stale the second you receive it, and needs caching, refetching, and invalidation. Drawer state belongs in <code>useState</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · SETUP ═══ -->
+<section class="section-block" id="setup">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Installation &amp; setup</h2>
+      <p class="section-subtitle">packages · QueryClient · QueryClientProvider</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-cmd">npm</span> install @tanstack/react-query
+<span class="tok-com"># optional, but you'll want it in production:</span>
+<span class="tok-cmd">npm</span> install @tanstack/react-query-devtools</code></pre>
+  </div>
+
+  <h3>Create a QueryClient and wrap the app</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/main.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> React <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> ReactDOM <span class="tok-key">from</span> <span class="tok-str">'react-dom/client'</span>;
+<span class="tok-key">import</span> { QueryClient, QueryClientProvider } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+<span class="tok-key">import</span> { ReactQueryDevtools } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query-devtools'</span>;
+<span class="tok-key">import</span> App <span class="tok-key">from</span> <span class="tok-str">'./App'</span>;
+
+<span class="tok-key">const</span> queryClient = <span class="tok-key">new</span> <span class="tok-cmd">QueryClient</span>({
+  <span class="tok-cmd">defaultOptions</span>: {
+    <span class="tok-cmd">queries</span>: {
+      <span class="tok-cmd">staleTime</span>: <span class="tok-num">60</span> * <span class="tok-num">1000</span>,              <span class="tok-com">// fresh for 1 minute</span>
+      <span class="tok-cmd">refetchOnWindowFocus</span>: <span class="tok-key">false</span>,
+    },
+  },
+});
+
+ReactDOM.<span class="tok-cmd">createRoot</span>(document.<span class="tok-cmd">getElementById</span>(<span class="tok-str">'root'</span>)).<span class="tok-cmd">render</span>(
+  &lt;QueryClientProvider client={queryClient}&gt;
+    &lt;App /&gt;
+    &lt;ReactQueryDevtools initialIsOpen={false} /&gt;
+  &lt;/QueryClientProvider&gt;
+);</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>TanStack Query does not fetch for you.</strong> It calls the async function <em>you</em> provide. That function usually wraps <code>fetch</code>, <code>axios</code>, or your own typed API client — the choice is yours, and the rest of TanStack Query is the same.</div>
+  </div>
+
+  <div class="quiz-box" id="q-setup-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">What is a <code>QueryClient</code> responsible for?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-setup-1', this, true)"><span class="opt-letter">A</span>Holding the cache and configuring default behaviour for every query and mutation in the app.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-setup-1', this, false)"><span class="opt-letter">B</span>Actually performing HTTP requests.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-setup-1-feedback"></div>
+    <div class="quiz-explain hidden">The <code>QueryClient</code> owns the cache and default options. It never makes requests itself — that's the query function's job. <code>QueryClientProvider</code> puts the client into React context so hooks can find it.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · USEQUERY ═══ -->
+<section class="section-block" id="usequery">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">useQuery — the core hook</h2>
+      <p class="section-subtitle">queryKey · queryFn · what it returns</p>
+    </div>
+  </div>
+
+  <p>Every data-fetching concern in TanStack Query centres on one hook. Two things it must have:</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Option</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>queryKey</code></td><td>An <b>array</b> that uniquely identifies this piece of data in the cache. <code>['users']</code>, <code>['user', 42]</code>, <code>['posts', { tag: 'react' }]</code>. Used for caching, refetching, and invalidation.</td></tr>
+        <tr><td><code>queryFn</code></td><td>The async function that fetches the data. Must return a promise. Whatever it resolves with is what <code>data</code> becomes.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">UsersList.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useQuery } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+
+<span class="tok-key">async function</span> <span class="tok-cmd">fetchUsers</span>() {
+  <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/users'</span>);
+  <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed to fetch users'</span>);
+  <span class="tok-key">return</span> res.<span class="tok-cmd">json</span>();
+}
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">UsersList</span>() {
+  <span class="tok-key">const</span> { data, isLoading, isError, error, refetch } = <span class="tok-cmd">useQuery</span>({
+    <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>],
+    <span class="tok-cmd">queryFn</span>: fetchUsers,
+  });
+
+  <span class="tok-key">if</span> (isLoading) <span class="tok-key">return</span> &lt;p&gt;Loading…&lt;/p&gt;;
+  <span class="tok-key">if</span> (isError)   <span class="tok-key">return</span> &lt;p&gt;Error: {error.message}&lt;/p&gt;;
+
+  <span class="tok-key">return</span> &lt;ul&gt;{data.<span class="tok-cmd">map</span>(u =&gt; &lt;li key={u._id}&gt;{u.name}&lt;/li&gt;)}&lt;/ul&gt;;
+}</code></pre>
+  </div>
+
+  <h3>The flags you actually use</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>data</code></td><td>The cached value, or <code>undefined</code> if the first fetch hasn't resolved.</td></tr>
+        <tr><td><code>error</code></td><td>The thrown error, or <code>null</code>.</td></tr>
+        <tr><td><code>isLoading</code></td><td><code>true</code> only on the <b>first</b> fetch when there's no data yet. Show a full-page spinner with this.</td></tr>
+        <tr><td><code>isFetching</code></td><td><code>true</code> whenever a fetch is in flight, including background refetches. Show a subtle "refreshing…" indicator with this.</td></tr>
+        <tr><td><code>isError</code></td><td><code>true</code> if the last fetch failed.</td></tr>
+        <tr><td><code>isSuccess</code></td><td><code>true</code> if the last fetch succeeded.</td></tr>
+        <tr><td><code>isStale</code></td><td><code>true</code> if the data is past its <code>staleTime</code>. May refetch on next trigger.</td></tr>
+        <tr><td><code>refetch</code></td><td>Manual trigger, returns a promise.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>isLoading</code> vs <code>isFetching</code>.</strong> Use <code>isLoading</code> for the "no data at all yet" spinner, and <code>isFetching</code> for the "refreshing in the background" indicator. If you show a full-page spinner on <code>isFetching</code>, the UI flickers on every window focus.</div>
+  </div>
+
+  <h3>Passing arguments — the queryKey is the argument</h3>
+  <p>To fetch one user by ID, put the ID <em>inside the key</em>. That way each user gets its own cache slot, and fetching user 42 doesn't overwrite user 7:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useUser(id)</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">export default function</span> <span class="tok-cmd">UserProfile</span>({ id }) {
+  <span class="tok-key">const</span> { data, isLoading } = <span class="tok-cmd">useQuery</span>({
+    <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'user'</span>, id],          <span class="tok-com">// id is part of the cache key</span>
+    <span class="tok-cmd">queryFn</span>: <span class="tok-key">async</span> () =&gt; {
+      <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/users/${id}`</span>);
+      <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'User not found'</span>);
+      <span class="tok-key">return</span> res.<span class="tok-cmd">json</span>();
+    },
+  });
+
+  <span class="tok-key">if</span> (isLoading) <span class="tok-key">return</span> &lt;p&gt;Loading…&lt;/p&gt;;
+  <span class="tok-key">return</span> &lt;h2&gt;{data.name}&lt;/h2&gt;;
+}</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Query keys are hierarchical.</strong> <code>['users']</code> and <code>['users', 42]</code> are separate caches, but invalidating <code>['users']</code> <em>also</em> invalidates every key that starts with it. This is how you invalidate "all users" in one line.</div>
+  </div>
+
+  <div class="quiz-box" id="q-usequery-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">A component shows a full-page spinner. Which flag should it use?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-usequery-1', this, false)"><span class="opt-letter">A</span><code>isFetching</code> — because a request is in flight.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-usequery-1', this, true)"><span class="opt-letter">B</span><code>isLoading</code> — because there's no data yet on the first fetch.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-usequery-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>isLoading</code> = no data + fetching = first load. <code>isFetching</code> is also <code>true</code> during background refetches when <code>data</code> already exists — using it for a full-page spinner causes annoying flicker.</div>
+  </div>
+
+  <div class="quiz-box" id="q-usequery-2">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">Component A calls <code>useQuery({ queryKey: ['users'], queryFn })</code>. Component B renders at the same time with the same key. What happens?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-usequery-2', this, true)"><span class="opt-letter">A</span>One request is made; both components subscribe to the same cache entry.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-usequery-2', this, false)"><span class="opt-letter">B</span>Two separate requests are fired and end up in two separate caches.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-usequery-2-feedback"></div>
+    <div class="quiz-explain hidden">Same key = same cache entry. TanStack Query <b>de-duplicates in-flight requests</b> for identical keys — one network hit, both components update. This alone is worth adopting the library for.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · CACHING ═══ -->
+<section class="section-block" id="caching">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Caching: staleTime and gcTime</h2>
+      <p class="section-subtitle">fresh vs stale vs inactive vs garbage-collected</p>
+    </div>
+  </div>
+
+  <p>This is the single most misunderstood part of TanStack Query, and the part you'll be asked about in every interview. Two timers control every cached value:</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Option</th><th>Default</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td><code>staleTime</code></td><td><code>0</code> ms</td><td>How long the data is considered <b>fresh</b>. While fresh, TanStack Query <b>will not refetch</b> on window focus, mount, or reconnect. After staleTime passes, data is <b>stale</b> — eligible for background refetch, but still served from cache.</td></tr>
+        <tr><td><code>gcTime</code></td><td><code>5 min</code></td><td>How long <b>unused</b> data stays in memory before garbage collection. Timer only starts when the last subscriber unmounts. Formerly called <code>cacheTime</code>.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one-line difference</div>
+    <div class="concept-box-text"><p><b>staleTime</b> = "when should I re-fetch?"<br><b>gcTime</b> = "when should I <em>delete</em> it from memory?"</p><p>Data can be <em>stale</em> for hours and still <em>cached</em> — that just means the next component to mount will get the old data instantly, then a fresh request fires in the background to update it.</p></div>
+  </div>
+
+  <h3>The lifecycle, animated</h3>
+  <div class="stepper" data-stepper="lifecycle" data-steps="6">
+    <div class="stepper-head"><span class="stepper-title">Cache lifecycle of a query</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">state of the cache entry</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1-2">
+              <div class="stat-label">status</div>
+              <div class="stat-value"><span class="state-pill state-fetching">fetching</span></div>
+            </div>
+            <div class="stat" data-show="3">
+              <div class="stat-label">status</div>
+              <div class="stat-value"><span class="state-pill state-fresh">fresh</span></div>
+            </div>
+            <div class="stat" data-show="4">
+              <div class="stat-label">status</div>
+              <div class="stat-value"><span class="state-pill state-stale">stale</span></div>
+            </div>
+            <div class="stat" data-show="5">
+              <div class="stat-label">status</div>
+              <div class="stat-value"><span class="state-pill state-stale">inactive</span></div>
+            </div>
+            <div class="stat" data-show="6">
+              <div class="stat-label">status</div>
+              <div class="stat-value"><span class="state-pill state-inactive">GC'd</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">timers running</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="3-4">
+              <div class="stat-label">staleTime</div>
+              <div class="stat-value" style="font-size:15px">counting…</div>
+            </div>
+            <div class="stat" data-show="5-6">
+              <div class="stat-label">gcTime</div>
+              <div class="stat-value" style="font-size:15px">counting…</div>
+            </div>
+            <div class="stat" data-show="1-2">
+              <div class="stat-label">timers</div>
+              <div class="stat-value" style="font-size:15px">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>A component mounts and calls <code>useQuery</code>. The cache has no entry for the key, so TanStack Query fires the query function. The entry is now <b>fetching</b>.</li>
+      <li>The fetch resolves. Data is stored under the key, subscribers are notified, and the component re-renders with <code>data</code>. The entry becomes <b>fresh</b>.</li>
+      <li>staleTime starts counting. While fresh, if the same component mounts again or the window refocuses, <b>nothing refetches</b> — TanStack Query just returns the cached data. This is the "instant navigation" magic.</li>
+      <li>staleTime elapses. The entry is now <b>stale</b>. It is still in the cache — components still get it instantly — but the next trigger (mount, focus, reconnect) will fire a <b>background refetch</b>, and when it resolves, subscribers update smoothly without a spinner.</li>
+      <li>The last component using this key unmounts. The entry is now <b>inactive</b>. gcTime starts counting. If the same query mounts before gcTime elapses, the timer is cancelled and the cache is reused.</li>
+      <li>gcTime elapses with no subscribers. The entry is <b>garbage-collected</b> — freed from memory. A future mount starts cold again.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 6</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>Choosing values</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Data type</th><th>staleTime</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Real-time (chat, presence)</td><td><code>0</code></td><td>Any delay shows stale info. Combine with WebSockets for real updates.</td></tr>
+        <tr><td>Feeds, dashboards</td><td><code>30s – 1 min</code></td><td>Fresh enough; avoids thrashing the server on every tab switch.</td></tr>
+        <tr><td>User profile, settings</td><td><code>5 – 10 min</code></td><td>Rarely changes; refetching often is pure waste.</td></tr>
+        <tr><td>Static reference data (countries, categories)</td><td><code>Infinity</code></td><td>Never changes during the session. Manual invalidation after mutation.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-cache-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question"><code>staleTime: 5 * 60 * 1000</code>, <code>gcTime: 10 * 60 * 1000</code>. A component fetches at t=0, then unmounts at t=6 minutes. What happens at t=8 minutes if no other component has mounted?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-cache-1', this, false)"><span class="opt-letter">A</span>The cache is already gone — gcTime started at t=0.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-cache-1', this, true)"><span class="opt-letter">B</span>The cache is still there; gcTime started at t=6 (unmount) and will fire at t=16.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-cache-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>gcTime</code> only starts when the <b>last subscriber unmounts</b> — not when the data becomes stale. From unmount at t=6, ten minutes of gcTime means garbage collection at t=16.</div>
+  </div>
+
+  <div class="quiz-box" id="q-cache-2">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">You set <code>staleTime: 0</code> (the default). Does that mean data is <b>deleted</b> immediately?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-cache-2', this, false)"><span class="opt-letter">A</span>Yes — <code>staleTime: 0</code> means no caching.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-cache-2', this, true)"><span class="opt-letter">B</span>No — data is <em>stale immediately</em> (will refetch on next trigger) but still cached for <code>gcTime</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-cache-2-feedback"></div>
+    <div class="quiz-explain hidden">Stale ≠ deleted. <code>staleTime: 0</code> means "refetch aggressively", but the cache entry lives until <code>gcTime</code> expires after the last unmount — usually 5 minutes. Components still get instant data from cache; they just also get a background refetch.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · MUTATIONS ═══ -->
+<section class="section-block" id="mutations">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">useMutation — writing to the server</h2>
+      <p class="section-subtitle">mutate · callbacks · onSuccess · onError · onSettled</p>
+    </div>
+  </div>
+
+  <p>Queries are for <em>reading</em> server data. Mutations are for <em>changing</em> it — POST, PUT, PATCH, DELETE. They look similar but behave differently: mutations don't run automatically, they don't cache the response (unless you tell them to), and they don't refetch anything on their own. They just execute when you call them and give you a clean set of callbacks.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">AddUser.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useMutation, useQueryClient } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+
+<span class="tok-key">async function</span> <span class="tok-cmd">createUser</span>(newUser) {
+  <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/users'</span>, {
+    <span class="tok-cmd">method</span>: <span class="tok-str">'POST'</span>,
+    <span class="tok-cmd">headers</span>: { <span class="tok-str">'Content-Type'</span>: <span class="tok-str">'application/json'</span> },
+    <span class="tok-cmd">body</span>: JSON.<span class="tok-cmd">stringify</span>(newUser),
+  });
+  <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed to create user'</span>);
+  <span class="tok-key">return</span> res.<span class="tok-cmd">json</span>();
+}
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">AddUser</span>() {
+  <span class="tok-key">const</span> queryClient = <span class="tok-cmd">useQueryClient</span>();
+
+  <span class="tok-key">const</span> mutation = <span class="tok-cmd">useMutation</span>({
+    <span class="tok-cmd">mutationFn</span>: createUser,
+    <span class="tok-cmd">onSuccess</span>: () =&gt; {
+      <span class="tok-com">// the users list is now out of date — invalidate it</span>
+      queryClient.<span class="tok-cmd">invalidateQueries</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>] });
+    },
+    <span class="tok-cmd">onError</span>: (err) =&gt; {
+      <span class="tok-cmd">alert</span>(<span class="tok-str">'Create failed: '</span> + err.message);
+    },
+  });
+
+  <span class="tok-key">return</span> (
+    &lt;button
+      disabled={mutation.isPending}
+      onClick={() =&gt; <span class="tok-cmd">mutation.mutate</span>({ name: <span class="tok-str">'Aarav'</span>, age: <span class="tok-num">22</span> })}
+    &gt;
+      {mutation.isPending ? <span class="tok-str">'Saving…'</span> : <span class="tok-str">'Add user'</span>}
+    &lt;/button&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h3>What useMutation returns</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>mutate(vars)</code></td><td>Fire and forget. Errors don't propagate to your component's <code>try/catch</code>.</td></tr>
+        <tr><td><code>mutateAsync(vars)</code></td><td>Returns a promise; errors <b>do</b> throw, so <code>try/catch</code> works.</td></tr>
+        <tr><td><code>isPending</code></td><td><code>true</code> while the mutation is running — disable the submit button with this.</td></tr>
+        <tr><td><code>isSuccess</code> / <code>isError</code></td><td>Result of the last run.</td></tr>
+        <tr><td><code>data</code></td><td>What the mutation function resolved with — usually the server's response.</td></tr>
+        <tr><td><code>error</code></td><td>The thrown error if it failed.</td></tr>
+        <tr><td><code>reset()</code></td><td>Clear the mutation's state — handy after showing a success message.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>mutate vs mutateAsync</h3>
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Prefer <code>mutate</code> unless you need to <code>await</code>.</strong> <code>mutate</code> routes errors to your <code>onError</code> callback. <code>mutateAsync</code> throws on the returned promise — if you forget to <code>catch</code>, you get an unhandled rejection. Use <code>mutateAsync</code> only when you <em>must</em> wait before doing something next (e.g. navigating after success).</div>
+  </div>
+
+  <div class="quiz-box" id="q-mut-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">You just ran a <code>POST /api/users</code> mutation successfully. What does TanStack Query do by default to the cached <code>['users']</code> query?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-mut-1', this, true)"><span class="opt-letter">A</span>Nothing — the list stays stale until you invalidate or refetch it yourself.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-mut-1', this, false)"><span class="opt-letter">B</span>It automatically refetches all queries to stay in sync.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-mut-1-feedback"></div>
+    <div class="quiz-explain hidden">Mutations are <b>not</b> automatically reflected in query caches. That would be magical but also often unnecessary (a mutation might not affect anything). You invalidate manually in <code>onSuccess</code> — that's what <code>invalidateQueries</code> is for.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · INVALIDATION ═══ -->
+<section class="section-block" id="invalidation">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Invalidation — how data stays fresh after writes</h2>
+      <p class="section-subtitle">invalidateQueries · hierarchical keys · setQueryData</p>
+    </div>
+  </div>
+
+  <p>After a mutation, the cached copies of the affected queries are out of date. <code>invalidateQueries</code> tells TanStack Query "this data is now stale — refetch it". If the affected queries are currently mounted, they refetch immediately. If not, they're marked stale and will refetch the next time a component mounts.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">three flavours of invalidation</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// 1. Invalidate everything under 'users' — including ['users', 42], ['users', 7], etc.</span>
+queryClient.<span class="tok-cmd">invalidateQueries</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>] });
+
+<span class="tok-com">// 2. Invalidate only one specific user</span>
+queryClient.<span class="tok-cmd">invalidateQueries</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>, userId] });
+
+<span class="tok-com">// 3. Invalidate and force the refetch even if unmounted</span>
+queryClient.<span class="tok-cmd">invalidateQueries</span>({
+  <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>],
+  <span class="tok-cmd">refetchType</span>: <span class="tok-str">'all'</span>,
+});</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The prefix rule</div>
+    <div class="concept-box-text"><p>Invalidating <code>['users']</code> invalidates <b>every key that starts with <code>['users']</code></b>. So if your keys are <code>['users', list]</code>, <code>['users', 42]</code>, <code>['users', 43]</code>, one call cleans them all. This is why the query key must be structured — it's not a string, it's a path.</p></div>
+  </div>
+
+  <h3>Alternative: set the cache directly</h3>
+  <p>Sometimes you already know what changed — you created a user, and the server returned the new user object. Instead of refetching (extra network hit), push it into the cache:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">setQueryData</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-cmd">onSuccess</span>: (newUser) =&gt; {
+  queryClient.<span class="tok-cmd">setQueryData</span>([<span class="tok-str">'users'</span>], (old = []) =&gt; [...old, newUser]);
+  <span class="tok-com">// no refetch — the cache is now correct</span>
+}</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>When to invalidate vs setQueryData</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td>Server transformed the data, or computed fields you can't replicate</td><td><code>invalidateQueries</code> — refetch to get the truth</td></tr>
+        <tr><td>Simple append / update / delete, and the mutation returns the changed object</td><td><code>setQueryData</code> — cheaper, no extra request</td></tr>
+        <tr><td>Broad change affecting many keys</td><td><code>invalidateQueries</code> on the parent prefix</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-inv-1">
+    <div class="quiz-label">Quick check · 08</div>
+    <div class="quiz-question">Your keys are <code>['posts']</code>, <code>['posts', 1]</code>, <code>['posts', 2]</code>. You run <code>invalidateQueries({ queryKey: ['posts'] })</code>. What gets invalidated?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-inv-1', this, false)"><span class="opt-letter">A</span>Only <code>['posts']</code>.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-inv-1', this, true)"><span class="opt-letter">B</span>All three — TanStack Query matches by prefix.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-inv-1-feedback"></div>
+    <div class="quiz-explain hidden">Query keys are hierarchical. Invalidating a key invalidates every key that starts with it. So one <code>invalidateQueries</code> call cleans all posts, individual posts, and any nested variations.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · OPTIMISTIC ═══ -->
+<section class="section-block" id="optimistic">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Optimistic updates</h2>
+      <p class="section-subtitle">update cache instantly · rollback on error</p>
+    </div>
+  </div>
+
+  <p>An <strong>optimistic update</strong> means: assume the server will succeed, update the UI <em>immediately</em>, and if the server actually rejects, roll the UI back. It makes apps feel instant — likes, todos, comments, carts. The cost is a little more code, and it's worth understanding properly because it's a classic interview question.</p>
+
+  <p>The pattern has three steps: <b>cancel</b> any in-flight refetches (so they don't overwrite your optimistic data), <b>snapshot</b> the current cache (so you can restore it), and <b>update</b> the cache optimistically. If the mutation fails, restore the snapshot.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useAddTodo.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useMutation, useQueryClient } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useAddTodo</span>() {
+  <span class="tok-key">const</span> queryClient = <span class="tok-cmd">useQueryClient</span>();
+
+  <span class="tok-key">return</span> <span class="tok-cmd">useMutation</span>({
+    <span class="tok-cmd">mutationFn</span>: <span class="tok-key">async</span> (newTodo) =&gt; {
+      <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/todos'</span>, {
+        <span class="tok-cmd">method</span>: <span class="tok-str">'POST'</span>,
+        <span class="tok-cmd">headers</span>: { <span class="tok-str">'Content-Type'</span>: <span class="tok-str">'application/json'</span> },
+        <span class="tok-cmd">body</span>: JSON.<span class="tok-cmd">stringify</span>(newTodo),
+      });
+      <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed to add todo'</span>);
+      <span class="tok-key">return</span> res.<span class="tok-cmd">json</span>();
+    },
+
+    <span class="tok-com">// STEP 1 — cancel any in-flight refetches of the same query</span>
+    <span class="tok-cmd">onMutate</span>: <span class="tok-key">async</span> (newTodo) =&gt; {
+      <span class="tok-key">await</span> queryClient.<span class="tok-cmd">cancelQueries</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'todos'</span>] });
+
+      <span class="tok-com">// STEP 2 — snapshot the old cache so we can restore on error</span>
+      <span class="tok-key">const</span> previousTodos = queryClient.<span class="tok-cmd">getQueryData</span>([<span class="tok-str">'todos'</span>]);
+
+      <span class="tok-com">// STEP 3 — optimistically add the todo with a temporary id</span>
+      queryClient.<span class="tok-cmd">setQueryData</span>([<span class="tok-str">'todos'</span>], (old = []) =&gt; [
+        ...old,
+        { ...newTodo, _id: <span class="tok-str">'temp-'</span> + Date.<span class="tok-cmd">now</span>(), pending: <span class="tok-key">true</span> },
+      ]);
+
+      <span class="tok-com">// return context for use in onError</span>
+      <span class="tok-key">return</span> { previousTodos };
+    },
+
+    <span class="tok-com">// On failure — restore the snapshot</span>
+    <span class="tok-cmd">onError</span>: (err, newTodo, context) =&gt; {
+      <span class="tok-key">if</span> (context?.previousTodos) {
+        queryClient.<span class="tok-cmd">setQueryData</span>([<span class="tok-str">'todos'</span>], context.previousTodos);
+      }
+      <span class="tok-cmd">alert</span>(err.message);
+    },
+
+    <span class="tok-com">// Whether success or failure, refetch to sync with the server</span>
+    <span class="tok-cmd">onSettled</span>: () =&gt; {
+      queryClient.<span class="tok-cmd">invalidateQueries</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'todos'</span>] });
+    },
+  });
+}</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Why cancelQueries first?</div>
+    <div class="concept-box-text"><p>If a background refetch of <code>['todos']</code> was already in flight when the mutation started, it will resolve <em>after</em> your optimistic update and overwrite it with the stale server data. <code>cancelQueries</code> stops that refetch before it does damage.</p></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Callback</th><th>When it runs</th><th>What you do there</th></tr></thead>
+      <tbody>
+        <tr><td><code>onMutate</code></td><td>Before the mutation function runs</td><td>Cancel refetches, snapshot the cache, apply the optimistic change, return context</td></tr>
+        <tr><td><code>onError</code></td><td>If the mutation throws</td><td>Restore the snapshot from context</td></tr>
+        <tr><td><code>onSuccess</code></td><td>If it succeeds</td><td>Optionally replace the temp ID with the server's real ID</td></tr>
+        <tr><td><code>onSettled</code></td><td>After either outcome</td><td>Invalidate to make sure the cache matches the server</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-opt-1">
+    <div class="quiz-label">Quick check · 09</div>
+    <div class="quiz-question">You implement an optimistic update but forget <code>cancelQueries</code>. What could go wrong?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-opt-1', this, true)"><span class="opt-letter">A</span>A background refetch that was already in flight resolves after your optimistic write and overwrites it with stale data.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-opt-1', this, false)"><span class="opt-letter">B</span>The server rejects every mutation because TanStack Query never sends it.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-opt-1-feedback"></div>
+    <div class="quiz-explain hidden">It's a classic race: an old refetch that started before the mutation finishes after it, clobbering your optimistic change. <code>cancelQueries</code> is the fix.</div>
+  </div>
+
+  <div class="quiz-box" id="q-opt-2">
+    <div class="quiz-label">Quick check · 10</div>
+    <div class="quiz-question">Where do you get the <code>context</code> passed to <code>onError</code> and <code>onSettled</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-opt-2', this, false)"><span class="opt-letter">A</span>It's a global object on <code>QueryClient</code>.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-opt-2', this, true)"><span class="opt-letter">B</span>Whatever <code>onMutate</code> returns becomes the context for the later callbacks.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-opt-2-feedback"></div>
+    <div class="quiz-explain hidden">That's the whole point of returning <code>{ previousTodos }</code> from <code>onMutate</code>. It's the mutation's own per-call scratchpad.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · ADVANCED ═══ -->
+<section class="section-block" id="advanced">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Advanced patterns you'll use in production</h2>
+      <p class="section-subtitle">pagination · infinite queries · dependent queries · enabled</p>
+    </div>
+  </div>
+
+  <h3>Dependent queries — wait for a value before fetching</h3>
+  <p>If you can't fetch until you have an ID from somewhere else, use <code>enabled</code>. This is how you avoid fetching <code>/api/users/undefined</code>:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">dependent query</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> { data: user } = <span class="tok-cmd">useQuery</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'me'</span>], <span class="tok-cmd">queryFn</span>: fetchMe });
+
+<span class="tok-key">const</span> { data: posts } = <span class="tok-cmd">useQuery</span>({
+  <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'posts'</span>, user?.id],
+  <span class="tok-cmd">queryFn</span>: () =&gt; <span class="tok-cmd">fetchUserPosts</span>(user.id),
+  <span class="tok-cmd">enabled</span>: !!user?.id,                 <span class="tok-com">// don't run until user exists</span>
+});</code></pre>
+  </div>
+
+  <h3>Pagination with keepPreviousData</h3>
+  <p>Naive pagination flashes empty on every page change. <code>placeholderData: keepPreviousData</code> keeps the previous page visible while the next one loads:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">paginated query</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { keepPreviousData, useQuery } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">UsersPage</span>({ page }) {
+  <span class="tok-key">const</span> { data, isPlaceholderData } = <span class="tok-cmd">useQuery</span>({
+    <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>, { page }],
+    <span class="tok-cmd">queryFn</span>: () =&gt; <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/users?page=${page}`</span>).<span class="tok-cmd">then</span>(r =&gt; r.<span class="tok-cmd">json</span>()),
+    <span class="tok-cmd">placeholderData</span>: keepPreviousData,   <span class="tok-com">// show previous page while loading next</span>
+  });
+
+  <span class="tok-key">return</span> (
+    &lt;div style={{ opacity: isPlaceholderData ? <span class="tok-num">0.5</span> : <span class="tok-num">1</span> }}&gt;
+      {/* render data.users */}
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h3>Infinite queries for feeds</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useInfiniteQuery</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useInfiniteQuery } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+
+<span class="tok-key">const</span> { data, fetchNextPage, hasNextPage, isFetchingNextPage } = <span class="tok-cmd">useInfiniteQuery</span>({
+  <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'feed'</span>],
+  <span class="tok-cmd">queryFn</span>: ({ pageParam = <span class="tok-num">0</span> }) =&gt;
+    <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/posts?cursor=${pageParam}`</span>).<span class="tok-cmd">then</span>(r =&gt; r.<span class="tok-cmd">json</span>()),
+  <span class="tok-cmd">initialPageParam</span>: <span class="tok-num">0</span>,
+  <span class="tok-cmd">getNextPageParam</span>: (lastPage) =&gt; lastPage.nextCursor ?? <span class="tok-key">undefined</span>,
+});</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-adv-1">
+    <div class="quiz-label">Quick check · 11</div>
+    <div class="quiz-question">Your second query depends on an ID from the first. The first hasn't resolved yet. What stops the second from firing with an undefined ID?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-adv-1', this, true)"><span class="opt-letter">A</span><code>enabled: !!id</code> — the query won't run until the condition is true.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-adv-1', this, false)"><span class="opt-letter">B</span>Wrapping the fetch in a <code>try/catch</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-adv-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>enabled</code> is the built-in dependent-query pattern. Until <code>enabled: true</code>, the query sits idle and doesn't fetch.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · MERN ═══ -->
+<section class="section-block" id="mern">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">How it fits a MERN app</h2>
+      <p class="section-subtitle">server state vs client state · one source of truth · structure</p>
+    </div>
+  </div>
+
+  <p>In a MERN stack, your Express API is the source of truth. TanStack Query is the mirror that lives in the browser and keeps that mirror up to date. That means:</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>State</th><th>Lives in</th><th>Managed by</th></tr></thead>
+      <tbody>
+        <tr><td>User list, product catalogue, orders</td><td>Server → browser cache</td><td>TanStack Query</td></tr>
+        <tr><td>Current user (from <code>/api/auth/me</code>)</td><td>Server → browser cache</td><td>TanStack Query</td></tr>
+        <tr><td>Auth token</td><td><code>localStorage</code> / cookie</td><td>Your auth layer</td></tr>
+        <tr><td>Modal open/closed, tab index</td><td>Component</td><td><code>useState</code></td></tr>
+        <tr><td>Multi-step form draft (not yet submitted)</td><td>Component or Zustand/Redux</td><td>Client state store</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The most important MERN rule</div>
+    <div class="concept-box-text"><p>Don't copy TanStack Query data into Redux or Zustand "so it's all in one place". That's the #1 way to get two sources of truth that drift. Keep server data in TanStack Query's cache, and use the client store only for state the server doesn't know about.</p></div>
+  </div>
+
+  <h3>A wrapper so your components never call fetch directly</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/api/client.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> BASE = <span class="tok-str">'/api'</span>;
+
+<span class="tok-key">async function</span> <span class="tok-cmd">request</span>(path, options = {}) {
+  <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(BASE + path, {
+    ...options,
+    <span class="tok-cmd">headers</span>: {
+      <span class="tok-str">'Content-Type'</span>: <span class="tok-str">'application/json'</span>,
+      ...(options.headers || {}),
+      <span class="tok-cmd">Authorization</span>: <span class="tok-str">'Bearer '</span> + (localStorage.<span class="tok-cmd">getItem</span>(<span class="tok-str">'token'</span>) || <span class="tok-str">''</span>),
+    },
+  });
+  <span class="tok-key">if</span> (!res.ok) {
+    <span class="tok-key">const</span> body = <span class="tok-key">await</span> res.<span class="tok-cmd">json</span>().<span class="tok-cmd">catch</span>(() =&gt; ({}));
+    <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(body.message || <span class="tok-str">`Request failed: ${res.status}`</span>);
+  }
+  <span class="tok-key">return</span> res.<span class="tok-cmd">json</span>();
+}
+
+<span class="tok-key">export const</span> api = {
+  <span class="tok-cmd">getUsers</span>:  () =&gt; <span class="tok-cmd">request</span>(<span class="tok-str">'/users'</span>),
+  <span class="tok-cmd">getUser</span>:   (id) =&gt; <span class="tok-cmd">request</span>(<span class="tok-str">`/users/${id}`</span>),
+  <span class="tok-cmd">createUser</span>: (body) =&gt; <span class="tok-cmd">request</span>(<span class="tok-str">'/users'</span>, { <span class="tok-cmd">method</span>: <span class="tok-str">'POST'</span>, <span class="tok-cmd">body</span>: JSON.<span class="tok-cmd">stringify</span>(body) }),
+  <span class="tok-cmd">updateUser</span>: (id, body) =&gt; <span class="tok-cmd">request</span>(<span class="tok-str">`/users/${id}`</span>, { <span class="tok-cmd">method</span>: <span class="tok-str">'PUT'</span>, <span class="tok-cmd">body</span>: JSON.<span class="tok-cmd">stringify</span>(body) }),
+  <span class="tok-cmd">deleteUser</span>: (id) =&gt; <span class="tok-cmd">request</span>(<span class="tok-str">`/users/${id}`</span>, { <span class="tok-cmd">method</span>: <span class="tok-str">'DELETE'</span> }),
+};</code></pre>
+  </div>
+
+  <h3>Then hooks become trivial</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/hooks/useUsers.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useQuery, useMutation, useQueryClient } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+<span class="tok-key">import</span> { api } <span class="tok-key">from</span> <span class="tok-str">'../api/client'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useUsers</span>() {
+  <span class="tok-key">return</span> <span class="tok-cmd">useQuery</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>], <span class="tok-cmd">queryFn</span>: api.getUsers });
+}
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useCreateUser</span>() {
+  <span class="tok-key">const</span> qc = <span class="tok-cmd">useQueryClient</span>();
+  <span class="tok-key">return</span> <span class="tok-cmd">useMutation</span>({
+    <span class="tok-cmd">mutationFn</span>: api.createUser,
+    <span class="tok-cmd">onSuccess</span>: () =&gt; qc.<span class="tok-cmd">invalidateQueries</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>] }),
+  });
+}
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useDeleteUser</span>() {
+  <span class="tok-key">const</span> qc = <span class="tok-cmd">useQueryClient</span>();
+  <span class="tok-key">return</span> <span class="tok-cmd">useMutation</span>({
+    <span class="tok-cmd">mutationFn</span>: api.deleteUser,
+    <span class="tok-cmd">onSuccess</span>: () =&gt; qc.<span class="tok-cmd">invalidateQueries</span>({ <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>] }),
+  });
+}</code></pre>
+  </div>
+
+  <h3>Typical folder structure</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>src/
+├── api/
+│   └── client.js             <span class="tok-com">// fetch wrapper, shared auth headers</span>
+├── hooks/
+│   ├── useUsers.js           <span class="tok-com">// useQuery + useMutation for users</span>
+│   └── usePosts.js
+├── pages/
+│   └── UsersPage.jsx
+├── components/
+│   └── AddUserForm.jsx
+└── main.jsx                  <span class="tok-com">// QueryClientProvider</span></code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-mern-1">
+    <div class="quiz-label">Quick check · 12</div>
+    <div class="quiz-question">You're migrating a MERN app from Redux (thunks storing server data) to TanStack Query. What should happen to the server-data slices in Redux?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-mern-1', this, false)"><span class="opt-letter">A</span>Keep them — both are useful.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-mern-1', this, true)"><span class="opt-letter">B</span>Remove them — TanStack Query owns server state now; Redux (if kept) owns only client state.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-mern-1-feedback"></div>
+    <div class="quiz-explain hidden">Keeping both copies is the classic mistake that leads to drift. Migrate server data to TanStack Query fully; keep Redux only for state the server doesn't know about — or drop Redux entirely if nothing else uses it.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Wrong query key structure</td><td>Two components asking for the same data create separate caches; invalidation misses one</td><td>Standardise on a hierarchical key scheme: <code>[entity]</code>, <code>[entity, id]</code>, <code>[entity, filters]</code></td></tr>
+        <tr><td>Passing objects that change every render into the key</td><td>Cache is never reused; infinite refetches</td><td>Key must be stable. Pass the <em>values</em>, not the object.</td></tr>
+        <tr><td>Using <code>isFetching</code> for the main spinner</td><td>UI flickers on every background refetch</td><td>Use <code>isLoading</code> (first load only) for full-page; <code>isFetching</code> for subtle indicators</td></tr>
+        <tr><td>Refetching everything after every mutation</td><td>Network traffic explodes; components flicker</td><td><code>invalidateQueries</code> only the affected keys — or <code>setQueryData</code> for simple cases</td></tr>
+        <tr><td>Copying query data into <code>useState</code> / Redux</td><td>Two sources of truth that drift</td><td>Read from <code>useQuery</code> directly; derive with <code>useMemo</code>, not <code>useState</code></td></tr>
+        <tr><td>Optimistic update without <code>cancelQueries</code></td><td>In-flight refetch overwrites your optimistic write</td><td>Always cancel first</td></tr>
+        <tr><td>QueryFn that closes over props directly</td><td>Stale values, missed refetches</td><td>Put the value in the query key — TanStack Query calls your fn with the key's current values</td></tr>
+        <tr><td>Assuming errors are gone with <code>isError</code> only</td><td>Silent failures in production</td><td>Also log errors in a global <code>onError</code> on <code>QueryClient</code> defaults</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>The queryKey stability trap.</strong> <code>queryKey: ['users', { page }]</code> is stable — same object shape, same <code>page</code> value, deep-equal. But <code>queryKey: ['users', filters]</code> where <code>filters</code> is a new object every render is <b>still fine</b>, because TanStack Query deep-compares keys. What breaks is passing <em>unstable values inside</em> — like <code>queryKey: ['users', { on: Date.now() }]</code>. Keep keys made of primitives and plain objects and you'll never hit this.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What problem does TanStack Query solve?</span></summary><div class="qa-body"><p>It manages <em>server state</em> — data you don't own, that changes without you, and is often stale. It gives you caching, background refetching, deduplication, loading/error states, pagination, and invalidation in one tool. Without it, every API call becomes a bespoke <code>useEffect</code> + <code>useState</code> + cancellation dance, and every app reinvents the same cache badly.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>What is a query key and why is it an array?</span></summary><div class="qa-body"><p>The unique identifier for a piece of cached data. Arrays are used because they're hierarchical: <code>['users']</code> is a prefix of <code>['users', 42]</code>, so invalidating <code>['users']</code> invalidates all users and each individual user. Array items can be strings, numbers, plain objects — TanStack Query deep-compares them.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>Explain staleTime vs gcTime.</span></summary><div class="qa-body"><p><code>staleTime</code> is how long data is considered <b>fresh</b> and won't refetch on triggers like mount or window focus. <code>gcTime</code> is how long <b>unused</b> data stays in memory after the last component unmounts. They're independent: data can be stale for an hour but still cached. Default staleTime is <code>0</code> (refetch aggressively); default gcTime is 5 minutes.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What's the difference between isLoading and isFetching?</span></summary><div class="qa-body"><p><code>isLoading</code> is <code>true</code> only when there's no cached data and the first fetch is in flight — the "I have nothing to show" case. <code>isFetching</code> is <code>true</code> whenever a fetch is running, including background refetches when data is already shown. Use <code>isLoading</code> for full-page spinners, <code>isFetching</code> for subtle "refreshing…" indicators.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>How do you keep a query fresh after a mutation?</span></summary><div class="qa-body"><p>In <code>onSuccess</code> of the mutation, call <code>queryClient.invalidateQueries({ queryKey: [...] })</code> for the affected keys. If the affected queries are mounted, they refetch immediately; if not, they're marked stale and refetch on next mount. For simple cases where the mutation returns the changed object, use <code>setQueryData</code> to update the cache directly and skip the refetch.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>How would you implement an optimistic update?</span></summary><div class="qa-body"><p>In <code>onMutate</code>: <code>cancelQueries</code> to stop in-flight refetches, <code>getQueryData</code> to snapshot the old cache, <code>setQueryData</code> to apply the optimistic change, and <code>return { previous }</code>. In <code>onError</code>: restore from the returned context. Optionally <code>onSettled</code>: invalidate to reconcile with the server. That's the standard three-step pattern.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What is a dependent query and how do you implement one?</span></summary><div class="qa-body"><p>A query that needs a value from another query before it can run — e.g. fetching <code>/api/users/:id/posts</code> requires knowing the user ID. Implement it with <code>enabled: !!id</code> so the second query doesn't fire until the first has populated the value.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>What is the difference between useMutation.mutate and mutateAsync?</span></summary><div class="qa-body"><p><code>mutate</code> is fire-and-forget — errors go to the <code>onError</code> callback, and no promise is returned for you to await. <code>mutateAsync</code> returns a promise that rejects on error, so you can <code>try/catch</code> it — but if you forget to catch, you get an unhandled rejection. Prefer <code>mutate</code>; use <code>mutateAsync</code> only when you must wait.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>How does TanStack Query prevent duplicate requests?</span></summary><div class="qa-body"><p>If two components mount with the same <code>queryKey</code> and a fetch is already in flight, both subscribe to the same cache entry — the second does not fire another request. Same with rapid refetches: while one is running, further triggers are coalesced. This is one of the biggest benefits over hand-rolled <code>useEffect</code> fetching.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>Would you use TanStack Query instead of Redux, or alongside it?</span></summary><div class="qa-body"><p>TanStack Query <b>replaces</b> the server-state half of Redux. Most apps don't need a client state store at all after migrating to TanStack Query — auth user, lists, forms-that-are-submitted, everything comes from cache. If you still have complex client-only state (multi-step form drafts, UI flows shared across pages), Zustand or Redux Toolkit is fine alongside TanStack Query. What you <b>don't</b> do is copy server data into Redux "for consistency".</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>What happens if a query function throws?</span></summary><div class="qa-body"><p>TanStack Query catches the error, sets <code>isError: true</code>, stores the error, and by default retries up to <b>3 times</b> with exponential backoff before giving up. Configure with <code>retry</code> and <code>retryDelay</code> on the query or globally. Mutations don't retry by default.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>How does TanStack Query integrate with SSR (e.g. Next.js)?</span></summary><div class="qa-body"><p>You create a <code>QueryClient</code> per request on the server, prefetch the required queries with <code>prefetchQuery</code>, dehydrate the cache state, pass it to the client, and hydrate on mount. This gives instant first paint with cached data and no waterfall on hydration. The package <code>@tanstack/react-query</code> ships <code>HydrationBoundary</code> and <code>dehydrate</code>/<code>hydrate</code> helpers for exactly this.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Backend · MERN</span>
+  <span>TanStack Query · queries · mutations · caching · MERN integration</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>

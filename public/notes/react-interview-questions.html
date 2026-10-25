@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>100 React.js Interview Questions · Sheryians</title>
+<meta name="description" content="Top 100 React.js interview questions — fundamentals, Fiber, hooks, custom hooks, state management, performance, and scenarios.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --text-body:#2A2720; --surface-ink:#0E0F14; color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3; --surface-ink:#0A0B0F; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3; --surface-ink:#0A0B0F; color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+.container{max-width:980px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(36px,6vw,60px);font-weight:900;line-height:1;letter-spacing:-.025em;margin:0 0 18px;max-width:16ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:600px;margin:0 0 24px;line-height:1.55}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
+.progress-card{margin:32px 0 40px;padding:18px 22px;background:var(--paper2);border:1px solid var(--rule);border-radius:10px;display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between}
+.progress-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.progress-value{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1}
+.progress-value small{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:400;color:var(--muted);margin-left:6px}
+.progress-bar{flex:1;min-width:180px;height:4px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--accent);width:0%;transition:width .4s ease}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 40px;padding:14px 16px;background:var(--paper2);border:1px solid var(--rule);border-radius:10px}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap input{width:100%;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;padding:10px 14px 10px 38px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap::before{content:'⌕';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;pointer-events:none}
+.btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:9px 14px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.jumps{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 48px}
+.jump{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:1px solid var(--rule);border-radius:999px;color:var(--muted);text-decoration:none;transition:all .2s;background:var(--paper)}
+.jump:hover{border-color:var(--accent);color:var(--accent)}
+.jump strong{color:var(--ink);font-weight:600;margin-right:4px}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em}
+
+.q-list{display:flex;flex-direction:column;gap:8px}
+.q{border:1px solid var(--rule);border-radius:8px;background:var(--paper);transition:border-color .2s,background .2s}
+.q:hover{border-color:var(--ink)}
+.q[open]{border-color:var(--ink);background:var(--paper2)}
+.q[open] .q-num{color:var(--accent)}
+.q summary{list-style:none;cursor:pointer;display:flex;gap:14px;align-items:flex-start;padding:14px 18px;outline:none}
+.q summary::-webkit-details-marker{display:none}
+.q-num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;letter-spacing:.04em;padding-top:3px;min-width:26px;transition:color .2s}
+.q-text{font-size:14.5px;line-height:1.55;color:var(--ink);flex:1}
+.q-chevron{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--muted);flex-shrink:0;transition:transform .2s;padding-top:3px}
+.q[open] .q-chevron{transform:rotate(90deg);color:var(--accent)}
+.q-body{padding:0 18px 16px 58px;font-size:13.5px;color:var(--muted);line-height:1.6}
+.q-body .study-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:var(--muted);border-left:2px solid var(--rule);padding-left:10px;font-style:italic;margin-bottom:10px}
+.q.studied{border-color:var(--accent2);background:rgba(26,107,74,.05);position:relative}
+.q.studied .q-num{color:var(--accent2)}
+.q.studied summary::before{content:'✓';font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent2);font-weight:600;position:absolute;left:-20px;top:17px}
+.q .mark-studied{margin-top:10px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--muted);cursor:pointer;transition:all .2s}
+.q .mark-studied:hover{border-color:var(--accent2);color:var(--accent2)}
+.q.studied .mark-studied{border-color:var(--accent2);color:var(--accent2);background:transparent}
+.q.hidden{display:none}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .q summary{padding:12px 14px}
+  .q-body{padding:0 14px 14px 46px}
+  .q-num{min-width:22px}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Sheryians · Interview Prep</div>
+  <h1>100 <em>React.js</em> Interview Questions</h1>
+  <p class="hero-desc">Core React → Internals → Hooks → Custom Hooks → Performance → Scenarios. Open a card to test yourself, mark it studied, and watch progress climb.</p>
+  <div class="hero-meta">
+    <span>100 questions</span>
+    <span>·</span>
+    <span>10 modules</span>
+    <span>·</span>
+    <span>self-test format</span>
+  </div>
+</header>
+
+<div class="progress-card">
+  <div>
+    <div class="progress-label">Studied</div>
+    <div class="progress-value" id="progress-value">0<small>/ 100</small></div>
+  </div>
+  <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="search" id="search" placeholder="Search 100 questions…" autocomplete="off">
+  </div>
+  <button class="btn" id="collapse-all">Collapse all</button>
+  <button class="btn" id="reveal-all">Reveal all</button>
+  <button class="btn" id="reset-progress">Reset progress</button>
+</div>
+
+<nav class="jumps">
+  <a class="jump" href="#m1"><strong>01</strong>Fundamentals</a>
+  <a class="jump" href="#m2"><strong>02</strong>Virtual DOM</a>
+  <a class="jump" href="#m3"><strong>03</strong>State</a>
+  <a class="jump" href="#m4"><strong>04</strong>Hooks</a>
+  <a class="jump" href="#m5"><strong>05</strong>Custom Hooks</a>
+  <a class="jump" href="#m6"><strong>06</strong>Context</a>
+  <a class="jump" href="#m7"><strong>07</strong>Performance</a>
+  <a class="jump" href="#m8"><strong>08</strong>Modern</a>
+  <a class="jump" href="#m9"><strong>09</strong>Build React</a>
+  <a class="jump" href="#m10"><strong>10</strong>Scenarios</a>
+</nav>
+
+<!-- ═══ M1 · FUNDAMENTALS ═══ -->
+<section class="section-block" id="m1">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">React fundamentals & component architecture</h2>
+      <p class="section-subtitle">Module 1 · questions 1–10</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r1"><summary><span class="q-num">Q01</span><span class="q-text">What is React, and what problems does it solve?</span><span class="q-chevron">›</span></summary><div class="q-body"><p class="study-hint">Try answering before you look anything up.</p><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r2"><summary><span class="q-num">Q02</span><span class="q-text">What is the difference between React and React DOM?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r3"><summary><span class="q-num">Q03</span><span class="q-text">What is JSX, and how does it get transformed into JavaScript?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r4"><summary><span class="q-num">Q04</span><span class="q-text">What is the difference between a React element, component, and DOM node?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r5"><summary><span class="q-num">Q05</span><span class="q-text">What is the difference between functional and class components?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r6"><summary><span class="q-num">Q06</span><span class="q-text">What are props and state, and how do they differ?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r7"><summary><span class="q-num">Q07</span><span class="q-text">What is one-way data flow, and why does React follow it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r8"><summary><span class="q-num">Q08</span><span class="q-text">What is the difference between controlled and uncontrolled components?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r9"><summary><span class="q-num">Q09</span><span class="q-text">What is lifting state up, and what is prop drilling?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r10"><summary><span class="q-num">Q10</span><span class="q-text">What happens from a state update until the browser displays the updated UI?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M2 · VIRTUAL DOM ═══ -->
+<section class="section-block" id="m2">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Virtual DOM, reconciliation & Fiber</h2>
+      <p class="section-subtitle">Module 2 · questions 11–22</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r11"><summary><span class="q-num">Q11</span><span class="q-text">What is the Virtual DOM, and how does it differ from the real DOM?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r12"><summary><span class="q-num">Q12</span><span class="q-text">Does the Virtual DOM make React inherently faster than direct DOM manipulation?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r13"><summary><span class="q-num">Q13</span><span class="q-text">What is reconciliation, and when does React perform it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r14"><summary><span class="q-num">Q14</span><span class="q-text">What is the diffing algorithm, and what assumptions does React use?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r15"><summary><span class="q-num">Q15</span><span class="q-text">How do element types and keys influence reconciliation?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r16"><summary><span class="q-num">Q16</span><span class="q-text">Why are array indexes often poor keys, and when might they be acceptable?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r17"><summary><span class="q-num">Q17</span><span class="q-text">What happens to component state when its key or position changes?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r18"><summary><span class="q-num">Q18</span><span class="q-text">What is React Fiber, and why was it introduced?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r19"><summary><span class="q-num">Q19</span><span class="q-text">What is a Fiber node, and what do child, sibling, and return represent?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r20"><summary><span class="q-num">Q20</span><span class="q-text">What are the current Fiber tree, work-in-progress tree, and alternate pointer?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r21"><summary><span class="q-num">Q21</span><span class="q-text">What is the difference between the render phase and the commit phase?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r22"><summary><span class="q-num">Q22</span><span class="q-text">What are concurrent rendering, scheduling, and lanes? Does concurrent rendering mean multithreading?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M3 · STATE ═══ -->
+<section class="section-block" id="m3">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">State, rendering & event handling</h2>
+      <p class="section-subtitle">Module 3 · questions 23–32</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r23"><summary><span class="q-num">Q23</span><span class="q-text">What causes a React component to re-render?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r24"><summary><span class="q-num">Q24</span><span class="q-text">Does a parent re-render always cause its children to re-render?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r25"><summary><span class="q-num">Q25</span><span class="q-text">Why doesn't calling a state setter immediately change the state in the current render?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r26"><summary><span class="q-num">Q26</span><span class="q-text">What is a state snapshot, and how does it relate to closures?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r27"><summary><span class="q-num">Q27</span><span class="q-text">What is the difference between setCount(count + 1) and setCount(prev => prev + 1)?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r28"><summary><span class="q-num">Q28</span><span class="q-text">What is batching, and how does automatic batching work in modern React?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r29"><summary><span class="q-num">Q29</span><span class="q-text">Why should you avoid mutating state directly?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r30"><summary><span class="q-num">Q30</span><span class="q-text">What is the difference between derived state and redundant state?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r31"><summary><span class="q-num">Q31</span><span class="q-text">What are synthetic events, event delegation, and event propagation in React?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r32"><summary><span class="q-num">Q32</span><span class="q-text">How do keys affect component identity and state preservation in lists?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M4 · HOOKS ═══ -->
+<section class="section-block" id="m4">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Hooks & their internal behavior</h2>
+      <p class="section-subtitle">Module 4 · questions 33–45</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r33"><summary><span class="q-num">Q33</span><span class="q-text">What are Hooks, and why were they introduced?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r34"><summary><span class="q-num">Q34</span><span class="q-text">What are the Rules of Hooks, and why can't Hooks be called conditionally?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r35"><summary><span class="q-num">Q35</span><span class="q-text">How does React associate Hook state with a component across renders?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r36"><summary><span class="q-num">Q36</span><span class="q-text">How does useState() work, including lazy initialization and functional updates?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r37"><summary><span class="q-num">Q37</span><span class="q-text">When should you use useReducer() instead of useState()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r38"><summary><span class="q-num">Q38</span><span class="q-text">How does useEffect() work, and what do its dependency arrays mean?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r39"><summary><span class="q-num">Q39</span><span class="q-text">Why might useEffect() run twice in development under Strict Mode?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r40"><summary><span class="q-num">Q40</span><span class="q-text">What is a stale closure, and how can you fix one?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r41"><summary><span class="q-num">Q41</span><span class="q-text">What is effect cleanup, and when does React run cleanup functions?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r42"><summary><span class="q-num">Q42</span><span class="q-text">What is the difference between useEffect() and useLayoutEffect()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r43"><summary><span class="q-num">Q43</span><span class="q-text">What is useRef(), and how does it differ from state?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r44"><summary><span class="q-num">Q44</span><span class="q-text">What is the difference between useMemo(), useCallback(), and React.memo()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r45"><summary><span class="q-num">Q45</span><span class="q-text">What are useContext(), useId(), useTransition(), and useDeferredValue() used for?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M5 · CUSTOM HOOKS ═══ -->
+<section class="section-block" id="m5">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Custom Hooks implementation</h2>
+      <p class="section-subtitle">Module 5 · questions 46–57</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r46"><summary><span class="q-num">Q46</span><span class="q-text">What are custom Hooks, and what makes them different from regular utility functions?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r47"><summary><span class="q-num">Q47</span><span class="q-text">Implement usePrevious() to return the previous committed value.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r48"><summary><span class="q-num">Q48</span><span class="q-text">Implement useDebounce() to delay a value until changes stop.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r49"><summary><span class="q-num">Q49</span><span class="q-text">Implement useDebouncedCallback() and explain how it differs from useDebounce().</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r50"><summary><span class="q-num">Q50</span><span class="q-text">Implement useFetch() with loading, data, error, and request cancellation.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r51"><summary><span class="q-num">Q51</span><span class="q-text">How would you prevent race conditions in a custom data-fetching Hook?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r52"><summary><span class="q-num">Q52</span><span class="q-text">Implement useLocalStorage() with safe initialization and persistence.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r53"><summary><span class="q-num">Q53</span><span class="q-text">Implement useInterval() without stale closures.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r54"><summary><span class="q-num">Q54</span><span class="q-text">Implement useOnClickOutside() for a modal or dropdown.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r55"><summary><span class="q-num">Q55</span><span class="q-text">Implement useWindowSize() and useMediaQuery() with proper cleanup.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r56"><summary><span class="q-num">Q56</span><span class="q-text">Implement useIntersectionObserver() for infinite scrolling or lazy loading.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r57"><summary><span class="q-num">Q57</span><span class="q-text">Implement a reusable useAsync() Hook and explain how to handle errors, cancellation, and unmounting safely.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M6 · CONTEXT ═══ -->
+<section class="section-block" id="m6">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Context, global state & data fetching</h2>
+      <p class="section-subtitle">Module 6 · questions 58–67</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r58"><summary><span class="q-num">Q58</span><span class="q-text">How does Context work, and why can it cause unnecessary re-renders?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r59"><summary><span class="q-num">Q59</span><span class="q-text">How would you optimize Context providers and split unrelated state?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r60"><summary><span class="q-num">Q60</span><span class="q-text">When should you use Context, Redux Toolkit, or Zustand?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r61"><summary><span class="q-num">Q61</span><span class="q-text">How do Redux actions, reducers, dispatch, and the store work?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r62"><summary><span class="q-num">Q62</span><span class="q-text">How do Redux Toolkit's createSlice() and createAsyncThunk() work?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r63"><summary><span class="q-num">Q63</span><span class="q-text">How does Zustand manage state subscriptions and selectors?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r64"><summary><span class="q-num">Q64</span><span class="q-text">What is the difference between client state and server state?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r65"><summary><span class="q-num">Q65</span><span class="q-text">How does TanStack Query handle caching, invalidation, and refetching?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r66"><summary><span class="q-num">Q66</span><span class="q-text">What is the difference between staleTime and gcTime in TanStack Query?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r67"><summary><span class="q-num">Q67</span><span class="q-text">How would you handle optimistic updates, rollback, and duplicate API requests?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M7 · PERFORMANCE ═══ -->
+<section class="section-block" id="m7">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Performance optimization</h2>
+      <p class="section-subtitle">Module 7 · questions 68–77</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r68"><summary><span class="q-num">Q68</span><span class="q-text">How do you identify unnecessary re-renders in React?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r69"><summary><span class="q-num">Q69</span><span class="q-text">When should you use React.memo()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r70"><summary><span class="q-num">Q70</span><span class="q-text">When should you use useMemo() and useCallback()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r71"><summary><span class="q-num">Q71</span><span class="q-text">Why can unstable object and function references cause performance issues?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r72"><summary><span class="q-num">Q72</span><span class="q-text">How do you optimize a list with thousands of items?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r73"><summary><span class="q-num">Q73</span><span class="q-text">What is list virtualization, and when should you use it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r74"><summary><span class="q-num">Q74</span><span class="q-text">How do code splitting, React.lazy(), and Suspense improve performance?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r75"><summary><span class="q-num">Q75</span><span class="q-text">How do you use React DevTools Profiler to find bottlenecks?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r76"><summary><span class="q-num">Q76</span><span class="q-text">What are common causes of excessive effects and render loops?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r77"><summary><span class="q-num">Q77</span><span class="q-text">How would you measure whether an optimization actually improved performance?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M8 · MODERN ═══ -->
+<section class="section-block" id="m8">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Modern React, errors & rendering strategies</h2>
+      <p class="section-subtitle">Module 8 · questions 78–87</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r78"><summary><span class="q-num">Q78</span><span class="q-text">What are Error Boundaries, and which errors can they catch?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r79"><summary><span class="q-num">Q79</span><span class="q-text">What is Suspense, and how does it differ from manually managing loading state?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r80"><summary><span class="q-num">Q80</span><span class="q-text">What are startTransition(), useTransition(), and useDeferredValue()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r81"><summary><span class="q-num">Q81</span><span class="q-text">What are useOptimistic(), useActionState(), and useFormStatus() used for?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r82"><summary><span class="q-num">Q82</span><span class="q-text">What are React Server Components, and how do they differ from Client Components?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r83"><summary><span class="q-num">Q83</span><span class="q-text">What are CSR, SSR, SSG, and ISR?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r84"><summary><span class="q-num">Q84</span><span class="q-text">What is hydration, and why do hydration mismatches happen?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r85"><summary><span class="q-num">Q85</span><span class="q-text">What is streaming server rendering, and how does selective hydration work?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r86"><summary><span class="q-num">Q86</span><span class="q-text">What does "use client" mean in Next.js, and how does it affect the component tree?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r87"><summary><span class="q-num">Q87</span><span class="q-text">How do you handle authentication, caching, and data fetching in a React or Next.js application?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M9 · BUILD REACT ═══ -->
+<section class="section-block" id="m9">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Build React from scratch</h2>
+      <p class="section-subtitle">Module 9 · questions 88–93</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r88"><summary><span class="q-num">Q88</span><span class="q-text">How would you implement a minimal React-like library from scratch?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r89"><summary><span class="q-num">Q89</span><span class="q-text">Implement a basic createElement() function and explain the structure of a React element.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r90"><summary><span class="q-num">Q90</span><span class="q-text">Implement a basic render() function that converts your element tree into DOM nodes.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r91"><summary><span class="q-num">Q91</span><span class="q-text">Implement a minimal useState() mechanism and explain why Hook call order matters.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r92"><summary><span class="q-num">Q92</span><span class="q-text">Implement a basic Virtual DOM diffing and reconciliation algorithm.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r93"><summary><span class="q-num">Q93</span><span class="q-text">How would you add keyed list reconciliation, effect cleanup, and scheduled rendering to your minimal implementation?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M10 · SCENARIOS ═══ -->
+<section class="section-block" id="m10">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Scenario-based & coding questions</h2>
+      <p class="section-subtitle">Module 10 · questions 94–100</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="r94"><summary><span class="q-num">Q94</span><span class="q-text">A search component fetches data on every keystroke. How would you implement debouncing, cancellation, and race-condition protection?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r95"><summary><span class="q-num">Q95</span><span class="q-text">A component renders infinitely because of useEffect(). How would you diagnose and fix it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r96"><summary><span class="q-num">Q96</span><span class="q-text">A list shows incorrect values after deleting or reordering items. How would you investigate its keys and component identity?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r97"><summary><span class="q-num">Q97</span><span class="q-text">A dashboard has thousands of rows and frequent updates. How would you optimize rendering and state management?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r98"><summary><span class="q-num">Q98</span><span class="q-text">An API request returns after the user navigates away or changes the query. How would you prevent stale UI updates?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r99"><summary><span class="q-num">Q99</span><span class="q-text">A form submits twice, or an optimistic update fails. How would you ensure correct user feedback and data consistency?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="r100"><summary><span class="q-num">Q100</span><span class="q-text">You inherit a React application with prop drilling, duplicated state, excessive re-renders, and poorly structured effects. How would you refactor it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Interview Prep</span>
+  <span>100 React.js questions · 10 modules</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var STORAGE_KEY = 'sheryians-react-questions-v1';
+  var studied = {};
+  try { studied = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { studied = {}; }
+  var allQs = Array.prototype.slice.call(document.querySelectorAll('.q'));
+  var total = allQs.length;
+  var progressValue = document.getElementById('progress-value');
+  var progressFill  = document.getElementById('progress-fill');
+
+  function saveStudied(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(studied)); } catch(e) {} }
+  function updateProgress(){
+    var count = 0;
+    allQs.forEach(function(q){ if (q.classList.contains('studied')) count++; });
+    progressValue.innerHTML = count + '<small>/ ' + total + '</small>';
+    progressFill.style.width = (total ? (100*count/total) : 0) + '%';
+  }
+  allQs.forEach(function(q){
+    var id = q.getAttribute('data-q');
+    if (studied[id]) q.classList.add('studied');
+    var btn = q.querySelector('.mark-studied');
+    if (btn) {
+      if (studied[id]) btn.textContent = '✓ Studied';
+      btn.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        var isStudied = q.classList.toggle('studied');
+        if (isStudied) { studied[id]=true; btn.textContent='✓ Studied'; }
+        else { delete studied[id]; btn.textContent='Mark as studied'; }
+        saveStudied(); updateProgress();
+      });
+    }
+  });
+  updateProgress();
+
+  var search = document.getElementById('search');
+  function runSearch(){
+    var term = (search.value || '').trim().toLowerCase();
+    allQs.forEach(function(q){
+      var text = q.querySelector('.q-text').textContent.toLowerCase();
+      var hit = !term || text.indexOf(term) !== -1;
+      q.classList.toggle('hidden', !hit);
+      if (term && hit) q.open = true;
+    });
+    document.querySelectorAll('.section-block').forEach(function(sec){
+      var anyVisible = sec.querySelectorAll('.q:not(.hidden)').length > 0;
+      sec.style.display = anyVisible ? '' : 'none';
+    });
+  }
+  if (search) search.addEventListener('input', runSearch);
+
+  document.getElementById('collapse-all').addEventListener('click', function(){ allQs.forEach(function(q){ q.open=false; }); });
+  document.getElementById('reveal-all').addEventListener('click', function(){ allQs.forEach(function(q){ if (!q.classList.contains('hidden')) q.open=true; }); });
+  document.getElementById('reset-progress').addEventListener('click', function(){
+    if (!confirm('Reset all studied marks? This cannot be undone.')) return;
+    studied = {}; saveStudied();
+    allQs.forEach(function(q){ q.classList.remove('studied'); var b = q.querySelector('.mark-studied'); if (b) b.textContent='Mark as studied'; });
+    updateProgress();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault(); if (search) search.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>

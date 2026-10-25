@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>100 JavaScript Interview Questions · Sheryians</title>
+<meta name="description" content="Top 100 JavaScript interview questions — fundamentals, scope, closures, prototypes, async, patterns, memory, and coding.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --text-body:#2A2720; --surface-ink:#0E0F14; color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3; --surface-ink:#0A0B0F; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3; --surface-ink:#0A0B0F; color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+.container{max-width:980px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(36px,6vw,60px);font-weight:900;line-height:1;letter-spacing:-.025em;margin:0 0 18px;max-width:16ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:600px;margin:0 0 24px;line-height:1.55}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
+.progress-card{margin:32px 0 40px;padding:18px 22px;background:var(--paper2);border:1px solid var(--rule);border-radius:10px;display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between}
+.progress-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.progress-value{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1}
+.progress-value small{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:400;color:var(--muted);margin-left:6px}
+.progress-bar{flex:1;min-width:180px;height:4px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--accent);width:0%;transition:width .4s ease}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 40px;padding:14px 16px;background:var(--paper2);border:1px solid var(--rule);border-radius:10px}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap input{width:100%;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;padding:10px 14px 10px 38px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap::before{content:'⌕';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;pointer-events:none}
+.btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:9px 14px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.jumps{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 48px}
+.jump{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:1px solid var(--rule);border-radius:999px;color:var(--muted);text-decoration:none;transition:all .2s;background:var(--paper)}
+.jump:hover{border-color:var(--accent);color:var(--accent)}
+.jump strong{color:var(--ink);font-weight:600;margin-right:4px}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.02em}
+
+.q-list{display:flex;flex-direction:column;gap:8px}
+.q{border:1px solid var(--rule);border-radius:8px;background:var(--paper);transition:border-color .2s,background .2s}
+.q:hover{border-color:var(--ink)}
+.q[open]{border-color:var(--ink);background:var(--paper2)}
+.q[open] .q-num{color:var(--accent)}
+.q summary{list-style:none;cursor:pointer;display:flex;gap:14px;align-items:flex-start;padding:14px 18px;outline:none}
+.q summary::-webkit-details-marker{display:none}
+.q-num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;letter-spacing:.04em;padding-top:3px;min-width:26px;transition:color .2s}
+.q-text{font-size:14.5px;line-height:1.55;color:var(--ink);flex:1}
+.q-chevron{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--muted);flex-shrink:0;transition:transform .2s;padding-top:3px}
+.q[open] .q-chevron{transform:rotate(90deg);color:var(--accent)}
+.q-body{padding:0 18px 16px 58px;font-size:13.5px;color:var(--muted);line-height:1.6}
+.q-body .study-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:var(--muted);border-left:2px solid var(--rule);padding-left:10px;font-style:italic;margin-bottom:10px}
+.q.studied{border-color:var(--accent2);background:rgba(26,107,74,.05);position:relative}
+.q.studied .q-num{color:var(--accent2)}
+.q.studied summary::before{content:'✓';font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent2);font-weight:600;position:absolute;left:-20px;top:17px}
+.q .mark-studied{margin-top:10px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--muted);cursor:pointer;transition:all .2s}
+.q .mark-studied:hover{border-color:var(--accent2);color:var(--accent2)}
+.q.studied .mark-studied{border-color:var(--accent2);color:var(--accent2);background:transparent}
+.q.hidden{display:none}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .q summary{padding:12px 14px}
+  .q-body{padding:0 14px 14px 46px}
+  .q-num{min-width:22px}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Sheryians · Interview Prep</div>
+  <h1>100 <em>JavaScript</em> Interview Questions</h1>
+  <p class="hero-desc">Beginner fundamentals → advanced concepts → coding → scenarios. Open a card to test yourself, mark it studied, watch the progress bar climb.</p>
+  <div class="hero-meta">
+    <span>100 questions</span>
+    <span>·</span>
+    <span>10 modules</span>
+    <span>·</span>
+    <span>self-test format</span>
+  </div>
+</header>
+
+<div class="progress-card">
+  <div>
+    <div class="progress-label">Studied</div>
+    <div class="progress-value" id="progress-value">0<small>/ 100</small></div>
+  </div>
+  <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="search" id="search" placeholder="Search 100 questions…" autocomplete="off">
+  </div>
+  <button class="btn" id="collapse-all">Collapse all</button>
+  <button class="btn" id="reveal-all">Reveal all</button>
+  <button class="btn" id="reset-progress">Reset progress</button>
+</div>
+
+<nav class="jumps">
+  <a class="jump" href="#m1"><strong>01</strong>Fundamentals</a>
+  <a class="jump" href="#m2"><strong>02</strong>Scope</a>
+  <a class="jump" href="#m3"><strong>03</strong>Functions</a>
+  <a class="jump" href="#m4"><strong>04</strong>Objects</a>
+  <a class="jump" href="#m5"><strong>05</strong>Arrays</a>
+  <a class="jump" href="#m6"><strong>06</strong>Async</a>
+  <a class="jump" href="#m7"><strong>07</strong>Async Patterns</a>
+  <a class="jump" href="#m8"><strong>08</strong>Memory</a>
+  <a class="jump" href="#m9"><strong>09</strong>Coding</a>
+  <a class="jump" href="#m10"><strong>10</strong>Scenarios</a>
+</nav>
+
+<!-- ═══ M1 · FUNDAMENTALS ═══ -->
+<section class="section-block" id="m1">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">JavaScript fundamentals</h2>
+      <p class="section-subtitle">Module 1 · questions 1–10</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j1"><summary><span class="q-num">Q01</span><span class="q-text">What is JavaScript, and how does it differ from languages like Java and C++?</span><span class="q-chevron">›</span></summary><div class="q-body"><p class="study-hint">Try answering before you look anything up.</p><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j2"><summary><span class="q-num">Q02</span><span class="q-text">What are the different data types in JavaScript? Explain primitive and non-primitive types.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j3"><summary><span class="q-num">Q03</span><span class="q-text">What is the difference between var, let, and const?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j4"><summary><span class="q-num">Q04</span><span class="q-text">What is the difference between undefined, null, and undeclared variables?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j5"><summary><span class="q-num">Q05</span><span class="q-text">What is the difference between == and ===?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j6"><summary><span class="q-num">Q06</span><span class="q-text">What are truthy and falsy values? Which values are falsy in JavaScript?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j7"><summary><span class="q-num">Q07</span><span class="q-text">What is type coercion? Explain implicit and explicit coercion with examples.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j8"><summary><span class="q-num">Q08</span><span class="q-text">What is the difference between primitive values and objects in terms of copying and mutation?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j9"><summary><span class="q-num">Q09</span><span class="q-text">What is the difference between NaN, Infinity, and -Infinity? How do you check for NaN?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j10"><summary><span class="q-num">Q10</span><span class="q-text">What is the difference between Object.is(), ===, and ==?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M2 · SCOPE ═══ -->
+<section class="section-block" id="m2">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Scope, hoisting & execution context</h2>
+      <p class="section-subtitle">Module 2 · questions 11–20</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j11"><summary><span class="q-num">Q11</span><span class="q-text">What are global, function, and block scope?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j12"><summary><span class="q-num">Q12</span><span class="q-text">What is lexical scope, and how does JavaScript resolve variable references?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j13"><summary><span class="q-num">Q13</span><span class="q-text">What is hoisting? How does it behave with var, let, const, and function declarations?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j14"><summary><span class="q-num">Q14</span><span class="q-text">What is the Temporal Dead Zone (TDZ)?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j15"><summary><span class="q-num">Q15</span><span class="q-text">What is an execution context, and what happens when a function is called?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j16"><summary><span class="q-num">Q16</span><span class="q-text">What is the Call Stack, and how does JavaScript use it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j17"><summary><span class="q-num">Q17</span><span class="q-text">What is the difference between function declarations, function expressions, and arrow functions regarding hoisting?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j18"><summary><span class="q-num">Q18</span><span class="q-text">What is the difference between lexical scope and dynamic scope?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j19"><summary><span class="q-num">Q19</span><span class="q-text">What is the scope chain?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j20"><summary><span class="q-num">Q20</span><span class="q-text">What happens when a variable is accessed before initialization or when it doesn't exist?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M3 · FUNCTIONS ═══ -->
+<section class="section-block" id="m3">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Functions, closures & this</h2>
+      <p class="section-subtitle">Module 3 · questions 21–32</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j21"><summary><span class="q-num">Q21</span><span class="q-text">What are first-class functions in JavaScript?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j22"><summary><span class="q-num">Q22</span><span class="q-text">What are higher-order functions? Give practical examples.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j23"><summary><span class="q-num">Q23</span><span class="q-text">What is a closure, and how does it work internally?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j24"><summary><span class="q-num">Q24</span><span class="q-text">What are practical use cases of closures?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j25"><summary><span class="q-num">Q25</span><span class="q-text">What is the difference between this in regular functions and arrow functions?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j26"><summary><span class="q-num">Q26</span><span class="q-text">How is this determined when a function is called?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j27"><summary><span class="q-num">Q27</span><span class="q-text">Explain call(), apply(), and bind() with examples.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j28"><summary><span class="q-num">Q28</span><span class="q-text">What is the difference between a callback function and a higher-order function?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j29"><summary><span class="q-num">Q29</span><span class="q-text">What are IIFEs, and why were they used?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j30"><summary><span class="q-num">Q30</span><span class="q-text">What is currying, and how would you implement it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j31"><summary><span class="q-num">Q31</span><span class="q-text">What is function composition, and how would you implement it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j32"><summary><span class="q-num">Q32</span><span class="q-text">What are pure functions, side effects, and referential transparency?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M4 · OBJECTS ═══ -->
+<section class="section-block" id="m4">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Objects, prototypes & classes</h2>
+      <p class="section-subtitle">Module 4 · questions 33–42</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j33"><summary><span class="q-num">Q33</span><span class="q-text">How do objects work in JavaScript, and how do property lookup and inheritance work?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j34"><summary><span class="q-num">Q34</span><span class="q-text">What is a prototype, and what is the prototype chain?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j35"><summary><span class="q-num">Q35</span><span class="q-text">What is prototypal inheritance, and how does it differ from classical inheritance?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j36"><summary><span class="q-num">Q36</span><span class="q-text">What happens internally when you use the new keyword?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j37"><summary><span class="q-num">Q37</span><span class="q-text">What is the difference between Object.create() and creating an object with {}?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j38"><summary><span class="q-num">Q38</span><span class="q-text">What is the difference between shallow copying and deep copying an object?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j39"><summary><span class="q-num">Q39</span><span class="q-text">What are object descriptors, getters, and setters?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j40"><summary><span class="q-num">Q40</span><span class="q-text">What is the difference between Object.freeze(), Object.seal(), and Object.preventExtensions()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j41"><summary><span class="q-num">Q41</span><span class="q-text">How do ES6 classes, constructors, extends, and super work?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j42"><summary><span class="q-num">Q42</span><span class="q-text">What are static methods, private class fields, and private methods?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M5 · ARRAYS ═══ -->
+<section class="section-block" id="m5">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Arrays & modern JavaScript</h2>
+      <p class="section-subtitle">Module 5 · questions 43–52</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j43"><summary><span class="q-num">Q43</span><span class="q-text">What is the difference between map(), filter(), reduce(), and forEach()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j44"><summary><span class="q-num">Q44</span><span class="q-text">What is the difference between find(), findIndex(), some(), and every()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j45"><summary><span class="q-num">Q45</span><span class="q-text">What is the difference between slice() and splice()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j46"><summary><span class="q-num">Q46</span><span class="q-text">What is the difference between concat(), spread syntax, and Array.from()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j47"><summary><span class="q-num">Q47</span><span class="q-text">What is destructuring, and how do default values work?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j48"><summary><span class="q-num">Q48</span><span class="q-text">What are rest parameters and spread syntax? How are they different?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j49"><summary><span class="q-num">Q49</span><span class="q-text">What is optional chaining (?.) and nullish coalescing (??)?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j50"><summary><span class="q-num">Q50</span><span class="q-text">What are Map, Set, WeakMap, and WeakSet, and when would you use them?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j51"><summary><span class="q-num">Q51</span><span class="q-text">What are iterators, iterables, and generators?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j52"><summary><span class="q-num">Q52</span><span class="q-text">What are ES modules, and how do named exports differ from default exports?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M6 · ASYNC ═══ -->
+<section class="section-block" id="m6">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Asynchronous JavaScript & the event loop</h2>
+      <p class="section-subtitle">Module 6 · questions 53–65</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j53"><summary><span class="q-num">Q53</span><span class="q-text">Is JavaScript single-threaded? What does that actually mean?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j54"><summary><span class="q-num">Q54</span><span class="q-text">What is the event loop, and how does it coordinate asynchronous operations?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j55"><summary><span class="q-num">Q55</span><span class="q-text">What is the difference between the Call Stack, task queue, and microtask queue?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j56"><summary><span class="q-num">Q56</span><span class="q-text">What is the difference between microtasks and macrotasks? Which runs first?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j57"><summary><span class="q-num">Q57</span><span class="q-text">How do Promises work, and what are their possible states?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j58"><summary><span class="q-num">Q58</span><span class="q-text">What is the difference between .then(), .catch(), and .finally()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j59"><summary><span class="q-num">Q59</span><span class="q-text">What is Promise chaining, and how does error propagation work through a chain?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j60"><summary><span class="q-num">Q60</span><span class="q-text">What is the difference between Promise.all(), Promise.allSettled(), Promise.race(), and Promise.any()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j61"><summary><span class="q-num">Q61</span><span class="q-text">How does async/await work, and how does error handling work with it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j62"><summary><span class="q-num">Q62</span><span class="q-text">What is the difference between sequential and parallel execution of asynchronous tasks?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j63"><summary><span class="q-num">Q63</span><span class="q-text">What happens when you await a non-Promise value?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j64"><summary><span class="q-num">Q64</span><span class="q-text">How do timers such as setTimeout() and setInterval() interact with the event loop?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j65"><summary><span class="q-num">Q65</span><span class="q-text">Predict the output of code involving synchronous statements, Promises, queueMicrotask(), and timers.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M7 · ASYNC PATTERNS ═══ -->
+<section class="section-block" id="m7">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Advanced asynchronous patterns</h2>
+      <p class="section-subtitle">Module 7 · questions 66–73</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j66"><summary><span class="q-num">Q66</span><span class="q-text">What is callback hell, and how can Promises and async/await improve the code?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j67"><summary><span class="q-num">Q67</span><span class="q-text">What are race conditions in JavaScript, and how can you prevent them?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j68"><summary><span class="q-num">Q68</span><span class="q-text">How do you implement request cancellation using AbortController?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j69"><summary><span class="q-num">Q69</span><span class="q-text">How would you implement a retry mechanism with exponential backoff?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j70"><summary><span class="q-num">Q70</span><span class="q-text">How would you limit concurrent API requests to a fixed number?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j71"><summary><span class="q-num">Q71</span><span class="q-text">What is the difference between concurrency and parallelism?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j72"><summary><span class="q-num">Q72</span><span class="q-text">What are Web Workers, and when would you use them?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j73"><summary><span class="q-num">Q73</span><span class="q-text">How would you implement a timeout wrapper for a Promise?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M8 · MEMORY ═══ -->
+<section class="section-block" id="m8">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Memory, performance & browser APIs</h2>
+      <p class="section-subtitle">Module 8 · questions 74–82</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j74"><summary><span class="q-num">Q74</span><span class="q-text">How does garbage collection work in JavaScript? What is reachability?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j75"><summary><span class="q-num">Q75</span><span class="q-text">What causes memory leaks in JavaScript applications?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j76"><summary><span class="q-num">Q76</span><span class="q-text">What is the difference between stack memory and heap memory conceptually?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j77"><summary><span class="q-num">Q77</span><span class="q-text">What are debouncing and throttling, and how would you implement both?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j78"><summary><span class="q-num">Q78</span><span class="q-text">What is event delegation, and why is it useful?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j79"><summary><span class="q-num">Q79</span><span class="q-text">What is event bubbling, event capturing, and event propagation?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j80"><summary><span class="q-num">Q80</span><span class="q-text">What is the difference between preventDefault() and stopPropagation()?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j81"><summary><span class="q-num">Q81</span><span class="q-text">What is the difference between cookies, localStorage, and sessionStorage?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j82"><summary><span class="q-num">Q82</span><span class="q-text">What is the difference between CommonJS and ES modules, and how does module caching work?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M9 · CODING ═══ -->
+<section class="section-block" id="m9">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Coding & implementation</h2>
+      <p class="section-subtitle">Module 9 · questions 83–92</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j83"><summary><span class="q-num">Q83</span><span class="q-text">Implement your own version of map(), filter(), and reduce().</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j84"><summary><span class="q-num">Q84</span><span class="q-text">Implement a deep clone function, handling nested objects, arrays, and circular references.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j85"><summary><span class="q-num">Q85</span><span class="q-text">Implement a function to deeply compare two objects for equality.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j86"><summary><span class="q-num">Q86</span><span class="q-text">Implement debounce() and throttle() from scratch, including cancellation where appropriate.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j87"><summary><span class="q-num">Q87</span><span class="q-text">Implement Promise.all() from scratch.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j88"><summary><span class="q-num">Q88</span><span class="q-text">Implement a Promise-based sleep() function and a retry utility.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j89"><summary><span class="q-num">Q89</span><span class="q-text">Implement a function that flattens a deeply nested array.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j90"><summary><span class="q-num">Q90</span><span class="q-text">Implement a function to group an array of objects by a specified property.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j91"><summary><span class="q-num">Q91</span><span class="q-text">Implement memoization for a function with multiple arguments.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j92"><summary><span class="q-num">Q92</span><span class="q-text">Implement a function that limits the number of concurrent asynchronous tasks.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<!-- ═══ M10 · SCENARIOS ═══ -->
+<section class="section-block" id="m10">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Output prediction & scenarios</h2>
+      <p class="section-subtitle">Module 10 · questions 93–100</p>
+    </div>
+  </div>
+  <div class="q-list">
+    <details class="q" data-q="j93"><summary><span class="q-num">Q93</span><span class="q-text">What is the output of a closure-based counter, and why does each returned function retain its own state?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j94"><summary><span class="q-num">Q94</span><span class="q-text">What happens when asynchronous callbacks capture variables declared with var versus let inside a loop?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j95"><summary><span class="q-num">Q95</span><span class="q-text">Predict the output of code involving object references, shallow copies, nested mutations, and spread syntax.</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j96"><summary><span class="q-num">Q96</span><span class="q-text">How would you prevent duplicate API requests when a user clicks a button repeatedly?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j97"><summary><span class="q-num">Q97</span><span class="q-text">An API returns responses out of order. How would you ensure only the latest response updates the UI?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j98"><summary><span class="q-num">Q98</span><span class="q-text">A function unexpectedly loses its this value when passed as a callback. How would you fix it?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j99"><summary><span class="q-num">Q99</span><span class="q-text">An application becomes slow after running for several minutes. How would you investigate potential memory leaks?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+    <details class="q" data-q="j100"><summary><span class="q-num">Q100</span><span class="q-text">How would you design a reusable async utility that supports cancellation, retries, timeouts, and error handling?</span><span class="q-chevron">›</span></summary><div class="q-body"><button class="mark-studied" type="button">Mark as studied</button></div></details>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Interview Prep</span>
+  <span>100 JavaScript questions · 10 modules</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var STORAGE_KEY = 'sheryians-js-questions-v1';
+  var studied = {};
+  try { studied = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { studied = {}; }
+  var allQs = Array.prototype.slice.call(document.querySelectorAll('.q'));
+  var total = allQs.length;
+  var progressValue = document.getElementById('progress-value');
+  var progressFill  = document.getElementById('progress-fill');
+
+  function saveStudied(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(studied)); } catch(e) {} }
+  function updateProgress(){
+    var count = 0;
+    allQs.forEach(function(q){ if (q.classList.contains('studied')) count++; });
+    progressValue.innerHTML = count + '<small>/ ' + total + '</small>';
+    progressFill.style.width = (total ? (100*count/total) : 0) + '%';
+  }
+  allQs.forEach(function(q){
+    var id = q.getAttribute('data-q');
+    if (studied[id]) q.classList.add('studied');
+    var btn = q.querySelector('.mark-studied');
+    if (btn) {
+      if (studied[id]) btn.textContent = '✓ Studied';
+      btn.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        var isStudied = q.classList.toggle('studied');
+        if (isStudied) { studied[id]=true; btn.textContent='✓ Studied'; }
+        else { delete studied[id]; btn.textContent='Mark as studied'; }
+        saveStudied(); updateProgress();
+      });
+    }
+  });
+  updateProgress();
+
+  var search = document.getElementById('search');
+  function runSearch(){
+    var term = (search.value || '').trim().toLowerCase();
+    allQs.forEach(function(q){
+      var text = q.querySelector('.q-text').textContent.toLowerCase();
+      var hit = !term || text.indexOf(term) !== -1;
+      q.classList.toggle('hidden', !hit);
+      if (term && hit) q.open = true;
+    });
+    document.querySelectorAll('.section-block').forEach(function(sec){
+      var anyVisible = sec.querySelectorAll('.q:not(.hidden)').length > 0;
+      sec.style.display = anyVisible ? '' : 'none';
+    });
+  }
+  if (search) search.addEventListener('input', runSearch);
+
+  document.getElementById('collapse-all').addEventListener('click', function(){ allQs.forEach(function(q){ q.open=false; }); });
+  document.getElementById('reveal-all').addEventListener('click', function(){ allQs.forEach(function(q){ if (!q.classList.contains('hidden')) q.open=true; }); });
+  document.getElementById('reset-progress').addEventListener('click', function(){
+    if (!confirm('Reset all studied marks? This cannot be undone.')) return;
+    studied = {}; saveStudied();
+    allQs.forEach(function(q){ q.classList.remove('studied'); var b = q.querySelector('.mark-studied'); if (b) b.textContent='Mark as studied'; });
+    updateProgress();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault(); if (search) search.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>

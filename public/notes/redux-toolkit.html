@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redux Toolkit for MERN · Sheryians</title>
+<meta name="description" content="Redux Toolkit from zero to production — configureStore, createSlice, createAsyncThunk, RTK Query, and how it fits a MERN stack.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:17ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Backend · Frontend State · MERN</div>
+  <h1>Redux <em>Toolkit</em> for MERN</h1>
+  <p class="hero-desc">From "why does Redux have so much boilerplate" to a production-ready store with async API calls, caching, and DevTools. Every concept explained, then shown in code you can paste into a MERN project.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">configureStore</span>
+    <span class="hero-tag">createSlice</span>
+    <span class="hero-tag">createAsyncThunk</span>
+    <span class="hero-tag">RTK Query</span>
+    <span class="hero-tag">MERN integration</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · WHY RTK ═══ -->
+<section class="section-block" id="why">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">Why Redux Toolkit exists</h2>
+      <p class="section-subtitle">the boilerplate problem · what RTK fixes</p>
+    </div>
+  </div>
+
+  <p class="lead">Plain Redux works. But writing it by hand is exhausting: you write action type constants, action creators, switch-statement reducers, manual object spreads for every update, and a store setup that wires middleware and DevTools yourself. Redux Toolkit (RTK) is the official fix — the same Redux underneath, with the repetitive parts generated for you.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Task</th><th>Hand-written Redux</th><th>Redux Toolkit</th></tr></thead>
+      <tbody>
+        <tr><td>Store setup</td><td><code>createStore</code> + <code>applyMiddleware</code> + <code>compose</code> + DevTools enhancer</td><td>One <code>configureStore()</code> call [citation:1][citation:2]</td></tr>
+        <tr><td>Action types</td><td>Hand-written string constants</td><td>Generated from reducer names [citation:3]</td></tr>
+        <tr><td>Action creators</td><td>Hand-written functions</td><td>Generated by <code>createSlice</code> [citation:3]</td></tr>
+        <tr><td>Immutable updates</td><td><code>{ ...state, items: [...state.items, x] }</code></td><td><code>state.items.push(x)</code> — Immer handles the copy [citation:1]</td></tr>
+        <tr><td>Async logic</td><td>Hand-written thunk dispatching <code>_PENDING</code> / <code>_SUCCESS</code> / <code>_FAILURE</code></td><td><code>createAsyncThunk</code> generates all three [citation:14]</td></tr>
+        <tr><td>Data fetching + caching</td><td>Write it yourself</td><td>RTK Query — endpoints, hooks, cache management [citation:14]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one sentence to remember</div>
+    <div class="concept-box-text"><p>Redux Toolkit is <b>still Redux</b>: one store, dispatched action objects, reducers that update state. What changes is <b>how much code you write to get there</b>. [citation:1]</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-why-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">Which statement about Redux Toolkit is <em>false</em>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-why-1', this, false)"><span class="opt-letter">A</span>It replaces Redux with a completely different data-flow model.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-why-1', this, true)"><span class="opt-letter">B</span>It uses Immer so you can write "mutating" reducer code safely.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-why-1-feedback"></div>
+    <div class="quiz-explain hidden">RTK does <b>not</b> replace Redux — the store, actions, and reducers are still Redux [citation:1]. What changes is the ergonomics: <code>configureStore</code> handles setup, <code>createSlice</code> generates actions/types, and Immer turns mutation syntax into immutable updates.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · INSTALL + STORE ═══ -->
+<section class="section-block" id="setup">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Installation &amp; store setup</h2>
+      <p class="section-subtitle">npm packages · configureStore · Provider</p>
+    </div>
+  </div>
+
+  <h3>What to install</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-cmd">npm</span> install @reduxjs/toolkit react-redux</code></pre>
+  </div>
+  <p><code>@reduxjs/toolkit</code> includes the Redux core, Redux Thunk, and Reselect. <code>react-redux</code> gives you <code>Provider</code>, <code>useSelector</code>, and <code>useDispatch</code>. [citation:7]</p>
+
+  <h3>Create the store</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/app/store.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { configureStore } <span class="tok-key">from</span> <span class="tok-str">'@reduxjs/toolkit'</span>;
+<span class="tok-key">import</span> usersReducer <span class="tok-key">from</span> <span class="tok-str">'../features/users/usersSlice'</span>;
+<span class="tok-key">import</span> authReducer  <span class="tok-key">from</span> <span class="tok-str">'../features/auth/authSlice'</span>;
+
+<span class="tok-key">export const</span> store = <span class="tok-cmd">configureStore</span>({
+  <span class="tok-key">reducer</span>: {
+    users: usersReducer,
+    auth:  authReducer,
+  },
+});</code></pre>
+  </div>
+
+  <p><code>configureStore</code> does all of this automatically: combines your slice reducers, adds <code>redux-thunk</code>, adds dev-mode checks for accidental mutations, and wires up the Redux DevTools Extension. [citation:2]</p>
+
+  <h3>Wrap the app with Provider</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/main.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> React <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> ReactDOM <span class="tok-key">from</span> <span class="tok-str">'react-dom/client'</span>;
+<span class="tok-key">import</span> { Provider } <span class="tok-key">from</span> <span class="tok-str">'react-redux'</span>;
+<span class="tok-key">import</span> { store } <span class="tok-key">from</span> <span class="tok-str">'./app/store'</span>;
+<span class="tok-key">import</span> App <span class="tok-key">from</span> <span class="tok-str">'./App'</span>;
+
+ReactDOM.<span class="tok-cmd">createRoot</span>(document.<span class="tok-cmd">getElementById</span>(<span class="tok-str">'root'</span>)).<span class="tok-cmd">render</span>(
+  &lt;Provider store={store}&gt;
+    &lt;App /&gt;
+  &lt;/Provider&gt;
+);</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>One store, one Provider.</strong> You wrap <code>&lt;App /&gt;</code> once at the root. Every component below it can now use <code>useSelector</code> and <code>useDispatch</code> without prop drilling.</div>
+  </div>
+
+  <div class="quiz-box" id="q-setup-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">What does <code>configureStore</code> add by default that hand-written <code>createStore</code> does not?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-setup-1', this, true)"><span class="opt-letter">A</span>Thunk middleware, dev-mode mutation checks, and Redux DevTools integration — all pre-wired.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-setup-1', this, false)"><span class="opt-letter">B</span>A second store for async state.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-setup-1-feedback"></div>
+    <div class="quiz-explain hidden">Those three defaults are why RTK exists [citation:1][citation:2]. You can override any of them with the <code>middleware</code> and <code>enhancers</code> options if you need to.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · CREATESLICE ═══ -->
+<section class="section-block" id="slice">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">createSlice — reducers, actions, types, all at once</h2>
+      <p class="section-subtitle">name · initialState · reducers · Immer · exports</p>
+    </div>
+  </div>
+
+  <p><code>createSlice</code> takes a slice name, an initial state, and an object of reducer functions. It returns a reducer, and it <strong>automatically generates</strong> action creators and action type strings from the reducer names. [citation:3]</p>
+
+  <h3>A complete slice</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/features/counter/counterSlice.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { createSlice } <span class="tok-key">from</span> <span class="tok-str">'@reduxjs/toolkit'</span>;
+
+<span class="tok-key">const</span> initialState = {
+  value: <span class="tok-num">0</span>,
+  status: <span class="tok-str">'idle'</span>,
+};
+
+<span class="tok-key">const</span> counterSlice = <span class="tok-cmd">createSlice</span>({
+  <span class="tok-key">name</span>: <span class="tok-str">'counter'</span>,
+  initialState,
+  <span class="tok-key">reducers</span>: {
+    increment(state) {
+      state.value += <span class="tok-num">1</span>;             <span class="tok-com">// looks like mutation — Immer makes it safe</span>
+    },
+    decrement(state) {
+      state.value -= <span class="tok-num">1</span>;
+    },
+    incrementByAmount(state, action) {
+      state.value += action.payload;   <span class="tok-com">// action.payload is whatever you pass to dispatch</span>
+    },
+  },
+});
+
+<span class="tok-key">export const</span> { increment, decrement, incrementByAmount } = counterSlice.actions;
+<span class="tok-key">export default</span> counterSlice.reducer;</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">What just happened</div>
+    <div class="concept-box-text"><p>You wrote <b>three reducer functions</b>. RTK gave you:</p><p>· Action creators: <code>increment()</code>, <code>decrement()</code>, <code>incrementByAmount(5)</code><br>· Action types: <code>'counter/increment'</code>, <code>'counter/decrement'</code>, <code>'counter/incrementByAmount'</code><br>· A reducer ready to be added to the store.</p></div>
+  </div>
+
+  <h3>Immer: why mutation syntax is safe</h3>
+  <p>Inside a <code>createSlice</code> reducer, writing <code>state.value += 1</code> looks like mutation — but Immer records your changes and produces a <strong>new immutable state object</strong> behind the scenes. No spreads, no accidental reference bugs. [citation:1]</p>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>One rule:</strong> you can mutate <code>state</code>, but you must <strong>return</strong> nothing (or return a brand-new state). Mixing "mutate and return" confuses Immer. Just mutate, or just return a new value — pick one.</div>
+  </div>
+
+  <h3>Using the slice in a component</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Counter.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useSelector, useDispatch } <span class="tok-key">from</span> <span class="tok-str">'react-redux'</span>;
+<span class="tok-key">import</span> { increment, decrement, incrementByAmount } <span class="tok-key">from</span> <span class="tok-str">'./counterSlice'</span>;
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">Counter</span>() {
+  <span class="tok-key">const</span> count = <span class="tok-cmd">useSelector</span>((state) =&gt; state.counter.value);
+  <span class="tok-key">const</span> dispatch = <span class="tok-cmd">useDispatch</span>();
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;p&gt;{count}&lt;/p&gt;
+      &lt;button onClick={() =&gt; dispatch(<span class="tok-cmd">increment</span>())}&gt;+1&lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch(<span class="tok-cmd">decrement</span>())}&gt;-1&lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch(<span class="tok-cmd">incrementByAmount</span>(<span class="tok-num">5</span>))}&gt;+5&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-slice-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">Given <code>createSlice({ name: 'todos', reducers: { addTodo(state, action) { ... } } })</code>, what action type is generated?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-slice-1', this, false)"><span class="opt-letter">A</span><code>'ADD_TODO'</code></button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-slice-1', this, true)"><span class="opt-letter">B</span><code>'todos/addTodo'</code></button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-slice-1-feedback"></div>
+    <div class="quiz-explain hidden">The pattern is <code>{sliceName}/{reducerName}</code> [citation:3]. So <code>name: 'todos'</code> + <code>addTodo</code> produces <code>'todos/addTodo'</code>. You never type this string yourself — the action creator carries it.</div>
+  </div>
+
+  <div class="quiz-box" id="q-slice-2">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">Why can you write <code>state.items.push(newItem)</code> inside a slice reducer without breaking Redux?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-slice-2', this, true)"><span class="opt-letter">A</span>Immer intercepts the mutation and produces a new immutable state object.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-slice-2', this, false)"><span class="opt-letter">B</span>Redux Toolkit disables immutability checks in development.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-slice-2-feedback"></div>
+    <div class="quiz-explain hidden">Immer is baked into <code>createSlice</code> [citation:1]. Your code mutates a draft; Immer diffs it and returns a new state. You get the ergonomics of mutation with the safety of immutability.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · ASYNC THUNK ═══ -->
+<section class="section-block" id="async">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">createAsyncThunk — API calls the right way</h2>
+      <p class="section-subtitle">pending · fulfilled · rejected · extraReducers · unwrap</p>
+    </div>
+  </div>
+
+  <p>In a MERN app, most state comes from your Express API. <code>createAsyncThunk</code> takes an action type string and a function that returns a promise, and generates a thunk that dispatches three lifecycle actions: <code>pending</code>, <code>fulfilled</code>, and <code>rejected</code>. [citation:14][citation:11]</p>
+
+  <h3>The three phases, visualised</h3>
+  <div class="stepper" data-stepper="thunk" data-steps="5">
+    <div class="stepper-head"><span class="stepper-title">createAsyncThunk lifecycle</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">what gets dispatched</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-cls='{"2":"is-off"}'>
+              <div class="stat-label">1 · pending</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:4px">users/fetchUsers/pending</div>
+            </div>
+            <div class="stat" data-cls='{"1":"is-off","3":"is-off"}'>
+              <div class="stat-label">2 · fulfilled</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:4px">users/fetchUsers/fulfilled</div>
+            </div>
+            <div class="stat" data-cls='{"1":"is-off","2":"is-off","4":"is-off"}'>
+              <div class="stat-label">3 · rejected</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:4px">users/fetchUsers/rejected</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">state after each</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="2">
+              <div class="stat-label">loading</div>
+              <div class="stat-value">true</div>
+            </div>
+            <div class="stat" data-show="3">
+              <div class="stat-label">loading</div>
+              <div class="stat-value">false</div>
+            </div>
+            <div class="stat" data-show="3">
+              <div class="stat-label">items</div>
+              <div class="stat-value" style="font-size:15px">set from payload</div>
+            </div>
+            <div class="stat" data-show="4">
+              <div class="stat-label">error</div>
+              <div class="stat-value" style="color:var(--accent);font-size:15px">set from payload</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>You call <code>dispatch(fetchUsers())</code>. The thunk runs your async function — here, a <code>fetch</code> to the Express API. Immediately, it dispatches the <b>pending</b> action. Your <code>extraReducers</code> sets <code>loading = true</code>.</li>
+      <li>If the promise resolves, the thunk dispatches <b>fulfilled</b> with the resolved value as <code>action.payload</code>. You set <code>loading = false</code> and store the data. [citation:11]</li>
+      <li>The fulfilled branch typically looks like: <code>state.loading = false; state.items = action.payload;</code> — one clean line, no manual success action.</li>
+      <li>If the promise rejects, the thunk dispatches <b>rejected</b>. The error lives in <code>action.error</code> (auto-serialised), or in <code>action.payload</code> if you used <code>rejectWithValue</code>. You set <code>loading = false</code> and store the message.</li>
+      <li>All three are handled in <code>extraReducers</code> via the builder callback — because these action types are <b>not</b> generated by your slice's own <code>reducers</code>. [citation:3]</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 5</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>A complete users slice with an API call</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">features/users/usersSlice.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { createSlice, createAsyncThunk } <span class="tok-key">from</span> <span class="tok-str">'@reduxjs/toolkit'</span>;
+
+<span class="tok-com">// 1. Define the async thunk</span>
+<span class="tok-key">export const</span> fetchUsers = <span class="tok-cmd">createAsyncThunk</span>(
+  <span class="tok-str">'users/fetchUsers'</span>,                       <span class="tok-com">// action type prefix</span>
+  <span class="tok-key">async</span> (_, { rejectWithValue }) =&gt; {          <span class="tok-com">// payload creator</span>
+    <span class="tok-key">try</span> {
+      <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/users'</span>);
+      <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed to fetch'</span>);
+      <span class="tok-key">return await</span> res.<span class="tok-cmd">json</span>();                 <span class="tok-com">// becomes action.payload</span>
+    } <span class="tok-key">catch</span> (err) {
+      <span class="tok-key">return</span> <span class="tok-cmd">rejectWithValue</span>(err.message);   <span class="tok-com">// becomes action.payload in rejected</span>
+    }
+  }
+);
+
+<span class="tok-com">// 2. Slice</span>
+<span class="tok-key">const</span> usersSlice = <span class="tok-cmd">createSlice</span>({
+  <span class="tok-key">name</span>: <span class="tok-str">'users'</span>,
+  <span class="tok-key">initialState</span>: {
+    items: [],
+    loading: <span class="tok-key">false</span>,
+    error: <span class="tok-key">null</span>,
+  },
+  <span class="tok-key">reducers</span>: {},                              <span class="tok-com">// no sync reducers here</span>
+  <span class="tok-key">extraReducers</span>: (builder) =&gt; {
+    builder
+      .<span class="tok-cmd">addCase</span>(fetchUsers.pending, (state) =&gt; {
+        state.loading = <span class="tok-key">true</span>;
+        state.error = <span class="tok-key">null</span>;
+      })
+      .<span class="tok-cmd">addCase</span>(fetchUsers.fulfilled, (state, action) =&gt; {
+        state.loading = <span class="tok-key">false</span>;
+        state.items = action.payload;
+      })
+      .<span class="tok-cmd">addCase</span>(fetchUsers.rejected, (state, action) =&gt; {
+        state.loading = <span class="tok-key">false</span>;
+        state.error = action.payload;
+      });
+  },
+});
+
+<span class="tok-key">export default</span> usersSlice.reducer;</code></pre>
+  </div>
+
+  <h3>Using it in a component</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">UsersList.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useEffect } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> { useSelector, useDispatch } <span class="tok-key">from</span> <span class="tok-str">'react-redux'</span>;
+<span class="tok-key">import</span> { fetchUsers } <span class="tok-key">from</span> <span class="tok-str">'./usersSlice'</span>;
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">UsersList</span>() {
+  <span class="tok-key">const</span> dispatch = <span class="tok-cmd">useDispatch</span>();
+  <span class="tok-key">const</span> { items, loading, error } = <span class="tok-cmd">useSelector</span>((state) =&gt; state.users);
+
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    dispatch(<span class="tok-cmd">fetchUsers</span>());
+  }, [dispatch]);
+
+  <span class="tok-key">if</span> (loading) <span class="tok-key">return</span> &lt;p&gt;Loading…&lt;/p&gt;;
+  <span class="tok-key">if</span> (error)   <span class="tok-key">return</span> &lt;p&gt;Error: {error}&lt;/p&gt;;
+
+  <span class="tok-key">return</span> &lt;ul&gt;{items.<span class="tok-cmd">map</span>((u) =&gt; &lt;li key={u._id}&gt;{u.name}&lt;/li&gt;)}&lt;/ul&gt;;
+}</code></pre>
+  </div>
+
+  <h3>rejectWithValue vs a thrown error</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Approach</th><th>What <code>action.payload</code> holds on rejection</th><th>When to use</th></tr></thead>
+      <tbody>
+        <tr><td><code>throw new Error('...')</code></td><td><code>undefined</code> — error is in <code>action.error.message</code></td><td>Quick prototypes; you only need the message</td></tr>
+        <tr><td><code>return rejectWithValue(msg)</code></td><td>Exactly <code>msg</code> (or any shape you pass)</td><td>Production — you control the error shape, and it stays serialisable [citation:11]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Waiting for a thunk in a component</h3>
+  <p>Sometimes you need to do something <em>after</em> the thunk finishes — redirect, close a modal, show a toast. Dispatch returns a promise; <code>.unwrap()</code> gives you the raw payload or throws the rejection. [citation:11]</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">awaiting a thunk</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> handleSubmit = <span class="tok-key">async</span> () =&gt; {
+  <span class="tok-key">try</span> {
+    <span class="tok-key">const</span> result = <span class="tok-key">await</span> dispatch(<span class="tok-cmd">fetchUsers</span>()).<span class="tok-cmd">unwrap</span>();
+    console.<span class="tok-cmd">log</span>(<span class="tok-str">'Got users:'</span>, result);
+    <span class="tok-cmd">navigate</span>(<span class="tok-str">'/dashboard'</span>);
+  } <span class="tok-key">catch</span> (err) {
+    console.<span class="tok-cmd">error</span>(<span class="tok-str">'Failed:'</span>, err);  <span class="tok-com">// err is whatever you passed to rejectWithValue</span>
+  }
+};</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-async-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">Where do you handle the <code>pending</code> / <code>fulfilled</code> / <code>rejected</code> actions of a thunk?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-async-1', this, false)"><span class="opt-letter">A</span>Inside the slice's <code>reducers</code> object.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-async-1', this, true)"><span class="opt-letter">B</span>Inside <code>extraReducers</code>, using the builder callback.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-async-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>reducers</code> is for actions the slice <b>generates</b>. Thunk lifecycle actions come from elsewhere, so they go in <code>extraReducers</code> [citation:3]. That is the entire reason <code>extraReducers</code> exists.</div>
+  </div>
+
+  <div class="quiz-box" id="q-async-2">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">What does <code>dispatch(fetchUsers()).unwrap()</code> do when the thunk rejects?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-async-2', this, true)"><span class="opt-letter">A</span>It throws the rejection payload, so you can <code>try/catch</code> it.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-async-2', this, false)"><span class="opt-letter">B</span>It returns <code>undefined</code> silently.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-async-2-feedback"></div>
+    <div class="quiz-explain hidden"><code>unwrap()</code> resolves with the fulfilled payload, or throws the rejection value [citation:11]. Without <code>unwrap</code>, the dispatched promise always <em>resolves</em> with the action object — it never rejects, to avoid unhandled promise warnings.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · RTK QUERY ═══ -->
+<section class="section-block" id="rtk-query">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">RTK Query — stop hand-writing data fetching</h2>
+      <p class="section-subtitle">createApi · auto-generated hooks · caching · invalidation</p>
+    </div>
+  </div>
+
+  <p>If <code>createAsyncThunk</code> feels like a lot of ceremony for "GET a list", that is because it is. RTK Query is the built-in data-fetching layer: you define endpoints once, and it generates a reducer, middleware, and React hooks that handle loading, caching, refetching, and invalidation. [citation:14]</p>
+
+  <h3>One API file, all your endpoints</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/services/api.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { createApi, fetchBaseQuery } <span class="tok-key">from</span> <span class="tok-str">'@reduxjs/toolkit/query/react'</span>;
+
+<span class="tok-key">export const</span> api = <span class="tok-cmd">createApi</span>({
+  <span class="tok-key">reducerPath</span>: <span class="tok-str">'api'</span>,
+  <span class="tok-key">baseQuery</span>: <span class="tok-cmd">fetchBaseQuery</span>({ baseUrl: <span class="tok-str">'/api'</span> }),
+  <span class="tok-key">tagTypes</span>: [<span class="tok-str">'Users'</span>, <span class="tok-str">'Posts'</span>],
+  <span class="tok-key">endpoints</span>: (builder) =&gt; ({
+    <span class="tok-cmd">getUsers</span>: builder.<span class="tok-cmd">query</span>({
+      <span class="tok-cmd">query</span>: () =&gt; <span class="tok-str">'/users'</span>,
+      <span class="tok-cmd">providesTags</span>: [<span class="tok-str">'Users'</span>],
+    }),
+    <span class="tok-cmd">addUser</span>: builder.<span class="tok-cmd">mutation</span>({
+      <span class="tok-cmd">query</span>: (body) =&gt; ({ <span class="tok-cmd">url</span>: <span class="tok-str">'/users'</span>, <span class="tok-cmd">method</span>: <span class="tok-str">'POST'</span>, body }),
+      <span class="tok-cmd">invalidatesTags</span>: [<span class="tok-str">'Users'</span>],
+    }),
+  }),
+});
+
+<span class="tok-key">export const</span> { useGetUsersQuery, useAddUserMutation } = api;</code></pre>
+  </div>
+
+  <h3>Add it to the store</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/app/store.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { configureStore } <span class="tok-key">from</span> <span class="tok-str">'@reduxjs/toolkit'</span>;
+<span class="tok-key">import</span> { api } <span class="tok-key">from</span> <span class="tok-str">'../services/api'</span>;
+
+<span class="tok-key">export const</span> store = <span class="tok-cmd">configureStore</span>({
+  <span class="tok-key">reducer</span>: {
+    [api.reducerPath]: api.reducer,        <span class="tok-com">// RTK Query's reducer</span>
+  },
+  <span class="tok-key">middleware</span>: (gDM) =&gt; gDM().<span class="tok-cmd">concat</span>(api.middleware),  <span class="tok-com">// cache + lifecycle</span>
+});</code></pre>
+  </div>
+
+  <h3>Use the hook — no thunk, no useEffect</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">UsersList.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useGetUsersQuery } <span class="tok-key">from</span> <span class="tok-str">'../services/api'</span>;
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">UsersList</span>() {
+  <span class="tok-key">const</span> { data, isLoading, isError } = <span class="tok-cmd">useGetUsersQuery</span>();
+
+  <span class="tok-key">if</span> (isLoading) <span class="tok-key">return</span> &lt;p&gt;Loading…&lt;/p&gt;;
+  <span class="tok-key">if</span> (isError)   <span class="tok-key">return</span> &lt;p&gt;Something went wrong.&lt;/p&gt;;
+
+  <span class="tok-key">return</span> &lt;ul&gt;{data.<span class="tok-cmd">map</span>((u) =&gt; &lt;li key={u._id}&gt;{u.name}&lt;/li&gt;)}&lt;/ul&gt;;
+}</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">What RTK Query did for you</div>
+    <div class="concept-box-text"><p>It fetched on mount, tracked loading, cached the result, de-duplicated a second component that asked for the same data, and will refetch automatically when <code>addUser</code> fires — because the mutation invalidates the <code>'Users'</code> tag. [citation:14]</p></div>
+  </div>
+
+  <h3>Thunk vs RTK Query — when to use which</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>createAsyncThunk</th><th>RTK Query</th></tr></thead>
+      <tbody>
+        <tr><td>Best for</td><td>Complex async flows, chained dispatches, non-HTTP async</td><td>Standard API calls — GET / POST / PUT / DELETE</td></tr>
+        <tr><td>Caching</td><td>You write it</td><td>Built in, tag-based invalidation</td></tr>
+        <tr><td>Loading state</td><td>You set <code>loading</code> in <code>extraReducers</code></td><td>Provided as <code>isLoading</code>, <code>isFetching</code>, <code>isError</code></td></tr>
+        <tr><td>Code per endpoint</td><td>Thunk + 3 cases + component <code>useEffect</code></td><td>~5 lines in the endpoints object</td></tr>
+        <tr><td>Boilerplate</td><td>Medium</td><td>Very low [citation:14]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-rtkq-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">Two components both call <code>useGetUsersQuery()</code> at the same time. What happens?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-rtkq-1', this, true)"><span class="opt-letter">A</span>One request is sent; both components receive the cached result.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-rtkq-1', this, false)"><span class="opt-letter">B</span>Two requests are sent because each hook instance is independent.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-rtkq-1-feedback"></div>
+    <div class="quiz-explain hidden">RTK Query de-duplicates in-flight requests for the same endpoint + arguments. This is one of its core advantages over hand-written thunks, where two components would each fire their own request. [citation:6]</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · MERN INTEGRATION ═══ -->
+<section class="section-block" id="mern">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">How it fits a MERN app</h2>
+      <p class="section-subtitle">frontend state · backend boundary · auth example</p>
+    </div>
+  </div>
+
+  <p>In a MERN stack, <strong>MongoDB + Express</strong> own the data. <strong>React + Redux Toolkit</strong> own the client-side mirror of that data, plus UI state. The boundary is HTTP.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>State</th><th>Lives in</th><th>Managed by</th></tr></thead>
+      <tbody>
+        <tr><td>User list from <code>GET /api/users</code></td><td>Server → Redux cache</td><td>RTK Query endpoint</td></tr>
+        <tr><td>Logged-in user + token</td><td>Redux + <code>localStorage</code></td><td><code>authSlice</code> with a thunk for login</td></tr>
+        <tr><td>Modal open/closed</td><td>Component state</td><td><code>useState</code> — no Redux needed</td></tr>
+        <tr><td>Form draft before submit</td><td>Component state</td><td><code>useState</code> — no Redux needed</td></tr>
+        <tr><td>Cart items</td><td>Redux</td><td><code>cartSlice</code> (sync reducers)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Don't put everything in Redux</div>
+    <div class="concept-box-text"><p>Redux is for state that <b>multiple distant components need</b> or that must <b>survive navigation</b>. Modal toggles, form inputs, and hover state belong in component state. Putting them in Redux is the #1 reason people say "Redux is overkill".</p></div>
+  </div>
+
+  <h3>Typical MERN folder structure</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>src/
+├── app/
+│   └── store.js                 <span class="tok-com">// configureStore, all reducers</span>
+├── features/
+│   ├── auth/
+│   │   └── authSlice.js         <span class="tok-com">// login thunk, user state, token</span>
+│   ├── users/
+│   │   └── usersSlice.js        <span class="tok-com">// fetchUsers thunk + extraReducers</span>
+│   └── cart/
+│       └── cartSlice.js         <span class="tok-com">// sync reducers only</span>
+├── services/
+│   └── api.js                   <span class="tok-com">// RTK Query endpoints</span>
+├── components/
+│   └── UsersList.jsx            <span class="tok-com">// useGetUsersQuery()</span>
+└── main.jsx                     <span class="tok-com">// &lt;Provider store={store}&gt;</span></code></pre>
+  </div>
+
+  <h3>Auth: a thunk that talks to Express</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">features/auth/authSlice.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { createSlice, createAsyncThunk } <span class="tok-key">from</span> <span class="tok-str">'@reduxjs/toolkit'</span>;
+
+<span class="tok-key">export const</span> login = <span class="tok-cmd">createAsyncThunk</span>(
+  <span class="tok-str">'auth/login'</span>,
+  <span class="tok-key">async</span> ({ email, password }, { rejectWithValue }) =&gt; {
+    <span class="tok-key">try</span> {
+      <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/auth/login'</span>, {
+        <span class="tok-cmd">method</span>: <span class="tok-str">'POST'</span>,
+        <span class="tok-cmd">headers</span>: { <span class="tok-str">'Content-Type'</span>: <span class="tok-str">'application/json'</span> },
+        <span class="tok-cmd">body</span>: JSON.<span class="tok-cmd">stringify</span>({ email, password }),
+      });
+      <span class="tok-key">if</span> (!res.ok) {
+        <span class="tok-key">const</span> err = <span class="tok-key">await</span> res.<span class="tok-cmd">json</span>();
+        <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(err.message || <span class="tok-str">'Login failed'</span>);
+      }
+      <span class="tok-key">return await</span> res.<span class="tok-cmd">json</span>();           <span class="tok-com">// { user, token }</span>
+    } <span class="tok-key">catch</span> (err) {
+      <span class="tok-key">return</span> <span class="tok-cmd">rejectWithValue</span>(err.message);
+    }
+  }
+);
+
+<span class="tok-key">const</span> authSlice = <span class="tok-cmd">createSlice</span>({
+  <span class="tok-key">name</span>: <span class="tok-str">'auth'</span>,
+  <span class="tok-key">initialState</span>: {
+    user: <span class="tok-key">null</span>,
+    token: localStorage.<span class="tok-cmd">getItem</span>(<span class="tok-str">'token'</span>),
+    loading: <span class="tok-key">false</span>,
+    error: <span class="tok-key">null</span>,
+  },
+  <span class="tok-key">reducers</span>: {
+    <span class="tok-cmd">logout</span>(state) {
+      state.user = <span class="tok-key">null</span>;
+      state.token = <span class="tok-key">null</span>;
+      localStorage.<span class="tok-cmd">removeItem</span>(<span class="tok-str">'token'</span>);
+    },
+  },
+  <span class="tok-key">extraReducers</span>: (builder) =&gt; {
+    builder
+      .<span class="tok-cmd">addCase</span>(login.pending, (state) =&gt; {
+        state.loading = <span class="tok-key">true</span>;
+        state.error = <span class="tok-key">null</span>;
+      })
+      .<span class="tok-cmd">addCase</span>(login.fulfilled, (state, action) =&gt; {
+        state.loading = <span class="tok-key">false</span>;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        localStorage.<span class="tok-cmd">setItem</span>(<span class="tok-str">'token'</span>, action.payload.token);
+      })
+      .<span class="tok-cmd">addCase</span>(login.rejected, (state, action) =&gt; {
+        state.loading = <span class="tok-key">false</span>;
+        state.error = action.payload;
+      });
+  },
+});
+
+<span class="tok-key">export const</span> { logout } = authSlice.actions;
+<span class="tok-key">export default</span> authSlice.reducer;</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-mern-1">
+    <div class="quiz-question">Quick check · 08</div>
+    <div class="quiz-question">A component only shows/hides a dropdown. Should that state live in Redux?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-mern-1', this, false)"><span class="opt-letter">A</span>Yes — all state should be in Redux for consistency.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-mern-1', this, true)"><span class="opt-letter">B</span>No — component state is correct; Redux is for cross-component or persisted state.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-mern-1-feedback"></div>
+    <div class="quiz-explain hidden">Redux adds indirection. If only one component cares about the value, and it resets on unmount, <code>useState</code> is simpler and faster. Use Redux for the "single source of truth" state that distant components read. [citation:8]</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Mutating state outside a reducer</td><td>React doesn't re-render; DevTools shows no action</td><td>Always dispatch an action; never write <code>state.x =</code> in a component</td></tr>
+        <tr><td>Returning state <em>and</em> mutating it in Immer</td><td>Immer throws: "An immer producer returned a new value and modified its draft"</td><td>Mutate <b>or</b> return — never both</td></tr>
+        <tr><td>Forgetting <code>extraReducers</code> for thunks</td><td>Async data never reaches state; <code>loading</code> stays <code>false</code></td><td>Add all three cases: <code>pending</code>, <code>fulfilled</code>, <code>rejected</code></td></tr>
+        <tr><td>Putting local UI state in Redux</td><td>Boilerplate for no benefit; every keystroke dispatches</td><td>Use <code>useState</code> unless multiple distant components need it</td></tr>
+        <tr><td>Forgetting <code>api.middleware</code> in store</td><td>RTK Query hooks never fire; no caching, no lifecycle</td><td><code>middleware: (gDM) =&gt; gDM().concat(api.middleware)</code></td></tr>
+        <tr><td>Duplicating server data in Redux <em>and</em> RTK Query</td><td>Two sources of truth drift apart</td><td>Pick one: RTK Query for server data, plain slices for client-only state</td></tr>
+        <tr><td>Large objects in Redux DevTools</td><td>DevTools slows to a crawl</td><td>Normalise data; use <code>createEntityAdapter</code> or RTK Query's cache</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>The "two sources of truth" trap in MERN.</strong> If you fetch <code>/api/users</code> with a thunk into <code>usersSlice.items</code>, and <em>also</em> fetch it with RTK Query's <code>useGetUsersQuery</code>, you now have two copies. One component reads the first, another the second, and a mutation updates only one. Pick RTK Query for server data, or thunks — not both for the same endpoint.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · INTERVIEW QUESTIONS ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked about RTK</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is Redux Toolkit, and why is it preferred over plain Redux?</span></summary><div class="qa-body"><p>RTK is the official, opinionated toolset for Redux. It removes boilerplate: <code>configureStore</code> sets up the store with thunk and DevTools, <code>createSlice</code> generates action creators and types from reducer names, and Immer lets you write "mutating" reducer code that produces immutable state. It is still Redux — same store, actions, reducers — just with less code and fewer footguns. [citation:1][citation:14]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>What does configureStore do under the hood?</span></summary><div class="qa-body"><p>It combines your slice reducers with <code>combineReducers</code>, adds <code>redux-thunk</code> middleware, adds development-mode checks for accidental mutations and non-serialisable values, and enables the Redux DevTools Extension — all with one call. You can override each default with the <code>middleware</code> and <code>enhancers</code> options. [citation:2]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>How does createSlice reduce boilerplate?</span></summary><div class="qa-body"><p>You give it <code>name</code>, <code>initialState</code>, and an object of reducer functions. It returns the reducer <em>and</em> generates action creators and action type strings (<code>'sliceName/reducerName'</code>). Reducers can be written with mutation syntax because Immer is built in. [citation:3]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>Explain createAsyncThunk and the three lifecycle actions.</span></summary><div class="qa-body"><p>It takes an action-type prefix and a payload creator (async function). When dispatched, it dispatches <code>pending</code> immediately, then <code>fulfilled</code> with the resolved value as <code>payload</code>, or <code>rejected</code> with the error. You handle all three in <code>extraReducers</code>. Use <code>rejectWithValue</code> to control the rejection payload shape. [citation:11][citation:14]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>What is the difference between reducers and extraReducers in createSlice?</span></summary><div class="qa-body"><p><code>reducers</code> defines actions that the slice <em>generates</em> — sync handlers with auto-created action creators. <code>extraReducers</code> handles action types defined elsewhere: actions from other slices, or thunk lifecycle actions. Reducers in <code>extraReducers</code> do <em>not</em> generate new action creators. [citation:3]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>When should you use createAsyncThunk vs RTK Query?</span></summary><div class="qa-body"><p><code>createAsyncThunk</code> for complex async flows — chaining dispatches, reading state mid-flow, non-HTTP async. <code>RTK Query</code> for standard API endpoints: it handles caching, de-duplication, loading states, and tag-based invalidation with far less code. For a typical MERN CRUD app, RTK Query covers most of what you'd otherwise write with thunks. [citation:14]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>Why can you mutate state in a createSlice reducer?</span></summary><div class="qa-body"><p>Because Immer wraps the reducer. You're mutating a <em>draft</em>, not the real state. Immer records the changes and produces a new immutable state object. The result is safe and idiomatic — but you must not both mutate and return a new value. [citation:1]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>How does RTK Query handle caching and refetching?</span></summary><div class="qa-body"><p>Each endpoint result is cached under a key. Components subscribe via generated hooks. You assign <code>providesTags</code> to queries and <code>invalidatesTags</code> to mutations; when a mutation invalidates a tag, every query providing that tag refetches automatically. In-flight requests are de-duplicated. [citation:6][citation:14]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>What does dispatch(fetchUsers()).unwrap() do?</span></summary><div class="qa-body"><p>The dispatched thunk returns a promise that always <em>resolves</em> with the action object. <code>.unwrap()</code> extracts the fulfilled payload, or throws the rejection value — so you can <code>try/catch</code> it in the component. [citation:11]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>Is Redux Toolkit overkill for a small MERN app?</span></summary><div class="qa-body"><p>Often, yes. If your app is a handful of pages and state lives mostly in components, <code>useState</code> and <code>useContext</code> may be enough. Redux earns its place when you have <em>reasonable amounts of data changing over time</em>, need a single source of truth, or find prop drilling unmanageable. [citation:8]</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Backend · MERN</span>
+  <span>Redux Toolkit · store · slices · thunks · RTK Query</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  /* copy */
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  /* quiz */
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  /* stepper */
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>

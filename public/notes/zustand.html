@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zustand — a complete guide · Sheryians</title>
+<meta name="description" content="Zustand from zero to production — the store API, selectors, async actions, middleware (persist, devtools, immer), slices pattern, TypeScript, and testing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:17ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+.tok-type{color:#E5C07B;font-weight:500}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+.comp-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);margin-bottom:6px;transition:all .3s}
+.comp-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--ink)}
+.comp-status{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;padding:2px 8px;border-radius:4px;margin-left:auto}
+.comp-status.render{background:rgba(200,75,31,.15);color:var(--accent);border:1px solid var(--accent)}
+.comp-status.skip{background:rgba(26,107,74,.12);color:var(--accent2);border:1px solid var(--accent2)}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Frontend State · React · MERN</div>
+  <h1><em>Zustand</em> — the small store with sharp teeth</h1>
+  <p class="hero-desc">The store library that fits in your head. How it works, why it's different from Context and Redux, how selectors keep re-renders under control, and everything else you need to ship it in production.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">create</span>
+    <span class="hero-tag">selectors</span>
+    <span class="hero-tag">async actions</span>
+    <span class="hero-tag">middleware</span>
+    <span class="hero-tag">slices pattern</span>
+    <span class="hero-tag">TypeScript</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · WHY ═══ -->
+<section class="section-block" id="why">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">Why Zustand exists</h2>
+      <p class="section-subtitle">the shape of the problem · where Redux and Context fall short</p>
+    </div>
+  </div>
+
+  <p class="lead">React's built-in tools for shared state are context and lifting state up. Both work, both have hard ceilings. Context re-renders every consumer on every change; prop drilling crumbles past three levels. Redux solves both, but asks you to learn actions, reducers, middleware, and DevTools setup before you ship a toggle. Zustand is the smallest useful answer: <b>one hook, one store, selectors for precision, zero boilerplate</b>.</p>
+
+  <h3>The three big options, honestly compared</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>Context API</th><th>Redux Toolkit</th><th>Zustand</th></tr></thead>
+      <tbody>
+        <tr><td>Setup cost</td><td>Provider + reducer + typed context</td><td>Store + slice + Provider + hook</td><td>One <code>create()</code> call</td></tr>
+        <tr><td>Re-render granularity</td><td>Every consumer re-renders on any change</td><td>Per-selector, via <code>useSelector</code></td><td>Per-selector, with a single hook</td></tr>
+        <tr><td>Provider required</td><td>Yes</td><td>Yes</td><td>No — stores are modules</td></tr>
+        <tr><td>Async built in</td><td>No</td><td>via <code>createAsyncThunk</code></td><td>Just write <code>async</code> functions in the store</td></tr>
+        <tr><td>Outside React</td><td>No</td><td>Yes</td><td>Yes (<code>useStore.getState()</code>)</td></tr>
+        <tr><td>Best when</td><td>Small, mostly-read data (theme, auth user)</td><td>Large team, strict conventions, DevTools-heavy</td><td>Focused app state with minimal ceremony</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one sentence</div>
+    <div class="concept-box-text"><p>Zustand is a <b>single object in memory</b>, wrapped in a hook that returns whatever <em>slice</em> of that object you ask for. It has no Provider, no actions, no reducer — just functions on an object that mutate it and notify subscribers.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-why-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">What is the main reason people reach for Zustand instead of Context?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-why-1', this, false)"><span class="opt-letter">A</span>Context can't hold objects.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-why-1', this, true)"><span class="opt-letter">B</span>Context re-renders every consumer on every change; Zustand lets each component subscribe to just the slice it reads.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-why-1-feedback"></div>
+    <div class="quiz-explain hidden">Context's value prop is "avoid prop drilling", but every consumer re-renders when the value changes. Zustand gives per-selector re-renders with a fraction of the boilerplate.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · SETUP ═══ -->
+<section class="section-block" id="setup">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Installation &amp; first store</h2>
+      <p class="section-subtitle">create · useStore · the shape of the return value</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-cmd">npm</span> install zustand</code></pre>
+  </div>
+
+  <p>Create a store with <code>create</code>. It takes a function that returns your initial state <em>plus</em> whatever actions you want to expose. The return value is a React hook you call to read state, and the same object carries <code>.getState()</code>, <code>.setState()</code>, and <code>.subscribe()</code> for use outside React.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">stores/counter.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { create } <span class="tok-key">from</span> <span class="tok-str">'zustand'</span>;
+
+<span class="tok-key">export const</span> useCounterStore = <span class="tok-cmd">create</span>((set) =&gt; ({
+  <span class="tok-com">// state</span>
+  count: <span class="tok-num">0</span>,
+  step: <span class="tok-num">1</span>,
+
+  <span class="tok-com">// actions — plain functions, called directly</span>
+  increment: () =&gt; <span class="tok-cmd">set</span>((s) =&gt; ({ count: s.count + s.step })),
+  decrement: () =&gt; <span class="tok-cmd">set</span>((s) =&gt; ({ count: s.count - s.step })),
+  reset:     () =&gt; <span class="tok-cmd">set</span>({ count: <span class="tok-num">0</span> }),
+  setStep:   (n) =&gt; <span class="tok-cmd">set</span>({ step: n }),
+}));</code></pre>
+  </div>
+
+  <h3>Using it in a component</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Counter.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useCounterStore } <span class="tok-key">from</span> <span class="tok-str">'../stores/counter'</span>;
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">Counter</span>() {
+  <span class="tok-key">const</span> count     = <span class="tok-cmd">useCounterStore</span>((s) =&gt; s.count);
+  <span class="tok-key">const</span> increment = <span class="tok-cmd">useCounterStore</span>((s) =&gt; s.increment);
+  <span class="tok-key">const</span> reset     = <span class="tok-cmd">useCounterStore</span>((s) =&gt; s.reset);
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;p&gt;{count}&lt;/p&gt;
+      &lt;button onClick={increment}&gt;+1&lt;/button&gt;
+      &lt;button onClick={reset}&gt;reset&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>No <code>Provider</code>.</strong> Zustand stores are just modules. Import them anywhere — including <code>.ts</code> files, services, or Redux DevTools. Each <code>create</code> call makes a completely isolated store; they do not talk to each other unless you wire them to.</div>
+  </div>
+
+  <div class="quiz-box" id="q-setup-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">What does <code>create()</code> return?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-setup-1', this, true)"><span class="opt-letter">A</span>A hook function with extra methods — <code>getState</code>, <code>setState</code>, <code>subscribe</code>.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-setup-1', this, false)"><span class="opt-letter">B</span>A React context object.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-setup-1-feedback"></div>
+    <div class="quiz-explain hidden">The return value is a hook — you call <code>useStore(selector)</code> inside components. It also carries the non-hook API for code that isn't a React component.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · SELECTORS ═══ -->
+<section class="section-block" id="selectors">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Selectors — precision re-rendering</h2>
+      <p class="section-subtitle">what a selector does · shallow equality · unstable object traps</p>
+    </div>
+  </div>
+
+  <p>When you call <code>useStore(selector)</code>, Zustand runs your selector against the current state and subscribes to changes. On every <code>set()</code>, it re-runs the selector and compares the new result to the previous one. If they're equal (<code>Object.is</code> by default), <b>this component does not re-render</b>. If they differ, it does.</p>
+
+  <div class="stepper" data-stepper="selectors" data-steps="6">
+    <div class="stepper-head"><span class="stepper-title">Store update → who re-renders?</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">components subscribed</div>
+          <div id="comp-list">
+            <div class="comp-row" data-cls='{"2":"is-off","3":"is-off"}'>
+              <span class="comp-name">Counter</span>
+              <span class="comp-status render">re-render</span>
+            </div>
+            <div class="comp-row" data-cls='{"2":"is-off","3":"is-off"}'>
+              <span class="comp-name">Toolbar</span>
+              <span class="comp-status render">re-render</span>
+            </div>
+            <div class="comp-row" data-cls='{"2":"is-off"}'>
+              <span class="comp-name">Footer</span>
+              <span class="comp-status skip">skip</span>
+            </div>
+            <div class="comp-row" data-cls='{"2":"is-off"}'>
+              <span class="comp-name">Header</span>
+              <span class="comp-status skip">skip</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">what each subscribes to</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat">
+              <div class="stat-label">Counter</div>
+              <div class="stat-value" style="font-size:14px">(s) =&gt; s.count</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Toolbar</div>
+              <div class="stat-value" style="font-size:14px">(s) =&gt; s.step</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Footer</div>
+              <div class="stat-value" style="font-size:14px">(s) =&gt; s.theme</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Header</div>
+              <div class="stat-value" style="font-size:14px">(s) =&gt; s.user?.name</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>Two components subscribe to <code>count</code> and <code>step</code>, two subscribe to unrelated slices. Initially all render once — normal.</li>
+      <li>An action runs <code>set(s =&gt; ({ count: s.count + 1 }))</code>.</li>
+      <li>Zustand re-runs every subscribed selector. <b>Counter</b>: result changed → re-renders. <b>Toolbar</b>: <code>step</code> unchanged → does not re-render. <b>Footer</b> and <b>Header</b>: unrelated slices → do not re-render.</li>
+      <li>Only <b>Counter</b> re-rendered. That's the whole win — context would have re-rendered all four.</li>
+      <li>Now an action runs <code>set({ step: 5 })</code>. This time only <b>Toolbar</b> re-renders.</li>
+      <li>Two components, two independent updates. Zustand's comparison is <code>Object.is</code> on the selector's return value — so the return value's stability determines everything.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 6</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>The unstable-object trap</h3>
+  <p>If your selector returns a <em>new object every time</em>, <code>Object.is</code> always reports "different" — even if the contents are identical. The component re-renders on every store update, even updates it doesn't care about.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">unstable.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// ❌ Every update produces a NEW object — always re-renders</span>
+<span class="tok-key">const</span> { count, step } = <span class="tok-cmd">useCounterStore</span>((s) =&gt; ({ count: s.count, step: s.step }));
+
+<span class="tok-com">// ✅ Read each slice separately</span>
+<span class="tok-key">const</span> count = <span class="tok-cmd">useCounterStore</span>((s) =&gt; s.count);
+<span class="tok-key">const</span> step  = <span class="tok-cmd">useCounterStore</span>((s) =&gt; s.step);
+
+<span class="tok-com">// ✅ Or keep the object but tell Zustand to compare shallowly</span>
+<span class="tok-key">import</span> { useShallow } <span class="tok-key">from</span> <span class="tok-str">'zustand/react/shallow'</span>;
+<span class="tok-key">const</span> { count, step } = <span class="tok-cmd">useCounterStore</span>(
+  <span class="tok-cmd">useShallow</span>((s) =&gt; ({ count: s.count, step: s.step }))
+);</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>The number one Zustand bug.</strong> A selector that returns a fresh object or array every call. It looks correct, but the component re-renders on every store change. Fix: read one field per selector, or wrap with <code>useShallow</code>.</div>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Selectors can compute.</strong> <code>(s) =&gt; s.todos.filter(t =&gt; !t.done).length</code> is fine — but the filter runs on every store update, and the array being created is a new object, so you'd still re-render on unrelated changes. Cache computed values outside the store, or derive in <code>useMemo</code> in the component.</div>
+  </div>
+
+  <div class="quiz-box" id="q-sel-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">A component does <code>useStore((s) =&gt; ({ a: s.a, b: s.b }))</code>. It re-renders on every store update, even when only <code>c</code> changes. Why?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-sel-1', this, false)"><span class="opt-letter">A</span>Zustand doesn't support object selectors.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-sel-1', this, true)"><span class="opt-letter">B</span>Every call creates a new object reference, so <code>Object.is</code> reports it as changed.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-sel-1-feedback"></div>
+    <div class="quiz-explain hidden">Zustand compares the selector's <b>return value</b> by reference. A fresh <code>{ a, b }</code> literal is always a new reference, so the check always fails. Fix: split into two selectors, or use <code>useShallow</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · SET AND STATE ═══ -->
+<section class="section-block" id="set">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">set and the store API</h2>
+      <p class="section-subtitle">set partial · set function · get · replace · subscribe</p>
+    </div>
+  </div>
+
+  <p>The <code>set</code> function is how you update state. It accepts either a partial object (merged into state) or a function that receives the current state and returns a partial. The <code>get</code> function returns the current state — useful when an action needs to read state.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">set-patterns.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-cmd">create</span>((set, get) =&gt; ({
+  count: <span class="tok-num">0</span>,
+  user: <span class="tok-key">null</span>,
+
+  <span class="tok-com">// partial object — merged into current state</span>
+  reset: () =&gt; <span class="tok-cmd">set</span>({ count: <span class="tok-num">0</span> }),
+
+  <span class="tok-com">// function form — read the current state</span>
+  increment: () =&gt; <span class="tok-cmd">set</span>((s) =&gt; ({ count: s.count + <span class="tok-num">1</span> })),
+
+  <span class="tok-com">// get() — read state outside the setter</span>
+  double: () =&gt; <span class="tok-cmd">set</span>({ count: <span class="tok-cmd">get</span>().count * <span class="tok-num">2</span> }),
+
+  <span class="tok-com">// replace: true — WIPE state instead of merging</span>
+  logout: () =&gt; <span class="tok-cmd">set</span>({ count: <span class="tok-num">0</span>, user: <span class="tok-key">null</span> }, <span class="tok-key">true</span>),
+}));</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>The <code>replace: true</code> trap.</strong> With <code>set(obj, true)</code> the state becomes <em>exactly</em> the object you passed — no merge, no default fields. Every field you omit is gone, including actions. Use this only when you're intentionally resetting the whole store.</div>
+  </div>
+
+  <h3>Reading and writing state outside React</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">outside-react.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Get current state (a snapshot)</span>
+<span class="tok-key">const</span> current = useCounterStore.<span class="tok-cmd">getState</span>();
+
+<span class="tok-com">// Update without a React render</span>
+useCounterStore.<span class="tok-cmd">setState</span>({ count: <span class="tok-num">100</span> });
+
+<span class="tok-com">// Or the function form</span>
+useCounterStore.<span class="tok-cmd">setState</span>((s) =&gt; ({ count: s.count + <span class="tok-num">1</span> }));
+
+<span class="tok-com">// Subscribe to changes outside React (e.g., in an API client)</span>
+<span class="tok-key">const</span> unsub = useCounterStore.<span class="tok-cmd">subscribe</span>((state) =&gt; {
+  console.<span class="tok-cmd">log</span>(<span class="tok-str">'count is now'</span>, state.count);
+});
+<span class="tok-cmd">unsub</span>();</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-set-1">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">What does <code>set({ count: 5 }, true)</code> do that <code>set({ count: 5 })</code> doesn't?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-set-1', this, true)"><span class="opt-letter">A</span>It replaces the state — any field you didn't include is wiped.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-set-1', this, false)"><span class="opt-letter">B</span>It freezes the state so it can't be changed again.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-set-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>replace: true</code> replaces the whole state object with the partial you pass. Every field you didn't list becomes undefined. Use it for logout-style resets, not for normal updates.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · ASYNC ═══ -->
+<section class="section-block" id="async">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Async actions</h2>
+      <p class="section-subtitle">no thunk · no middleware · just async functions</p>
+    </div>
+  </div>
+
+  <p>In Redux, an async action needs <code>createAsyncThunk</code> and three reducers. In Zustand, you write an async function. That's it. The function updates state at each step — loading, then data or error — using the same <code>set</code>.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">stores/users.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { create } <span class="tok-key">from</span> <span class="tok-str">'zustand'</span>;
+
+<span class="tok-key">export const</span> useUsersStore = <span class="tok-cmd">create</span>((set, get) =&gt; ({
+  users: [],
+  loading: <span class="tok-key">false</span>,
+  error: <span class="tok-key">null</span>,
+
+  fetchUsers: <span class="tok-key">async</span> () =&gt; {
+    <span class="tok-cmd">set</span>({ loading: <span class="tok-key">true</span>, error: <span class="tok-key">null</span> });
+    <span class="tok-key">try</span> {
+      <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/users'</span>);
+      <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed'</span>);
+      <span class="tok-key">const</span> users = <span class="tok-key">await</span> res.<span class="tok-cmd">json</span>();
+      <span class="tok-cmd">set</span>({ users, loading: <span class="tok-key">false</span> });
+    } <span class="tok-key">catch</span> (err) {
+      <span class="tok-cmd">set</span>({ error: err.message, loading: <span class="tok-key">false</span> });
+    }
+  },
+
+  addUser: <span class="tok-key">async</span> (user) =&gt; {
+    <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/users'</span>, {
+      <span class="tok-cmd">method</span>: <span class="tok-str">'POST'</span>,
+      <span class="tok-cmd">headers</span>: { <span class="tok-str">'Content-Type'</span>: <span class="tok-str">'application/json'</span> },
+      <span class="tok-cmd">body</span>: JSON.<span class="tok-cmd">stringify</span>(user),
+    });
+    <span class="tok-key">const</span> created = <span class="tok-key">await</span> res.<span class="tok-cmd">json</span>();
+    <span class="tok-cmd">set</span>((s) =&gt; ({ users: [...s.users, created] }));
+  },
+}));</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Race conditions are still your problem.</strong> If <code>fetchUsers</code> is called twice quickly, the second <code>set</code> may resolve before the first, leaving stale data in state. Store a request ID or an <code>AbortController</code> in the store and check it before writing. Zustand does not do this for you — same as Redux thunks.</div>
+  </div>
+
+  <h3>Reading from the store inside an action</h3>
+  <p>Use <code>get()</code> when an action needs a value from elsewhere in the store:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">get-inside-action.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-cmd">create</span>((set, get) =&gt; ({
+  cart: [],
+  addToCart: (item) =&gt; {
+    <span class="tok-key">const</span> existing = <span class="tok-cmd">get</span>().cart.<span class="tok-cmd">find</span>((x) =&gt; x.id === item.id);
+    <span class="tok-key">if</span> (existing) {
+      <span class="tok-cmd">set</span>((s) =&gt; ({
+        cart: s.cart.<span class="tok-cmd">map</span>((x) =&gt; x.id === item.id ? { ...x, qty: x.qty + <span class="tok-num">1</span> } : x),
+      }));
+    } <span class="tok-key">else</span> {
+      <span class="tok-cmd">set</span>((s) =&gt; ({ cart: [...s.cart, { ...item, qty: <span class="tok-num">1</span> }] }));
+    }
+  },
+}));</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-async-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">You want to call <code>useUsersStore.getState().fetchUsers()</code> from a non-React module. Does this work?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-async-1', this, true)"><span class="opt-letter">A</span>Yes — the whole store is accessible outside React via <code>getState</code>.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-async-1', this, false)"><span class="opt-letter">B</span>No — the store only works inside components.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-async-1-feedback"></div>
+    <div class="quiz-explain hidden">The store lives in module scope, not in React context. Anywhere you import it, you can read and call its actions — including from services, listeners, and other stores.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · MIDDLEWARE ═══ -->
+<section class="section-block" id="middleware">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Middleware</h2>
+      <p class="section-subtitle">persist · devtools · immer · combine them</p>
+    </div>
+  </div>
+
+  <p>Middleware wraps the <code>create</code> call to extend the store. They're optional — the base store works fine without any. Each one adds capabilities the base store intentionally leaves out.</p>
+
+  <h3>persist — survive a reload</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">persist.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { create } <span class="tok-key">from</span> <span class="tok-str">'zustand'</span>;
+<span class="tok-key">import</span> { persist } <span class="tok-key">from</span> <span class="tok-str">'zustand/middleware'</span>;
+
+<span class="tok-key">export const</span> useCartStore = <span class="tok-cmd">create</span>(
+  <span class="tok-cmd">persist</span>(
+    (set) =&gt; ({
+      items: [],
+      addItem: (item) =&gt; <span class="tok-cmd">set</span>((s) =&gt; ({ items: [...s.items, item] })),
+      clear: () =&gt; <span class="tok-cmd">set</span>({ items: [] }),
+    }),
+    {
+      <span class="tok-cmd">name</span>: <span class="tok-str">'cart'</span>,                 <span class="tok-com">// localStorage key</span>
+      <span class="tok-cmd">partialize</span>: (state) =&gt; ({ items: state.items }),  <span class="tok-com">// omit actions</span>
+      <span class="tok-cmd">version</span>: <span class="tok-num">1</span>,                 <span class="tok-com">// for migrations</span>
+    }
+  )
+);</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Don't persist functions.</strong> By default <code>persist</code> serialises the whole state to localStorage — which fails on functions. Use <code>partialize</code> to keep only the data fields. This is the most common <code>persist</code> mistake.</div>
+  </div>
+
+  <h3>devtools — the Redux DevTools you know and love</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">devtools.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { create } <span class="tok-key">from</span> <span class="tok-str">'zustand'</span>;
+<span class="tok-key">import</span> { devtools } <span class="tok-key">from</span> <span class="tok-str">'zustand/middleware'</span>;
+
+<span class="tok-key">export const</span> useCounterStore = <span class="tok-cmd">create</span>(
+  <span class="tok-cmd">devtools</span>(
+    (set) =&gt; ({
+      count: <span class="tok-num">0</span>,
+      increment: () =&gt; <span class="tok-cmd">set</span>(
+        (s) =&gt; ({ count: s.count + <span class="tok-num">1</span> }),
+        <span class="tok-key">false</span>,
+        <span class="tok-str">'counter/increment'</span>   <span class="tok-com">// action name shown in DevTools</span>
+      ),
+    }),
+    { <span class="tok-cmd">name</span>: <span class="tok-str">'CounterStore'</span> }      <span class="tok-com">// tab name in DevTools</span>
+  )
+);</code></pre>
+  </div>
+
+  <h3>immer — mutate without spreads</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">immer.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { create } <span class="tok-key">from</span> <span class="tok-str">'zustand'</span>;
+<span class="tok-key">import</span> { immer } <span class="tok-key">from</span> <span class="tok-str">'zustand/middleware/immer'</span>;
+
+<span class="tok-key">export const</span> useTodoStore = <span class="tok-cmd">create</span>(
+  <span class="tok-cmd">immer</span>((set) =&gt; ({
+    todos: [],
+    add: (text) =&gt; <span class="tok-cmd">set</span>((s) =&gt; { s.todos.<span class="tok-cmd">push</span>({ text, done: <span class="tok-key">false</span> }); }),
+    toggle: (i) =&gt; <span class="tok-cmd">set</span>((s) =&gt; { s.todos[i].done = !s.todos[i].done; }),
+  }))
+);</code></pre>
+  </div>
+
+  <h3>Combining middleware</h3>
+  <p>Order matters: outermost wraps innermost. Common order is <code>devtools(persist(immer(...)))</code> — DevTools sees every update, persist serialises, immer handles mutation syntax:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">combined.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { create } <span class="tok-key">from</span> <span class="tok-str">'zustand'</span>;
+<span class="tok-key">import</span> { devtools, persist } <span class="tok-key">from</span> <span class="tok-str">'zustand/middleware'</span>;
+<span class="tok-key">import</span> { immer } <span class="tok-key">from</span> <span class="tok-str">'zustand/middleware/immer'</span>;
+
+<span class="tok-key">export const</span> useCartStore = <span class="tok-cmd">create</span>&lt;<span class="tok-type">CartState</span>&gt;()(
+  <span class="tok-cmd">devtools</span>(
+    <span class="tok-cmd">persist</span>(
+      <span class="tok-cmd">immer</span>((set) =&gt; ({
+        items: [],
+        add: (item) =&gt; <span class="tok-cmd">set</span>((s) =&gt; { s.items.<span class="tok-cmd">push</span>(item); }, <span class="tok-key">false</span>, <span class="tok-str">'cart/add'</span>),
+      })),
+      { <span class="tok-cmd">name</span>: <span class="tok-str">'cart'</span>, <span class="tok-cmd">partialize</span>: (s) =&gt; ({ items: s.items }) }
+    ),
+    { <span class="tok-cmd">name</span>: <span class="tok-str">'CartStore'</span> }
+  )
+);</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-mw-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">Your persisted store serialises to localStorage but action functions keep disappearing on reload. Why?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-mw-1', this, true)"><span class="opt-letter">A</span><code>JSON.stringify</code> drops functions — use <code>partialize</code> to persist only data fields.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-mw-1', this, false)"><span class="opt-letter">B</span><code>persist</code> doesn't support actions at all.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-mw-1-feedback"></div>
+    <div class="quiz-explain hidden">Functions aren't JSON-serialisable. When <code>persist</code> reads the store back, the actions are simply gone. <code>partialize</code> keeps only the serialisable fields — actions live in the code, not the storage.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · SLICES ═══ -->
+<section class="section-block" id="slices">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">The slices pattern</h2>
+      <p class="section-subtitle">one store, many concerns · the Zustand answer to "reducers"</p>
+    </div>
+  </div>
+
+  <p>As a store grows, one big <code>create</code> becomes hard to read. The slices pattern splits the state shape into focused pieces, then combines them into one store. Same store at runtime, better organised source.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">slices/cartSlice.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">export const</span> createCartSlice = (set) =&gt; ({
+  cart: { items: [] },
+  addToCart: (item) =&gt; <span class="tok-cmd">set</span>((s) =&gt; ({ cart: { items: [...s.cart.items, item] } })),
+});</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">slices/userSlice.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">export const</span> createUserSlice = (set) =&gt; ({
+  user: <span class="tok-key">null</span>,
+  setUser: (u) =&gt; <span class="tok-cmd">set</span>({ user: u }),
+  clearUser: () =&gt; <span class="tok-cmd">set</span>({ user: <span class="tok-key">null</span> }),
+});</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">stores/useAppStore.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { create } <span class="tok-key">from</span> <span class="tok-str">'zustand'</span>;
+<span class="tok-key">import</span> { createCartSlice } <span class="tok-key">from</span> <span class="tok-str">'./slices/cartSlice'</span>;
+<span class="tok-key">import</span> { createUserSlice } <span class="tok-key">from</span> <span class="tok-str">'./slices/userSlice'</span>;
+
+<span class="tok-key">export const</span> useAppStore = <span class="tok-cmd">create</span>((...a) =&gt; ({
+  ...<span class="tok-cmd">createCartSlice</span>(...a),
+  ...<span class="tok-cmd">createUserSlice</span>(...a),
+}));</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Why this is nice</div>
+    <div class="concept-box-text"><p>The store is still a single flat object at runtime — <code>state.cart.items</code>, <code>state.user</code>, <code>state.addToCart</code>. But the source is split by concern, each slice is testable in isolation, and adding a new domain is one import + one spread. This is Zustand's equivalent of RTK slices without the ceremony.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-slices-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">In the slices pattern, is <code>state.cart</code> a nested object inside a per-slice store, or a property on one flat store?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-slices-1', this, false)"><span class="opt-letter">A</span>A nested per-slice store — each slice is its own Zustand store.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-slices-1', this, true)"><span class="opt-letter">B</span>A property on one flat store — the slices are just spread into the combined <code>create</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-slices-1-feedback"></div>
+    <div class="quiz-explain hidden">Slices are a code-organisation tool, not a runtime boundary. At runtime there's one store; each slice contributes keys to it. The nested structure (<code>cart.items</code>) is your choice, not a requirement.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · TYPESCRIPT ═══ -->
+<section class="section-block" id="typescript">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Zustand with TypeScript</h2>
+      <p class="section-subtitle">the StateCreator type · combining middleware · typed selectors</p>
+    </div>
+  </div>
+
+  <p>Zustand is written in TypeScript, and the typing is clean once you know the pattern. Two things to remember: declare the state type on <code>create&lt;T&gt;()</code>, and use the curried form <code>create&lt;T&gt;()(...)</code> when you attach middleware.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">typed-store.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { create } <span class="tok-key">from</span> <span class="tok-str">'zustand'</span>;
+<span class="tok-key">import</span> { devtools, persist } <span class="tok-key">from</span> <span class="tok-str">'zustand/middleware'</span>;
+
+<span class="tok-key">interface</span> <span class="tok-type">User</span> {
+  id: <span class="tok-type">string</span>;
+  name: <span class="tok-type">string</span>;
+}
+
+<span class="tok-key">interface</span> <span class="tok-type">AuthState</span> {
+  user: <span class="tok-type">User</span> | <span class="tok-key">null</span>;
+  login: (user: <span class="tok-type">User</span>) =&gt; <span class="tok-type">void</span>;
+  logout: () =&gt; <span class="tok-type">void</span>;
+}
+
+<span class="tok-key">export const</span> useAuthStore = <span class="tok-cmd">create</span>&lt;<span class="tok-type">AuthState</span>&gt;()(
+  <span class="tok-cmd">devtools</span>(
+    <span class="tok-cmd">persist</span>(
+      (set) =&gt; ({
+        user: <span class="tok-key">null</span>,
+        login: (user) =&gt; <span class="tok-cmd">set</span>({ user }, <span class="tok-key">false</span>, <span class="tok-str">'auth/login'</span>),
+        logout: () =&gt; <span class="tok-cmd">set</span>({ user: <span class="tok-key">null</span> }, <span class="tok-key">false</span>, <span class="tok-str">'auth/logout'</span>),
+      }),
+      { <span class="tok-cmd">name</span>: <span class="tok-str">'auth'</span>, <span class="tok-cmd">partialize</span>: (s) =&gt; ({ user: s.user }) }
+    ),
+    { <span class="tok-cmd">name</span>: <span class="tok-str">'AuthStore'</span> }
+  )
+);</code></pre>
+  </div>
+
+  <h3>Typed selectors with an equality function</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">typed-selector.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useShallow } <span class="tok-key">from</span> <span class="tok-str">'zustand/react/shallow'</span>;
+
+<span class="tok-com">// Single field</span>
+<span class="tok-key">const</span> user = <span class="tok-cmd">useAuthStore</span>((s) =&gt; s.user);       <span class="tok-com">// User | null</span>
+
+<span class="tok-com">// Multiple fields, shallow equality</span>
+<span class="tok-key">const</span> { user, logout } = <span class="tok-cmd">useAuthStore</span>(
+  <span class="tok-cmd">useShallow</span>((s) =&gt; ({ user: s.user, logout: s.logout }))
+);</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Why <code>create&lt;T&gt;()(...)</code> with the extra <code>()</code>?</strong> Middleware changes the store's type signature — <code>devtools(persist(fn))</code> is not the same shape as <code>fn</code>. The curried form lets TypeScript apply the middleware's type transformations correctly. Without it, you'll get confusing type errors.</div>
+  </div>
+
+  <div class="quiz-box" id="q-ts-1">
+    <div class="quiz-label">Quick check · 08</div>
+    <div class="quiz-question">What does <code>create&lt;AuthState&gt;()(...)</code> do differently from <code>create((set) =&gt; ...)</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-ts-1', this, true)"><span class="opt-letter">A</span>Declares the state type on the store, and the curried form lets middleware type-infer correctly.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-ts-1', this, false)"><span class="opt-letter">B</span>Makes the store immutable at runtime.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-ts-1-feedback"></div>
+    <div class="quiz-explain hidden">TypeScript types are erased — nothing changes at runtime. The generics tell the compiler what the store looks like, and the curried form is required when middleware is involved.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · TESTING ═══ -->
+<section class="section-block" id="testing">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Testing Zustand stores</h2>
+      <p class="section-subtitle">reset between tests · no wrapper · plain function tests</p>
+    </div>
+  </div>
+
+  <p>Stores are plain modules. You don't need a React testing utility to test them — just import and call actions directly. The one thing you must do is reset state between tests so they don't leak into each other.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">counter.test.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useCounterStore } <span class="tok-key">from</span> <span class="tok-str">'./counter'</span>;
+
+<span class="tok-cmd">beforeEach</span>(() =&gt; {
+  <span class="tok-com">// reset the store before each test</span>
+  useCounterStore.<span class="tok-cmd">setState</span>({ count: <span class="tok-num">0</span>, step: <span class="tok-num">1</span> }, <span class="tok-key">true</span>);
+});
+
+<span class="tok-cmd">test</span>(<span class="tok-str">'increment adds step'</span>, () =&gt; {
+  useCounterStore.<span class="tok-cmd">getState</span>().<span class="tok-cmd">increment</span>();
+  <span class="tok-cmd">expect</span>(useCounterStore.<span class="tok-cmd">getState</span>().count).<span class="tok-cmd">toBe</span>(<span class="tok-num">1</span>);
+});</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Reset properly.</strong> <code>setState({count: 0})</code> merges — it leaves actions intact but doesn't reset <code>step</code>. Use <code>setState(initial, true)</code> to wipe everything, or store an <code>initialState</code> object and reset from it. Otherwise a test that changes <code>step</code> will affect the next test.</div>
+  </div>
+
+  <div class="quiz-box" id="q-test-1">
+    <div class="quiz-label">Quick check · 09</div>
+    <div class="quiz-question">Why do you need to reset the store between tests?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-test-1', this, false)"><span class="opt-letter">A</span>Because each test runs in a different browser tab.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-test-1', this, true)"><span class="opt-letter">B</span>Because the store is module-level singleton — the same instance persists across tests, so state leaks.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-test-1-feedback"></div>
+    <div class="quiz-explain hidden">Imported once, shared across tests. If test A increments <code>count</code>, test B sees the incremented value unless you reset. This is different from component-local state, which is fresh per test.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Selector returns a new object each call</td><td>Component re-renders on every store update</td><td>Split into field selectors, or wrap with <code>useShallow</code></td></tr>
+        <tr><td>Persisting the whole store</td><td>Actions disappear; localStorage bloats</td><td><code>partialize</code> to only data fields</td></tr>
+        <tr><td>Mutating state directly without <code>set</code></td><td>No re-render, no DevTools action</td><td>Always call <code>set</code> — even for nested updates</td></tr>
+        <tr><td>Forgetting <code>get()</code> when actions need to read</td><td>Stale values from closures</td><td>Use <code>get()</code> at call time, not a captured variable</td></tr>
+        <tr><td><code>set(obj, true)</code> for normal updates</td><td>Wipes all fields not in <code>obj</code></td><td>Only use <code>true</code> for full-store resets</td></tr>
+        <tr><td>Putting local UI state in the global store</td><td>Boilerplate for nothing; state lingers between unmounts</td><td>Use <code>useState</code> unless multiple distant components need it</td></tr>
+        <tr><td>No <code>partialize</code> with sensitive fields</td><td>Tokens / passwords written to localStorage in plain text</td><td>Only persist non-sensitive fields; use httpOnly cookies for auth tokens</td></tr>
+        <tr><td>Never resetting in tests</td><td>Tests pass alone, fail together</td><td>Reset in <code>beforeEach</code></td></tr>
+        <tr><td>Duplicating Zustand + TanStack Query for the same data</td><td>Two sources of truth that drift</td><td>Zustand for client state; TanStack Query for server state</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Zustand is not a cache.</strong> Don't store fetched server data in Zustand unless you're building your own caching layer. TanStack Query or SWR exist exactly for that. Use Zustand for <em>client state</em>: UI, drafts, cart, preferences, session tokens. Two tools, two jobs.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked about Zustand</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is Zustand, and how does it differ from Redux?</span></summary><div class="qa-body"><p>Zustand is a small state management library for React (and vanilla JS) built around a single store per module. Unlike Redux, there is no Provider, no reducer, no action type constants — you define state and actions in one object, and mutate state with a <code>set</code> function. Component subscription is per-selector by default, so you get the same re-render precision as Redux with a fraction of the code.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>Why doesn't Zustand require a Provider?</span></summary><div class="qa-body"><p>Because the store lives in <b>module scope</b>, not in React context. When you call <code>create()</code>, the returned hook and the internal store are already available to any module that imports them. Redux uses a Provider to inject the store into context; Zustand sidesteps the whole layer. The upside is less boilerplate and access outside React; the downside is that you can't have two different instances of the same store in one app tree without extra work (there's a <code>createStore</code> + <code>useStore</code> pattern for that case).</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>How do selectors prevent unnecessary re-renders?</span></summary><div class="qa-body"><p>When you call <code>useStore(selector)</code>, Zustand runs the selector against current state and stores the result. On every state update, it re-runs the selector and compares the new result to the previous one using <code>Object.is</code>. If they're equal, the component <em>does not re-render</em>. This means each component subscribes only to the specific slice it reads, ignoring unrelated state changes entirely.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What's the pitfall with selecting multiple fields in an object?</span></summary><div class="qa-body"><p>The selector <code>(s) =&gt; ({ a: s.a, b: s.b })</code> creates a <b>new object literal every call</b>. Zustand's default <code>Object.is</code> comparison always fails, so the component re-renders on every store update. Fix: split into one selector per field, or wrap with <code>useShallow</code> from <code>zustand/react/shallow</code> so Zustand compares the object shallowly instead of by reference.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>How would you implement an async action in Zustand?</span></summary><div class="qa-body"><p>Just write an async function on the store. No thunk, no middleware. The function calls <code>set</code> to flip loading, awaits the fetch, then calls <code>set</code> again with data or error. It's a plain JS function; the store has no opinion about how you handle async. Race conditions and cancellation are still your responsibility — an <code>AbortController</code> stored alongside the action, or checking a request ID before writing, is the standard fix.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>What does the persist middleware do, and what's the pitfall?</span></summary><div class="qa-body"><p>It serialises the store to storage (localStorage by default) and rehydrates on load. The pitfall is that JSON can't serialise functions — so if you persist the whole state, every action disappears after reload. The fix is <code>partialize</code>: a function returning only the data fields you want to persist. Also mind <code>version</code> and <code>migrate</code> for schema changes, and avoid persisting sensitive fields like tokens.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What is the slices pattern and why use it?</span></summary><div class="qa-body"><p>Split the store's state and actions into separate factory functions — one per concern — then spread them into a single <code>create</code>. Each slice is a plain function that takes <code>set</code> and returns a partial state. At runtime there is still one store; the slices are purely an organisational tool. This keeps large stores readable and each slice testable in isolation — the same idea as RTK's <code>createSlice</code>, without the reducer ceremony.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>How do you use a Zustand store outside React?</span></summary><div class="qa-body"><p>Every store returned by <code>create</code> exposes <code>getState()</code>, <code>setState()</code>, and <code>subscribe()</code>. From a service module, event handler, or another store, you can call <code>useStore.getState().someAction()</code> or read a snapshot. This makes Zustand naturally usable in non-React code — a common ask when migrating an existing app.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>When would you use Zustand vs TanStack Query vs Context?</span></summary><div class="qa-body"><p><b>TanStack Query</b> for server state — anything fetched from an API. <b>Zustand</b> for client state shared across distant components — cart, session, preferences, UI drafts. <b>Context</b> for injecting a value deep in the tree that rarely changes — a theme, a router, a small user object — where re-render cost is negligible. Big apps often use all three.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>How do you reset a Zustand store for testing?</span></summary><div class="qa-body"><p>Because the store is a module-level singleton, state leaks between tests. Call <code>useStore.setState(initialState, true)</code> in <code>beforeEach</code> — the second argument <code>true</code> replaces the whole state instead of merging. Store the initial state in a constant (or in your slice factories) so the reset stays in sync with your defaults.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>How does Zustand work internally?</span></summary><div class="qa-body"><p>Under the hood it's a closure — <code>create</code> holds a state variable, a set of listeners, and a <code>setState</code> that mutates the state and notifies every listener. The React hook is built with <code>useSyncExternalStore</code>, which is the React-provided way to subscribe to an external store. That's why there's no Provider: the hook returns the current snapshot and subscribes to changes directly. The entire library is <b>a few hundred lines</b>.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Frontend · State</span>
+  <span>Zustand · store · selectors · middleware · slices</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>
