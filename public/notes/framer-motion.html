@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Framer Motion — the complete guide · Sheryians</title>
+<meta name="description" content="Framer Motion (Motion) from basics to advanced — motion components, variants, AnimatePresence, gestures, layout animations, scroll effects, springs, and performance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:18ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+.tok-type{color:#E5C07B;font-weight:500}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Frontend · Animation · React</div>
+  <h1><em>Framer Motion</em> — animate everything</h1>
+  <p class="hero-desc">The React animation library that feels like React. Declarative props for fades, springs, gestures, layout transitions, and scroll effects — without the CSS keyframe wrangling or manual RAF loops.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">motion components</span>
+    <span class="hero-tag">variants &amp; stagger</span>
+    <span class="hero-tag">AnimatePresence</span>
+    <span class="hero-tag">gestures</span>
+    <span class="hero-tag">layout animations</span>
+    <span class="hero-tag">scroll effects</span>
+    <span class="hero-tag">springs</span>
+    <span class="hero-tag">performance</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · WHY ═══ -->
+<section class="section-block" id="why">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">Why Framer Motion exists</h2>
+      <p class="section-subtitle">CSS transitions don't know React · the missing animation layer</p>
+    </div>
+  </div>
+
+  <p class="lead">CSS transitions and keyframes are great for hover states and simple fades. They fall apart the moment an animation depends on <b>React state</b>. Animating a modal out when it unmounts? CSS can't do it — the element is already gone. Animating a list reorder? You'd need the FLIP technique by hand. Scroll-linked parallax? A `requestAnimationFrame` loop with manual math.</p>
+
+  <p>Framer Motion (now officially **Motion** — the npm package is `motion`, import from `motion/react`) solves this by making animation a first-class part of React's render model. You describe the states, and it handles the interpolation, the interruptions, the springs, and the unmount timing.</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one sentence</div>
+    <div class="concept-box-text"><p>Framer Motion turns animation into declarative React props: you say what the component should look like when <code>isOpen</code> is true, and it animates there — and back — automatically, with spring physics, gesture handling, and exit animations built in.</p></div>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Naming note.</strong> Framer Motion was renamed to <b>Motion</b> in late 2024. The old package <code>framer-motion</code> still exists, but new code should install <code>motion</code> and import from <code>motion/react</code> [citation:1][citation:3]. This guide uses the modern import path, but every concept applies to both.</div>
+  </div>
+
+  <div class="quiz-box" id="q-why-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">What's the fundamental thing CSS can't do that Framer Motion solves?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-why-1', this, false)"><span class="opt-letter">A</span>Hover effects.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-why-1', this, true)"><span class="opt-letter">B</span>Animating a component <em>out</em> when it unmounts — by the time CSS could run, React has already removed the element from the DOM.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-why-1-feedback"></div>
+    <div class="quiz-explain hidden">Exit animations require keeping the element in the DOM until the animation finishes. Framer Motion's <code>AnimatePresence</code> does exactly that — CSS alone cannot, because React unmounts synchronously.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · SETUP ═══ -->
+<section class="section-block" id="setup">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Setup &amp; the motion component</h2>
+      <p class="section-subtitle">install · motion.div · initial / animate / transition</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>npm install motion</code></pre>
+  </div>
+
+  <p>Replace any HTML element with its `<code>motion.</code>` counterpart. It accepts all the normal props plus animation props: <code>initial</code> (the starting state), <code>animate</code> (the target state), and <code>transition</code> (how to get there).</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">basic-fade.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { motion } <span class="tok-key">from</span> <span class="tok-str">'motion/react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">FadeIn</span>() {
+  <span class="tok-key">return</span> (
+    &lt;motion.div
+      <span class="tok-cmd">initial</span>={{ opacity: <span class="tok-num">0</span>, y: <span class="tok-num">20</span> }}
+      <span class="tok-cmd">animate</span>={{ opacity: <span class="tok-num">1</span>, y: <span class="tok-num">0</span> }}
+      <span class="tok-cmd">transition</span>={{ duration: <span class="tok-num">0.4</span>, ease: <span class="tok-str">'easeOut'</span> }}
+    &gt;
+      Hello
+    &lt;/motion.div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h3>What properties can you animate?</h3>
+  <p>Almost anything CSS can: <code>opacity</code>, <code>x</code>, <code>y</code>, <code>scale</code>, <code>rotate</code>, <code>backgroundColor</code>, <code>borderRadius</code>, <code>width</code>, <code>height</code>. The transform properties (<code>x</code>, <code>y</code>, <code>scale</code>, <code>rotate</code>) are GPU-accelerated and are what you should reach for first.</p>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Animate <code>transform</code> properties, not layout properties.</strong> <code>animate={{ x: 100 }}</code> is fast (GPU compositing). <code>animate={{ left: '100px' }}</code> or <code>animate={{ width: 200 }}</code> forces the browser to recalculate layout on every frame — janky on slower devices [citation:10][citation:13]. This single choice separates animations that feel smooth from animations that feel broken.</div>
+  </div>
+
+  <div class="quiz-box" id="q-setup-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">Which animation is more performant?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-setup-1', this, false)"><span class="opt-letter">A</span><code>animate={{ left: '100px' }}</code></button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-setup-1', this, true)"><span class="opt-letter">B</span><code>animate={{ x: 100 }}</code></button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-setup-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>x</code> compiles to <code>transform: translateX()</code>, which the GPU can composite without touching layout. <code>left</code> forces the browser to recalculate the position of every element on the page — every frame.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · VARIANTS ═══ -->
+<section class="section-block" id="variants">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Variants &amp; orchestration</h2>
+      <p class="section-subtitle">named states · inheritance · staggerChildren</p>
+    </div>
+  </div>
+
+  <p>Variants are named animation states defined outside the component. Instead of passing objects to <code>initial</code> and <code>animate</code>, you pass strings that reference the variant names.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">variants.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> cardVariants = {
+  <span class="tok-cmd">hidden</span>: { opacity: <span class="tok-num">0</span>, scale: <span class="tok-num">0.9</span>, y: <span class="tok-num">20</span> },
+  <span class="tok-cmd">visible</span>: { opacity: <span class="tok-num">1</span>, scale: <span class="tok-num">1</span>, y: <span class="tok-num">0</span> },
+  <span class="tok-cmd">exit</span>: { opacity: <span class="tok-num">0</span>, scale: <span class="tok-num">0.9</span> },
+};
+
+&lt;motion.div
+  <span class="tok-cmd">variants</span>={cardVariants}
+  <span class="tok-cmd">initial</span>=<span class="tok-str">"hidden"</span>
+  <span class="tok-cmd">animate</span>=<span class="tok-str">"visible"</span>
+  <span class="tok-cmd">exit</span>=<span class="tok-str">"exit"</span>
+/&gt;</code></pre>
+  </div>
+
+  <h3>Inheritance — the killer feature</h3>
+  <p>When a parent has a variant and children have variants with matching names, the parent's state <b>propagates down</b>. You don't need to pass <code>animate</code> to every child.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">staggered-list.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> container = {
+  <span class="tok-cmd">hidden</span>: { opacity: <span class="tok-num">0</span> },
+  <span class="tok-cmd">visible</span>: {
+    opacity: <span class="tok-num">1</span>,
+    <span class="tok-cmd">transition</span>: { <span class="tok-cmd">staggerChildren</span>: <span class="tok-num">0.08</span> },
+  },
+};
+
+<span class="tok-key">const</span> item = {
+  <span class="tok-cmd">hidden</span>: { opacity: <span class="tok-num">0</span>, y: <span class="tok-num">16</span> },
+  <span class="tok-cmd">visible</span>: { opacity: <span class="tok-num">1</span>, y: <span class="tok-num">0</span> },
+};
+
+&lt;motion.ul <span class="tok-cmd">variants</span>={container} <span class="tok-cmd">initial</span>=<span class="tok-str">"hidden"</span> <span class="tok-cmd">animate</span>=<span class="tok-str">"visible"</span>&gt;
+  {items.<span class="tok-cmd">map</span>(i =&gt; (
+    &lt;motion.li <span class="tok-cmd">key</span>={i.id} <span class="tok-cmd">variants</span>={item}&gt;
+      {i.name}
+    &lt;/motion.li&gt;
+  ))}
+&lt;/motion.ul&gt;</code></pre>
+  </div>
+
+  <p>The <code>staggerChildren</code> transition on the parent causes each child's <code>visible</code> animation to start 80ms after the previous one. This is how every polished staggered list you've seen is built [citation:2][citation:3].</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Why variants beat inline objects</div>
+    <div class="concept-box-text"><p>Variants give you (1) a single place to define a state's look, (2) inheritance so you orchestrate children from the parent, (3) the ability to swap whole animation themes by changing one variant name. Inline objects are fine for one-off animations; variants are how you scale animation across a component tree.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-var-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">A child <code>motion.li</code> has a <code>variants</code> prop but no <code>animate</code> prop. The parent has <code>animate="visible"</code>. What happens?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-var-1', this, true)"><span class="opt-letter">A</span>The child inherits the parent's animation state and animates to its own <code>visible</code> variant.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-var-1', this, false)"><span class="opt-letter">B</span>Nothing — the child needs its own <code>animate</code> prop to move.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-var-1-feedback"></div>
+    <div class="quiz-explain hidden">Variant propagation is automatic when names match. The parent says "visible", and every descendant with a <code>visible</code> variant animates to that state — which is what makes orchestration possible.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · EXIT ═══ -->
+<section class="section-block" id="exit">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">AnimatePresence — exit animations</h2>
+      <p class="section-subtitle">the one component everyone needs · modes · the key rule</p>
+    </div>
+  </div>
+
+  <p>When React removes a component, it's gone instantly. There's no chance for CSS to animate it out. <code>AnimatePresence</code> solves this: it keeps the element in the tree until its <code>exit</code> animation finishes, then unmounts it.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">modal-exit.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { motion, AnimatePresence } <span class="tok-key">from</span> <span class="tok-str">'motion/react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">Modal</span>({ isOpen }) {
+  <span class="tok-key">return</span> (
+    &lt;<span class="tok-cmd">AnimatePresence</span>&gt;
+      {isOpen &amp;&amp; (
+        &lt;motion.div
+          <span class="tok-cmd">key</span>=<span class="tok-str">"modal"</span>
+          <span class="tok-cmd">initial</span>={{ opacity: <span class="tok-num">0</span>, scale: <span class="tok-num">0.95</span> }}
+          <span class="tok-cmd">animate</span>={{ opacity: <span class="tok-num">1</span>, scale: <span class="tok-num">1</span> }}
+          <span class="tok-cmd">exit</span>={{ opacity: <span class="tok-num">0</span>, scale: <span class="tok-num">0.95</span> }}
+        &gt;
+          Modal content
+        &lt;/motion.div&gt;
+      )}
+    &lt;/<span class="tok-cmd">AnimatePresence</span>&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Two rules that break exit animations.</strong> (1) <code>AnimatePresence</code> must stay mounted — put it <em>outside</em> the conditional. If the whole <code>AnimatePresence</code> unmounts, it can't wait for anything. (2) Every direct child needs a stable <code>key</code>. Without it, React can't tell which element is exiting and which is entering, so exit animations never fire [citation:3][citation:9].</div>
+  </div>
+
+  <h3>AnimatePresence modes</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Mode</th><th>Behaviour</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr><td><code>sync</code> (default)</td><td>Enter and exit overlap</td><td>Independent animations, list items</td></tr>
+        <tr><td><code>wait</code></td><td>Enter waits for exit to finish</td><td>Page transitions, modal swap</td></tr>
+        <tr><td><code>popLayout</code></td><td>Exiting element leaves the flow; siblings animate into place</td><td>Lists where removing an item should collapse the gap</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">page-transition.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>&lt;<span class="tok-cmd">AnimatePresence</span> <span class="tok-cmd">mode</span>=<span class="tok-str">"wait"</span>&gt;
+  &lt;motion.div
+    <span class="tok-cmd">key</span>={pathname}   <span class="tok-com">// change key on route change</span>
+    <span class="tok-cmd">initial</span>={{ opacity: <span class="tok-num">0</span>, y: <span class="tok-num">12</span> }}
+    <span class="tok-cmd">animate</span>={{ opacity: <span class="tok-num">1</span>, y: <span class="tok-num">0</span> }}
+    <span class="tok-cmd">exit</span>={{ opacity: <span class="tok-num">0</span>, y: -<span class="tok-num">12</span> }}
+  &gt;
+    &lt;Outlet /&gt;
+  &lt;/motion.div&gt;
+&lt;/<span class="tok-cmd">AnimatePresence</span>&gt;</code></pre>
+  </div>
+  <p>Using <code>key={pathname}</code> means each route is a different "element" to <code>AnimatePresence</code> — the old one exits, then the new one enters. This is the standard page-transition pattern.</p>
+
+  <div class="quiz-box" id="q-exit-1">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">Your modal's exit animation never fires. What's the most likely cause?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-exit-1', this, false)"><span class="opt-letter">A</span>You forgot the <code>transition</code> prop.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-exit-1', this, true)"><span class="opt-letter">B</span>The <code>AnimatePresence</code> is inside the condition, so it unmounts with the modal — or the child is missing a unique <code>key</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-exit-1-feedback"></div>
+    <div class="quiz-explain hidden">The two most common causes: <code>AnimatePresence</code> unmounting along with its children, or a child without a key. It needs to stay in the tree to defer the unmount until the exit animation completes.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · GESTURES ═══ -->
+<section class="section-block" id="gestures">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Gestures</h2>
+      <p class="section-subtitle">whileHover · whileTap · drag · dragConstraints</p>
+    </div>
+  </div>
+
+  <p>Framer Motion has first-class props for interaction states. They animate automatically and revert when the interaction ends.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">gestures.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// hover + tap</span>
+&lt;motion.button
+  <span class="tok-cmd">whileHover</span>={{ scale: <span class="tok-num">1.05</span> }}
+  <span class="tok-cmd">whileTap</span>={{ scale: <span class="tok-num">0.95</span> }}
+  <span class="tok-cmd">transition</span>={{ type: <span class="tok-str">'spring'</span>, stiffness: <span class="tok-num">400</span>, damping: <span class="tok-num">20</span> }}
+&gt;
+  Click me
+&lt;/motion.button&gt;
+
+<span class="tok-com">// draggable card that snaps back to a boundary</span>
+&lt;motion.div
+  <span class="tok-cmd">drag</span>
+  <span class="tok-cmd">dragConstraints</span>={{ left: -<span class="tok-num">100</span>, right: <span class="tok-num">100</span>, top: -<span class="tok-num">100</span>, bottom: <span class="tok-num">100</span> }}
+  <span class="tok-cmd">dragElastic</span>={<span class="tok-num">0.2</span>}
+  <span class="tok-cmd">whileDrag</span>={{ cursor: <span class="tok-str">'grabbing'</span> }}
+/&gt;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Prop</th><th>When it runs</th><th>Reverts after?</th></tr></thead>
+      <tbody>
+        <tr><td><code>whileHover</code></td><td>Pointer enters</td><td>Yes</td></tr>
+        <tr><td><code>whileTap</code></td><td>Pointer pressed</td><td>Yes</td></tr>
+        <tr><td><code>whileFocus</code></td><td>Element focused</td><td>Yes</td></tr>
+        <tr><td><code>whileDrag</code></td><td>Dragging</td><td>Yes</td></tr>
+        <tr><td><code>whileInView</code></td><td>Scrolls into viewport</td><td>Optional (<code>once: true</code>)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>These are the props that make buttons feel like buttons and cards feel physical. The spring defaults on gestures are already tuned well — you rarely need to override them.</p>
+</section>
+
+<!-- ═══ 06 · LAYOUT ═══ -->
+<section class="section-block" id="layout">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Layout animations</h2>
+      <p class="section-subtitle">the layout prop · layoutId · LayoutGroup · FLIP under the hood</p>
+    </div>
+  </div>
+
+  <p>The <code>layout</code> prop is Framer Motion's superpower. Add it to an element and any time its size or position changes due to a React re-render, it animates the change — no from-value required. Under the hood it uses the FLIP technique (First, Last, Invert, Play): measure before, measure after, invert the difference with a transform, then animate it back to zero [citation:3][citation:14].</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">layout.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// The box resizes smoothly when isExpanded changes</span>
+&lt;motion.div
+  <span class="tok-cmd">layout</span>
+  <span class="tok-cmd">style</span>={{ width: isExpanded ? <span class="tok-num">400</span> : <span class="tok-num">200</span>, height: isExpanded ? <span class="tok-num">200</span> : <span class="tok-num">100</span> }}
+/&gt;</code></pre>
+  </div>
+
+  <h3>layoutId — shared element transitions</h3>
+  <p>Give two different elements the same <code>layoutId</code>. When one unmounts and the other mounts, Framer Motion animates between them as if it's the same element. This is how you build the "card expands into a modal" effect.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">shared-layout.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>{!selected ? (
+  &lt;motion.div
+    <span class="tok-cmd">layoutId</span>=<span class="tok-str">"card"</span>
+    onClick={() =&gt; setSelected(true)}
+    style={{ width: <span class="tok-num">200</span>, height: <span class="tok-num">120</span> }}
+  /&gt;
+) : (
+  &lt;motion.div
+    <span class="tok-cmd">layoutId</span>=<span class="tok-str">"card"</span>
+    onClick={() =&gt; setSelected(false)}
+    style={{ width: <span class="tok-num">600</span>, height: <span class="tok-num">400</span> }}
+  /&gt;
+)}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Text distortion during layout animations.</strong> Because <code>layout</code> animates using <code>transform: scale()</code>, a resizing parent will stretch its text and images. Fix: add <code>layout="position"</code> to children whose position should move but whose scale should not change [citation:9][citation:14]. This is the single most common layout animation bug.</div>
+  </div>
+
+  <h3>LayoutGroup — synchronised animations</h3>
+  <p>Layout animations only fire when the element itself re-renders. If two sibling components affect each other's layout but re-render independently, they get out of sync. Wrap them in <code>LayoutGroup</code> and their layout changes animate together [citation:4][citation:14].</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">layout-group.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { LayoutGroup, motion } <span class="tok-key">from</span> <span class="tok-str">'motion/react'</span>;
+
+&lt;<span class="tok-cmd">LayoutGroup</span>&gt;
+  &lt;motion.div layout /&gt;
+  &lt;motion.div layout /&gt;   <span class="tok-com">// both animate together</span>
+&lt;/<span class="tok-cmd">LayoutGroup</span>&gt;</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-layout-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">A card expands with <code>layout</code>, and the text inside stretches unnaturally. What's the fix?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-layout-1', this, false)"><span class="opt-letter">A</span>Remove the <code>layout</code> prop.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-layout-1', this, true)"><span class="opt-letter">B</span>Add <code>layout="position"</code> to the text children — they'll move without scaling.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-layout-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>layout="position"</code> tells Framer Motion to animate only the element's position, not its size — so text stays at its natural aspect ratio while the container resizes.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · SCROLL ═══ -->
+<section class="section-block" id="scroll">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Scroll effects</h2>
+      <p class="section-subtitle">whileInView · useScroll · useTransform · useSpring</p>
+    </div>
+  </div>
+
+  <p>Two different kinds of scroll animation, two different tools:</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>What you want</th><th>Tool</th></tr></thead>
+      <tbody>
+        <tr><td>"Animate when this element scrolls into view"</td><td><code>whileInView</code> (one line)</td></tr>
+        <tr><td>"Map scroll position to a value" (parallax, progress bar)</td><td><code>useScroll</code> + <code>useTransform</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>whileInView — the simple case</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">in-view.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>&lt;motion.section
+  <span class="tok-cmd">initial</span>={{ opacity: <span class="tok-num">0</span>, y: <span class="tok-num">30</span> }}
+  <span class="tok-cmd">whileInView</span>={{ opacity: <span class="tok-num">1</span>, y: <span class="tok-num">0</span> }}
+  <span class="tok-cmd">viewport</span>={{ once: <span class="tok-key">true</span>, margin: <span class="tok-str">'-100px'</span> }}
+  <span class="tok-cmd">transition</span>={{ duration: <span class="tok-num">0.6</span> }}
+/&gt;</code></pre>
+  </div>
+  <p><code>once: true</code> means it fires the first time and never again — the right choice for landing page sections [citation:3][citation:13]. <code>margin</code> adjusts the trigger point (negative = trigger earlier).</p>
+
+  <h3>useScroll + useTransform — scroll-linked values</h3>
+  <p>For parallax, progress bars, or anything that needs to track scroll continuously, you use <code>useScroll</code> (which returns Motion Values) and <code>useTransform</code> (which maps one range to another).</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">parallax.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { motion, useScroll, useTransform, useSpring } <span class="tok-key">from</span> <span class="tok-str">'motion/react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">ParallaxHero</span>() {
+  <span class="tok-key">const</span> { scrollYProgress } = <span class="tok-cmd">useScroll</span>();
+
+  <span class="tok-com">// smooth out the raw scroll value</span>
+  <span class="tok-key">const</span> smooth = <span class="tok-cmd">useSpring</span>(scrollYProgress);
+
+  <span class="tok-com">// map scroll 0→1 to y 0→-100</span>
+  <span class="tok-key">const</span> y = <span class="tok-cmd">useTransform</span>(smooth, [<span class="tok-num">0</span>, <span class="tok-num">1</span>], [<span class="tok-num">0</span>, -<span class="tok-num">100</span>]);
+
+  <span class="tok-com">// map scroll 0→0.3 to opacity 1→0</span>
+  <span class="tok-key">const</span> opacity = <span class="tok-cmd">useTransform</span>(smooth, [<span class="tok-num">0</span>, <span class="tok-num">0.3</span>], [<span class="tok-num">1</span>, <span class="tok-num">0</span>]);
+
+  <span class="tok-key">return</span> &lt;motion.div style={{ y, opacity }}&gt;Hero&lt;/motion.div&gt;;
+}</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Why Motion Values bypass React</div>
+    <div class="concept-box-text"><p><code>useScroll</code> returns Motion Values, not state. They update on every scroll event <b>without triggering a React re-render</b>. You pass them directly to <code>style</code>, and Framer Motion applies the transform to the DOM node. That's why scroll-linked animations can run at 60–120fps while your component tree stays quiet [citation:12][citation:8].</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-scroll-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">Why does <code>useScroll</code> not cause your component to re-render on every scroll?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-scroll-1', this, true)"><span class="opt-letter">A</span>It returns Motion Values, which update the DOM directly without touching React state.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-scroll-1', this, false)"><span class="opt-letter">B</span>It throttles the scroll event to once per second.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-scroll-1-feedback"></div>
+    <div class="quiz-explain hidden">Motion Values are a parallel system. They track values and drive animations outside React's render cycle. Passing them to <code>style</code> lets Framer Motion mutate the DOM node directly — high-performance scroll effects without render thrash.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · SPRINGS ═══ -->
+<section class="section-block" id="springs">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Springs &amp; transitions</h2>
+      <p class="section-subtitle">physics over duration · stiffness · damping · the feel table</p>
+    </div>
+  </div>
+
+  <p>By default, most Framer Motion animations use <b>springs</b>, not durations. Springs are physics-based: they respond to interruption naturally and feel more alive than a fixed-duration tween.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">spring-config.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>&lt;motion.div
+  <span class="tok-cmd">animate</span>={{ x: <span class="tok-num">100</span> }}
+  <span class="tok-cmd">transition</span>={{
+    <span class="tok-cmd">type</span>: <span class="tok-str">'spring'</span>,
+    <span class="tok-cmd">stiffness</span>: <span class="tok-num">300</span>,   <span class="tok-com">// how hard it pulls toward the target</span>
+    <span class="tok-cmd">damping</span>: <span class="tok-num">25</span>,     <span class="tok-com">// how much it resists overshooting</span>
+  }}
+/&gt;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Feel</th><th>Stiffness</th><th>Damping</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr><td>Snappy</td><td>500</td><td>30</td><td>Buttons, toggles, tabs</td></tr>
+        <tr><td>Smooth</td><td>300</td><td>25</td><td>Cards, panels, modals</td></tr>
+        <tr><td>Gentle</td><td>200</td><td>20</td><td>Page transitions, hero sections</td></tr>
+        <tr><td>Bouncy</td><td>400</td><td>15</td><td>Notifications, playful UI</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>The no-bounce rule.</strong> Damping ratio below 1 causes overshoot (bounce). For a spring that settles without bouncing, set <code>damping ≥ 2 × √stiffness</code>. If you want bounce, use it deliberately — not on every element [citation:13].</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · PERFORMANCE ═══ -->
+<section class="section-block" id="perf">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Performance &amp; bundle size</h2>
+      <p class="section-subtitle">LazyMotion · transform properties · reduced motion</p>
+    </div>
+  </div>
+
+  <p>Framer Motion's full bundle is around 34 KB gzipped. That's fine for most apps, but if you only need fades and simple transforms, you can cut it to under 5 KB with <code>LazyMotion</code>.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">lazy-motion.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { LazyMotion, domAnimation, m } <span class="tok-key">from</span> <span class="tok-str">'motion/react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">App</span>() {
+  <span class="tok-key">return</span> (
+    &lt;<span class="tok-cmd">LazyMotion</span> features={domAnimation}&gt;
+      &lt;<span class="tok-cmd">m</span>.div animate={{ opacity: <span class="tok-num">1</span> }} /&gt;
+    &lt;/<span class="tok-cmd">LazyMotion</span>&gt;
+  );
+}</code></pre>
+  </div>
+  <p><code>m</code> is a lightweight replacement for <code>motion</code> — same API, smaller bundle. <code>domAnimation</code> includes the features most apps need (transforms, gestures, exit animations). Only use the full <code>motion</code> import if you need layout animations or SVG path drawing [citation:3].</p>
+
+  <h3>Respect reduced motion</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">reduced-motion.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { MotionConfig } <span class="tok-key">from</span> <span class="tok-str">'motion/react'</span>;
+
+&lt;<span class="tok-cmd">MotionConfig</span> <span class="tok-cmd">reducedMotion</span>=<span class="tok-str">"user"</span>&gt;
+  &lt;App /&gt;
+&lt;/<span class="tok-cmd">MotionConfig</span>&gt;</code></pre>
+  </div>
+  <p>This disables motion for users who have "reduce motion" enabled in their OS. Not optional — large parallax and movement can cause nausea for people with vestibular disorders [citation:3][citation:6].</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Optimisation</th><th>What it saves</th></tr></thead>
+      <tbody>
+        <tr><td>Animate <code>x</code>/<code>y</code>/<code>scale</code> instead of <code>top</code>/<code>left</code>/<code>width</code></td><td>Layout recalculation every frame</td></tr>
+        <tr><td><code>LazyMotion</code> + <code>domAnimation</code></td><td>~30 KB of bundle</td></tr>
+        <tr><td><code>AnimatePresence</code> with <code>mode="wait"</code> for page transitions</td><td>Double-render of two pages</td></tr>
+        <tr><td><code>layout="position"</code> on text children</td><td>Distortion + unnecessary scale calculation</td></tr>
+        <tr><td><code>MotionConfig reducedMotion="user"</code></td><td>Accessibility + unnecessary animation for some users</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 10 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>AnimatePresence</code> inside a conditional</td><td>Exit animations never run</td><td>Keep it mounted; put the conditional <em>inside</em> it</td></tr>
+        <tr><td>Missing <code>key</code> on AnimatePresence children</td><td>React can't identify which child is exiting</td><td>Every direct child needs a stable <code>key</code></td></tr>
+        <tr><td>Animating <code>width</code>/<code>height</code> directly</td><td>Layout thrash, janky on mobile</td><td>Use <code>layout</code> prop or <code>scale</code></td></tr>
+        <tr><td>Text stretching during layout animation</td><td>Ugly distortion</td><td><code>layout="position"</code> on text children</td></tr>
+        <tr><td>Missing <code>layout="position"</code> on list item text</td><td>Text scales with the row</td><td>Add the prop to every child that shouldn't scale</td></tr>
+        <tr><td>Importing from <code>framer-motion</code> in new code</td><td>Deprecated path; larger bundle</td><td>Import from <code>motion/react</code></td></tr>
+        <tr><td>No <code>reducedMotion</code> config</td><td>Accessibility violation; motion-sensitive users suffer</td><td><code>MotionConfig reducedMotion="user"</code></td></tr>
+        <tr><td>Animating 100+ list items</td><td>Janky, dropped frames</td><td>Virtualize (react-window, TanStack Virtual) before animating</td></tr>
+        <tr><td><code>key={index}</code> on animated lists</td><td>Wrong item animates out on reorder</td><td>Use a stable id</td></tr>
+        <tr><td>Drag + layout on same element</td><td>Transforms fight each other</td><td>Separate the concerns; don't combine</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 11 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is Framer Motion, and what does it give you over CSS?</span></summary><div class="qa-body"><p>A React animation library (now called Motion) that turns animation into declarative props. Over CSS it adds: exit animations on unmount (<code>AnimatePresence</code>), layout animations on re-render (<code>layout</code>), gesture states (<code>whileHover</code>, <code>drag</code>), scroll-linked values without re-render (<code>useScroll</code>), and spring physics that respond to interruption. CSS handles simple transitions fine; Framer Motion handles anything that depends on React state or DOM changes.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>What is <code>AnimatePresence</code> and why is it needed?</span></summary><div class="qa-body"><p>React unmounts components synchronously — the element is gone from the DOM before any exit animation could run. <code>AnimatePresence</code> intercepts removal, keeps the element in the tree until its <code>exit</code> animation finishes, then unmounts it. Without it, exit animations are impossible in React [citation:3][citation:9].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>What are the two most common reasons an exit animation doesn't fire?</span></summary><div class="qa-body"><p>(1) <code>AnimatePresence</code> is inside the conditional and unmounts along with its children — it must stay mounted. (2) A direct child is missing a unique <code>key</code> — without one, React can't track which element is exiting [citation:3][citation:6].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What's the difference between <code>animate</code> and <code>whileHover</code>?</span></summary><div class="qa-body"><p><code>animate</code> is the target state the component should hold. <code>whileHover</code> is a transient state that applies only while the pointer is over the element, and reverts automatically when it leaves. Same idea for <code>whileTap</code>, <code>whileFocus</code>, <code>whileDrag</code>, <code>whileInView</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>What does the <code>layout</code> prop do, and how does it work under the hood?</span></summary><div class="qa-body"><p>It animates an element to its new size and position whenever a React re-render changes its layout — without you providing a from-value. Under the hood it uses FLIP: measure First, update state, measure Last, Invert the difference with a transform, then Play the animation back to zero [citation:3][citation:14].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>Why does text stretch during a layout animation, and how do you fix it?</span></summary><div class="qa-body"><p><code>layout</code> animates using <code>transform: scale()</code>, which stretches everything inside the element. Adding <code>layout="position"</code> to child elements makes them animate only their position, not their scale — so text stays at its natural aspect ratio [citation:9][citation:14].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What is <code>layoutId</code> used for?</span></summary><div class="qa-body"><p>Shared element transitions. Give two elements that are never mounted at the same time the same <code>layoutId</code>, and Framer Motion animates between them as if they're one element. This is how the "card expands into modal" effect works [citation:9][citation:14].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>How do scroll-linked animations work in Framer Motion?</span></summary><div class="qa-body"><p><code>useScroll()</code> returns Motion Values (like <code>scrollYProgress</code>) that update without re-rendering React. <code>useTransform(value, inputRange, outputRange)</code> maps one range to another. You pass the transformed value directly to <code>style</code> — e.g. <code>style={{ y }}</code> — and Framer Motion applies it to the DOM node directly [citation:12][citation:8].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>Should you animate <code>width</code>/<code>height</code> or <code>scale</code>? Why?</span></summary><div class="qa-body"><p><code>scale</code> (and <code>x</code>/<code>y</code>/<code>rotate</code>). These compile to <code>transform</code>, which the GPU can composite without recalculating layout. Animating <code>width</code>/<code>height</code>/<code>top</code>/<code>left</code> forces the browser to run layout on every frame, which is dramatically slower and causes jank on mobile [citation:10][citation:13].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>What's the difference between <code>motion</code> and <code>m</code>?</span></summary><div class="qa-body"><p><code>m</code> is the lightweight version of <code>motion</code>, used with <code>LazyMotion</code>. It has the same API but loads only the animation features you specify (e.g. <code>domAnimation</code>). This cuts the bundle from ~34 KB to under 5 KB. Use it when you don't need layout animations or SVG path drawing [citation:3].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>How do you handle reduced motion?</span></summary><div class="qa-body"><p>Wrap your app in <code><MotionConfig reducedMotion="user"></code>. This automatically disables motion for users who have "reduce motion" enabled in their OS. It's an accessibility requirement, not a nicety — large movement and parallax can trigger nausea for people with vestibular disorders [citation:3][citation:6].</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>When would you NOT use Framer Motion?</span></summary><div class="qa-body"><p>Simple hover/focus transitions where CSS is enough. List add/remove animations where <code>@formkit/auto-animate</code> is 10× smaller. Long timelines with overlapping keyframes or SVG morphing, where GSAP is stronger. 3D scenes (Three.js / React Three Fiber). Framer Motion is for React-driven UI animation — not for every animation problem.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Frontend · Animation</span>
+  <span>Framer Motion · variants · layout · gestures · scroll · springs</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+})();
+</script>
+</body>
+</html>

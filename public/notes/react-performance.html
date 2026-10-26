@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Performance &amp; data patterns in React · Sheryians</title>
+<meta name="description" content="Memoization, throttling &amp; debouncing, lazy loading, pagination, and infinite scroll — implemented raw in React, then rebuilt with TanStack Query.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:18ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+.pill{display:inline-block;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:999px;letter-spacing:.06em;margin:2px}
+.pill-call{background:rgba(200,75,31,.12);color:var(--accent);border:1px solid var(--accent)}
+.pill-skip{background:rgba(26,107,74,.12);color:var(--accent2);border:1px solid var(--accent2)}
+
+.raw-vs-rtk{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0 0}
+.rv-card{border:1px solid var(--rule);border-radius:10px;padding:14px 16px;background:var(--paper)}
+.rv-card h5{font-family:'Fraunces',Georgia,serif;font-size:15px;font-weight:600;margin:0 0 8px}
+.rv-card.raw{border-color:#E0B4A2;background:rgba(200,75,31,.03)}
+.rv-card.raw h5{color:var(--accent)}
+.rv-card.rtk{border-color:#A0C7B4;background:rgba(26,107,74,.03)}
+.rv-card.rtk h5{color:var(--accent2)}
+.rv-card p{font-size:13px;margin:0 0 6px}
+.rv-card ul{margin:0;padding-left:18px}
+.rv-card li{font-size:12.5px;margin-bottom:3px}
+
+/* quiz */
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols,.raw-vs-rtk{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Frontend · React · Performance &amp; Data</div>
+  <h1>Performance &amp; data patterns in <em>React</em></h1>
+  <p class="hero-desc">Memoization, throttle &amp; debounce, lazy loading, pagination, and infinite scroll — implemented raw first (hooks, useEffect, manual state), then rebuilt with TanStack Query so you can see exactly what the library takes care of.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">memo · useMemo · useCallback</span>
+    <span class="hero-tag">throttle &amp; debounce</span>
+    <span class="hero-tag">React.lazy · Suspense</span>
+    <span class="hero-tag">Pagination (raw + TQ)</span>
+    <span class="hero-tag">Infinite scroll (raw + TQ)</span>
+    <span class="hero-tag">IntersectionObserver</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · WHY ═══ -->
+<section class="section-block" id="why">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">The four problems these patterns solve</h2>
+      <p class="section-subtitle">re-render cost · network spam · bundle size · data loading</p>
+    </div>
+  </div>
+
+  <p class="lead">Every React performance problem you'll ever face falls into one of four buckets. Each of these patterns is the standard answer to one bucket.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Bucket</th><th>Symptom</th><th>Pattern</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Re-render cost</b></td>
+          <td>Typing in one input re-renders the whole tree; a parent update re-renders unrelated children; expensive calculations run every render</td>
+          <td><b>Memoization</b> — <code>React.memo</code>, <code>useMemo</code>, <code>useCallback</code></td>
+        </tr>
+        <tr>
+          <td><b>Event spam</b></td>
+          <td>A search fires an API call per keystroke; scroll handlers run 100× per second; resize handlers thrash the layout</td>
+          <td><b>Throttle / debounce</b> — collapse many events into one</td>
+        </tr>
+        <tr>
+          <td><b>Bundle size</b></td>
+          <td>First load is 2 MB of JS; heavy editors or charts delay time-to-interactive</td>
+          <td><b>Lazy loading</b> — <code>React.lazy</code> + <code>Suspense</code>, route-level splits</td>
+        </tr>
+        <tr>
+          <td><b>Data loading</b></td>
+          <td>Fetching all rows at once; a huge list locks up the browser; no way to load more as you scroll</td>
+          <td><b>Pagination / infinite scroll</b> — fetch a page at a time</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The structure of this note</div>
+    <div class="concept-box-text"><p>Each of the four patterns gets its own section. Inside, you'll find: <b>what it is</b>, <b>the raw React implementation</b> (with code you can copy), <b>the same feature rebuilt with TanStack Query</b>, and a <b>head-to-head</b> of what the library saves you. The last section is interview Q&amp;A.</p></div>
+  </div>
+</section>
+
+<!-- ═══ 02 · MEMOIZATION ═══ -->
+<section class="section-block" id="memo">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Memoization</h2>
+      <p class="section-subtitle">React.memo · useMemo · useCallback · what each one actually caches</p>
+    </div>
+  </div>
+
+  <p>Memoization means <b>remembering a previous result</b> so you don't recompute it. In React there are three separate memos, each caching a different thing. Mixing them up is the number-one source of useless optimizations.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Tool</th><th>Caches</th><th>Triggers re-render?</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr><td><code>React.memo</code></td><td>The <b>rendered output</b> of a component</td><td>Skips render if props shallow-equal</td><td>Expensive child that re-renders from parent updates</td></tr>
+        <tr><td><code>useMemo</code></td><td>A computed <b>value</b></td><td>N/A — it's not a component</td><td>Expensive derived data in render</td></tr>
+        <tr><td><code>useCallback</code></td><td>A <b>function reference</b></td><td>N/A — it's not a component</td><td>Stable handler for a memoized child or a deps array</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The problem, before memo</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">before.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">Parent</span>() {
+  <span class="tok-key">const</span> [count, setCount] = <span class="tok-cmd">useState</span>(<span class="tok-num">0</span>);
+  <span class="tok-key">const</span> [query, setQuery] = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+
+  <span class="tok-com">// 💥 New array, new function every render — even when query didn't change</span>
+  <span class="tok-key">const</span> items = [<span class="tok-num">1</span>, <span class="tok-num">2</span>, <span class="tok-num">3</span>].<span class="tok-cmd">map</span>(n =&gt; n * count);
+  <span class="tok-key">const</span> handleSearch = q =&gt; <span class="tok-cmd">setQuery</span>(q);
+
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; <span class="tok-cmd">setCount</span>(c =&gt; c + <span class="tok-num">1</span>)}&gt;{count}&lt;/button&gt;
+      &lt;ExpensiveList items={items} onSearch={handleSearch} /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+  </div>
+
+  <p>Every click of the button re-renders <code>Parent</code>, which recreates <code>items</code> and <code>handleSearch</code>. That means <code>ExpensiveList</code> receives brand-new props and re-renders — even though its actual data didn't change.</p>
+
+  <h3>Fix 1 — React.memo on the child</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">child.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> ExpensiveList = React.<span class="tok-cmd">memo</span>(<span class="tok-key">function</span>({ items, onSearch }) {
+  <span class="tok-com">// runs only when `items` or `onSearch` changes by Object.is comparison</span>
+  <span class="tok-key">return</span> &lt;ul&gt;{items.<span class="tok-cmd">map</span>(i =&gt; &lt;li key={i}&gt;{i}&lt;/li&gt;)}&lt;/ul&gt;;
+});</code></pre>
+  </div>
+  <p><code>React.memo</code> wraps a component so React skips rendering it if its props are shallow-equal to the previous render. The problem: <code>items</code> is a new array and <code>onSearch</code> is a new function every render — so <code>memo</code> alone doesn't help. You need the other two.</p>
+
+  <h3>Fix 2 — useMemo on the array</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">usememo.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> items = <span class="tok-cmd">useMemo</span>(
+  () =&gt; [<span class="tok-num">1</span>, <span class="tok-num">2</span>, <span class="tok-num">3</span>].<span class="tok-cmd">map</span>(n =&gt; n * count),
+  [count]   <span class="tok-com">// only recompute when count changes</span>
+);</code></pre>
+  </div>
+  <p>Now <code>items</code> keeps the same reference across renders — unless <code>count</code> changes. <code>React.memo</code>'s <code>Object.is</code> comparison on <code>items</code> now succeeds, and the child is skipped when only <code>query</code> changed.</p>
+
+  <h3>Fix 3 — useCallback on the handler</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">usecallback.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> handleSearch = <span class="tok-cmd">useCallback</span>((q) =&gt; {
+  <span class="tok-cmd">setQuery</span>(q);
+}, []);   <span class="tok-com">// stable — same reference forever (setQuery is stable)</span></code></pre>
+  </div>
+  <p>Without this, <code>onSearch</code> is a new function every render, and <code>React.memo</code> on the child fails its comparison even when nothing the child cares about changed.</p>
+
+  <h3>The chain in one picture</h3>
+  <div class="stepper" data-stepper="memo-chain" data-steps="5">
+    <div class="stepper-head"><span class="stepper-title">When does the memoized child actually skip rendering?</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">parent event</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">action</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">click +1</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">action</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">type into search</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">action</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">external state change (theme toggle)</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">child result</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">items changed</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif"><span class="pill pill-call">re-renders</span></div></div>
+            <div class="stat" data-show="2"><div class="stat-label">items unchanged, handler stable</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif"><span class="pill pill-skip">skipped</span></div></div>
+            <div class="stat" data-show="3"><div class="stat-label">parent re-rendered, nothing used changed</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif"><span class="pill pill-skip">skipped</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>Click the +1 button. <code>count</code> changes → <code>useMemo</code>'s deps change → <code>items</code> gets a new reference → <code>React.memo</code>'s <code>Object.is(items)</code> fails → the child renders. Correct and expected.</li>
+      <li>Type into the search box. <code>query</code> changes, <code>count</code> doesn't. <code>items</code> keeps the same reference (thanks to <code>useMemo</code>). <code>handleSearch</code> also keeps its reference (thanks to <code>useCallback</code> with <code>[]</code>). Both props pass <code>Object.is</code> → <code>React.memo</code> skips the child.</li>
+      <li>Some unrelated state changes higher up the tree (say, theme). <code>Parent</code> re-renders, but <code>items</code> and <code>handleSearch</code> are still the same references → child skipped again. In a real app, this is what keeps unrelated parts of the tree quiet.</li>
+      <li>Without <code>useMemo</code>, every parent render creates a new <code>items</code> array → child renders every time. Without <code>useCallback</code>, every parent render creates a new <code>handleSearch</code> → child renders every time.</li>
+      <li>All three are needed together. That's why "just add memo" almost never helps on its own. If you're going to memoize the child, memoize the props it receives too — or skip memoization entirely and fix the state shape.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 5</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Memoization is not free.</strong> Every <code>useMemo</code> and <code>useCallback</code> adds a comparison and a cache slot. If the calculation is cheap (a map over 3 items, an <code>arr.filter</code> on 10 elements), memoizing it is slower than recomputing. Profile first. Memoize the genuinely expensive things: large arrays, expensive formatting, heavy derived data, props passed to <code>React.memo</code> children.</div>
+  </div>
+
+  <h3>The most common memo mistakes</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Mistake</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>useMemo(() =&gt; obj, [])</code> for an object with a function inside</td><td>The function captures stale state from first render</td><td>Add the state to deps, or use a ref for the freshest value</td></tr>
+        <tr><td><code>useCallback(fn, [state])</code> where <code>state</code> changes often</td><td>The callback reference changes on every state change — same as no memoization</td><td>Use functional updates (<code>setX(x =&gt; ...)</code>) so the callback doesn't need to close over the value</td></tr>
+        <tr><td>Memoizing on the parent's side, ignoring the child</td><td>Parent props are stable, but the child itself re-renders because its parent renders</td><td>Wrap the child in <code>React.memo</code></td></tr>
+        <tr><td>Using <code>React.memo</code> everywhere</td><td>Every component has a prop comparison cost — many components are cheaper to just re-render</td><td>Only memoize components confirmed as re-render hot spots by DevTools Profiler</td></tr>
+        <tr><td>Passing an inline arrow to a memoized child</td><td><code>&lt;Child onClick={() =&gt; doSomething()} /&gt;</code> creates a new prop every render → memo fails</td><td>Pass a stable callback, or accept that memo won't help here</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-memo-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">A child is wrapped in <code>React.memo</code> but keeps re-rendering on every parent render. What's the most likely cause?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-memo-1', this, true)"><span class="opt-letter">A</span>One of its props is a new object, array, or function created inline every render.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-memo-1', this, false)"><span class="opt-letter">B</span><code>React.memo</code> is broken in that version.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-memo-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>React.memo</code> compares props with <code>Object.is</code>. An inline object <code>{`{ a: 1 }`}</code> or inline arrow <code>onClick={() =&gt; ...}</code> creates a fresh reference every render — always "different". Memoize the prop with <code>useMemo</code>/<code>useCallback</code>, or lift the value out of the render.</div>
+  </div>
+
+  <div class="quiz-box" id="q-memo-2">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">When is <code>useMemo</code> actually worth it?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-memo-2', this, false)"><span class="opt-letter">A</span>Always — memoize every derived value.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-memo-2', this, true)"><span class="opt-letter">B</span>When the computation is genuinely expensive (large array operations, sorting, filtering) or when the result must have a stable reference for another memoized component.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-memo-2-feedback"></div>
+    <div class="quiz-explain hidden">For cheap computations, the comparison overhead outweighs the savings. Profile, then memoize the hot spots. The stable-reference case is the "passed to <code>React.memo</code> child" scenario — memoizing is required for the child's memo to work.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · THROTTLE / DEBOUNCE ═══ -->
+<section class="section-block" id="throttle">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Throttle &amp; debounce</h2>
+      <p class="section-subtitle">collapse events · search-as-you-type · scroll &amp; resize handlers</p>
+    </div>
+  </div>
+
+  <p>Both reduce the number of times a function runs. They solve the same problem — events fire more often than the work should — with opposite timing.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>Debounce</th><th>Throttle</th></tr></thead>
+      <tbody>
+        <tr><td>Guarantee</td><td>Runs only after <code>wait</code> ms of <b>silence</b></td><td>Runs at most once every <code>wait</code> ms</td></tr>
+        <tr><td>If the user keeps typing</td><td>Never runs until they stop</td><td>Runs at regular intervals while typing</td></tr>
+        <tr><td>Great for</td><td>Search input, form validation, autosave</td><td>Scroll handlers, resize handlers, mouse-move, rate-limited API calls</td></tr>
+        <tr><td>Feels like</td><td>"Wait until you're done"</td><td>"Update on a schedule"</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Raw implementation — debounce</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">debounce.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">debounce</span>(fn, wait = <span class="tok-num">300</span>) {
+  <span class="tok-key">let</span> timer;
+  <span class="tok-key">return</span> <span class="tok-key">function</span> (...args) {
+    <span class="tok-cmd">clearTimeout</span>(timer);
+    timer = <span class="tok-cmd">setTimeout</span>(() =&gt; <span class="tok-cmd">fn</span>.<span class="tok-cmd">apply</span>(<span class="tok-key">this</span>, args), wait);
+  };
+}</code></pre>
+  </div>
+
+  <h3>Raw implementation — throttle</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">throttle.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">throttle</span>(fn, wait = <span class="tok-num">300</span>) {
+  <span class="tok-key">let</span> last = <span class="tok-num">0</span>;
+  <span class="tok-key">return</span> <span class="tok-key">function</span> (...args) {
+    <span class="tok-key">const</span> now = Date.<span class="tok-cmd">now</span>();
+    <span class="tok-key">if</span> (now - last &gt;= wait) {
+      last = now;
+      <span class="tok-cmd">fn</span>.<span class="tok-cmd">apply</span>(<span class="tok-key">this</span>, args);
+    }
+  };
+}</code></pre>
+  </div>
+
+  <h3>Raw debounce as a hook</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useDebouncedValue.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useState, useEffect } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useDebouncedValue</span>(value, wait = <span class="tok-num">300</span>) {
+  <span class="tok-key">const</span> [debounced, setDebounced] = <span class="tok-cmd">useState</span>(value);
+
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    <span class="tok-key">const</span> t = <span class="tok-cmd">setTimeout</span>(() =&gt; <span class="tok-cmd">setDebounced</span>(value), wait);
+    <span class="tok-key">return</span> () =&gt; <span class="tok-cmd">clearTimeout</span>(t);   <span class="tok-com">// cancel on next change or unmount</span>
+  }, [value, wait]);
+
+  <span class="tok-key">return</span> debounced;
+}</code></pre>
+  </div>
+
+  <h3>Raw throttle as a hook</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useThrottledValue.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useState, useEffect, useRef } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useThrottledValue</span>(value, wait = <span class="tok-num">300</span>) {
+  <span class="tok-key">const</span> [throttled, setThrottled] = <span class="tok-cmd">useState</span>(value);
+  <span class="tok-key">const</span> last = <span class="tok-cmd">useRef</span>(<span class="tok-num">0</span>);
+
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    <span class="tok-key">const</span> now = Date.<span class="tok-cmd">now</span>();
+    <span class="tok-key">if</span> (now - last.current &gt;= wait) {
+      last.current = now;
+      <span class="tok-cmd">setThrottled</span>(value);
+    }
+  }, [value, wait]);
+
+  <span class="tok-key">return</span> throttled;
+}</code></pre>
+  </div>
+
+  <h3>Using debounce for a search input</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">SearchBox.jsx (raw)</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">SearchBox</span>() {
+  <span class="tok-key">const</span> [query, setQuery] = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+  <span class="tok-key">const</span> [results, setResults] = <span class="tok-cmd">useState</span>([]);
+  <span class="tok-key">const</span> [loading, setLoading] = <span class="tok-cmd">useState</span>(<span class="tok-key">false</span>);
+  <span class="tok-key">const</span> debouncedQuery = <span class="tok-cmd">useDebouncedValue</span>(query, <span class="tok-num">400</span>);
+
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    <span class="tok-key">if</span> (!debouncedQuery) { <span class="tok-cmd">setResults</span>([]); <span class="tok-key">return</span>; }
+
+    <span class="tok-key">const</span> controller = <span class="tok-key">new</span> <span class="tok-cmd">AbortController</span>();
+    <span class="tok-cmd">setLoading</span>(<span class="tok-key">true</span>);
+
+    <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/search?q=${encodeURIComponent(debouncedQuery)}`</span>, {
+      <span class="tok-cmd">signal</span>: controller.signal,
+    })
+      .<span class="tok-cmd">then</span>(r =&gt; r.<span class="tok-cmd">json</span>())
+      .<span class="tok-cmd">then</span>(setResults)
+      .<span class="tok-cmd">catch</span>(err =&gt; { <span class="tok-key">if</span> (err.name !== <span class="tok-str">'AbortError'</span>) console.<span class="tok-cmd">error</span>(err); })
+      .<span class="tok-cmd">finally</span>(() =&gt; <span class="tok-cmd">setLoading</span>(<span class="tok-key">false</span>));
+
+    <span class="tok-key">return</span> () =&gt; controller.<span class="tok-cmd">abort</span>();   <span class="tok-com">// cancel on next keystroke or unmount</span>
+  }, [debouncedQuery]);
+
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;input value={query} onChange={e =&gt; <span class="tok-cmd">setQuery</span>(e.target.value)} /&gt;
+      {loading &amp;&amp; &lt;p&gt;Searching…&lt;/p&gt;}
+      &lt;ul&gt;{results.<span class="tok-cmd">map</span>(r =&gt; &lt;li key={r.id}&gt;{r.name}&lt;/li&gt;)}&lt;/ul&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Debounce alone is not enough for search.</strong> Debounce reduces the number of requests, but does not prevent two requests from being in flight — if the network is slow, an old response can land after a new one and overwrite fresher data with stale. Always pair debounce with <code>AbortController</code> (cancel the previous fetch) or an "ignore flag" pattern. This is a race condition, and it's the most common bug in a search box.</div>
+  </div>
+
+  <h3>Same search, with TanStack Query</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">SearchBox.jsx (TQ)</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useQuery } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+<span class="tok-key">import</span> { useState } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">SearchBox</span>() {
+  <span class="tok-key">const</span> [query, setQuery] = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+  <span class="tok-key">const</span> debounced = <span class="tok-cmd">useDebouncedValue</span>(query, <span class="tok-num">400</span>);
+
+  <span class="tok-key">const</span> { data = [], isFetching } = <span class="tok-cmd">useQuery</span>({
+    <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'search'</span>, debounced],
+    <span class="tok-cmd">queryFn</span>: ({ signal }) =&gt;
+      <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/search?q=${encodeURIComponent(debounced)}`</span>, { signal })
+        .<span class="tok-cmd">then</span>(r =&gt; r.<span class="tok-cmd">json</span>()),
+    <span class="tok-cmd">enabled</span>: debounced.length &gt; <span class="tok-num">0</span>,
+  });
+
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;input value={query} onChange={e =&gt; <span class="tok-cmd">setQuery</span>(e.target.value)} /&gt;
+      {isFetching &amp;&amp; &lt;p&gt;Searching…&lt;/p&gt;}
+      &lt;ul&gt;{data.<span class="tok-cmd">map</span>(r =&gt; &lt;li key={r.id}&gt;{r.name}&lt;/li&gt;)}&lt;/ul&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+  </div>
+  <p>Everything else is handled for you: the <code>signal</code> argument cancels the previous request automatically when the query key changes; the results for each debounced query are cached, so re-searching a value is instant; and switching back to a previous search shows the cached results instantly.</p>
+
+  <div class="raw-vs-rtk">
+    <div class="rv-card raw">
+      <h5>Raw React</h5>
+      <ul>
+        <li>Write <code>useDebouncedValue</code></li>
+        <li>Manage loading / error / data state</li>
+        <li>AbortController wiring</li>
+        <li>No caching — re-search refetches</li>
+        <li>Every component re-implements this</li>
+      </ul>
+    </div>
+    <div class="rv-card rtk">
+      <h5>TanStack Query</h5>
+      <ul>
+        <li>You only write the <code>useDebouncedValue</code> hook</li>
+        <li><code>isFetching</code>, <code>isError</code>, <code>data</code> built in</li>
+        <li><code>signal</code> auto-cancels on queryKey change</li>
+        <li>Caches per debounced value</li>
+        <li>Same pattern across every component</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="q-thr-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">You have a scroll handler that updates a "back to top" button's visibility. Debounce or throttle?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-thr-1', this, true)"><span class="opt-letter">A</span>Throttle — the button should appear promptly and stay updated while scrolling, but not on every pixel.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-thr-1', this, false)"><span class="opt-letter">B</span>Debounce — wait until they stop scrolling.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-thr-1-feedback"></div>
+    <div class="quiz-explain hidden">Debouncing the scroll handler means the button only appears after the user stops scrolling — for a UI affordance like "back to top", that's a worse experience. Throttle gives you one update per ~100ms while scrolling, which is smooth and cheap.</div>
+  </div>
+
+  <div class="quiz-box" id="q-thr-2">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">Debounce is applied to a search box. What additional problem still exists?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-thr-2', this, true)"><span class="opt-letter">A</span>Race conditions — a slow earlier request can resolve after a faster later one, overwriting fresher results with stale.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-thr-2', this, false)"><span class="opt-letter">B</span>Memory leaks.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-thr-2-feedback"></div>
+    <div class="quiz-explain hidden">Debounce reduces frequency but doesn't order responses. Fix: <code>AbortController</code> (cancel the previous request), an ignore flag (check <code>ignore</code> before setting state), or a request id — TanStack Query's <code>signal</code> handles it for you.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · LAZY LOADING ═══ -->
+<section class="section-block" id="lazy">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Lazy loading</h2>
+      <p class="section-subtitle">React.lazy · Suspense · route-level splits · component-level splits</p>
+    </div>
+  </div>
+
+  <p><b>Lazy loading</b> means delaying loading a piece of code until it's actually needed. On a big app, the initial bundle is the biggest bottleneck to time-to-interactive. Lazy loading splits the bundle so the first screen only downloads what it needs.</p>
+
+  <h3>Component-level lazy loading</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Modal.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { lazy, Suspense, useState } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">const</span> HeavyEditor = <span class="tok-cmd">lazy</span>(() =&gt; <span class="tok-key">import</span>(<span class="tok-str">'./HeavyEditor'</span>));
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">Page</span>() {
+  <span class="tok-key">const</span> [show, setShow] = <span class="tok-cmd">useState</span>(<span class="tok-key">false</span>);
+
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; <span class="tok-cmd">setShow</span>(<span class="tok-key">true</span>)}&gt;Edit&lt;/button&gt;
+      {show &amp;&amp; (
+        &lt;Suspense fallback={&lt;p&gt;Loading editor…&lt;/p&gt;}&gt;
+          &lt;HeavyEditor /&gt;
+        &lt;/Suspense&gt;
+      )}
+    &lt;/&gt;
+  );
+}</code></pre>
+  </div>
+  <p>The import of <code>HeavyEditor</code> doesn't happen until the component first renders. Before then, its JS is a separate chunk, unloaded. The user pays for it only when they click "Edit".</p>
+
+  <h3>Route-level split — the highest-impact version</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">routes.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { lazy, Suspense } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> { BrowserRouter, Routes, Route } <span class="tok-key">from</span> <span class="tok-str">'react-router-dom'</span>;
+
+<span class="tok-key">const</span> Home     = <span class="tok-cmd">lazy</span>(() =&gt; <span class="tok-key">import</span>(<span class="tok-str">'./pages/Home'</span>));
+<span class="tok-key">const</span> Products = <span class="tok-cmd">lazy</span>(() =&gt; <span class="tok-key">import</span>(<span class="tok-str">'./pages/Products'</span>));
+<span class="tok-key">const</span> Checkout = <span class="tok-cmd">lazy</span>(() =&gt; <span class="tok-key">import</span>(<span class="tok-str">'./pages/Checkout'</span>));
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">App</span>() {
+  <span class="tok-key">return</span> (
+    &lt;BrowserRouter&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading…&lt;/p&gt;}&gt;
+        &lt;Routes&gt;
+          &lt;Route path=<span class="tok-str">"/"</span>         element={&lt;Home /&gt;} /&gt;
+          &lt;Route path=<span class="tok-str">"/products"</span> element={&lt;Products /&gt;} /&gt;
+          &lt;Route path=<span class="tok-str">"/checkout"</span> element={&lt;Checkout /&gt;} /&gt;
+        &lt;/Routes&gt;
+      &lt;/Suspense&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">What lazy loading actually does</div>
+    <div class="concept-box-text"><p><code>React.lazy(fn)</code> tells React "when this component first needs to render, call <code>fn()</code> which returns a promise resolving to the module". React suspends rendering until the promise resolves, showing the nearest <code>&lt;Suspense&gt;</code> fallback. Bundlers (Vite, webpack) notice the dynamic <code>import()</code> and split the module into a separate chunk, loaded on demand.</p></div>
+  </div>
+
+  <h3>The rules</h3>
+  <ul>
+    <li><b>Wrap the lazy component in a <code>&lt;Suspense&gt;</code></b> with a fallback, or React throws. The nearest <code>Suspense</code> above the lazy component is the one that shows the fallback.</li>
+    <li><b>Split at boundaries users perceive</b> — routes, modals, tabs. Splitting one button's icon is over-engineering.</li>
+    <li><b>Preload on hover or intent.</b> If you know the user will go to <code>/checkout</code> soon, call <code>import('./pages/Checkout')</code> on hover of the "Checkout" button. The chunk starts downloading early, so <code>React.lazy</code> gets an already-loaded module when the route renders.</li>
+    <li><b>Don't lazy load the first screen.</b> Every <code>Suspense</code> boundary adds a flash. If a component is visible on initial load, keep it in the main bundle.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">preload-on-hover</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Start the download as soon as the user shows intent</span>
+<span class="tok-key">const</span> preloadCheckout = () =&gt; <span class="tok-key">import</span>(<span class="tok-str">'./pages/Checkout'</span>);
+
+&lt;Link to=<span class="tok-str">"/checkout"</span> onMouseEnter={preloadCheckout} onFocus={preloadCheckout}&gt;
+  Checkout
+&lt;/Link&gt;</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Don't lazy-load inside a synchronous component tree without <code>Suspense</code>.</strong> React throws "A component suspended while responding to synchronous input" if you don't have a <code>Suspense</code> ancestor. Every lazy component needs a boundary somewhere above it. On routes, put one at the router level — one fallback for the whole page is fine.</div>
+  </div>
+
+  <div class="quiz-box" id="q-lazy-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">What does <code>React.lazy(() =&gt; import('./X'))</code> return?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-lazy-1', this, false)"><span class="opt-letter">A</span>A promise that resolves to the module's default export — but as a component, not a plain value.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-lazy-1', this, true)"><span class="opt-letter">B</span>A special React component. When it first renders, it starts the import and suspends until the module arrives.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-lazy-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>React.lazy</code> returns a <b>component</b>, not a promise. You render it like any component (<code>&lt;X /&gt;</code>) and React handles the loading internally. The argument is a function that returns a promise of a module with a <code>default</code> export.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · PAGINATION ═══ -->
+<section class="section-block" id="pagination">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Pagination</h2>
+      <p class="section-subtitle">raw hooks · page + total · keep-previous-page UX · then TanStack Query</p>
+    </div>
+  </div>
+
+  <p>Pagination fetches one page of data at a time. Two things it needs to be good:</p>
+  <ul>
+    <li><b>Page boundary UI</b> — page numbers, prev/next buttons, disable on ends.</li>
+    <li><b>Smooth transition</b> — the previous page's data should stay visible while the next one loads, instead of flashing empty.</li>
+  </ul>
+
+  <h3>Raw implementation</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">usePaginatedUsers.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useState, useEffect } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">usePaginatedUsers</span>(page, limit = <span class="tok-num">10</span>) {
+  <span class="tok-key">const</span> [data, setData]       = <span class="tok-cmd">useState</span>({ users: [], total: <span class="tok-num">0</span> });
+  <span class="tok-key">const</span> [loading, setLoading] = <span class="tok-cmd">useState</span>(<span class="tok-key">true</span>);
+  <span class="tok-key">const</span> [error, setError]     = <span class="tok-cmd">useState</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    <span class="tok-key">const</span> controller = <span class="tok-key">new</span> <span class="tok-cmd">AbortController</span>();
+    <span class="tok-cmd">setLoading</span>(<span class="tok-key">true</span>);
+    <span class="tok-cmd">setError</span>(<span class="tok-key">null</span>);
+
+    <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/users?page=${page}&amp;limit=${limit}`</span>, { <span class="tok-cmd">signal</span>: controller.signal })
+      .<span class="tok-cmd">then</span>(r =&gt; {
+        <span class="tok-key">if</span> (!r.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed'</span>);
+        <span class="tok-key">return</span> r.<span class="tok-cmd">json</span>();
+      })
+      .<span class="tok-cmd">then</span>(setData)
+      .<span class="tok-cmd">catch</span>(err =&gt; { <span class="tok-key">if</span> (err.name !== <span class="tok-str">'AbortError'</span>) <span class="tok-cmd">setError</span>(err); })
+      .<span class="tok-cmd">finally</span>(() =&gt; <span class="tok-cmd">setLoading</span>(<span class="tok-key">false</span>));
+
+    <span class="tok-key">return</span> () =&gt; controller.<span class="tok-cmd">abort</span>();
+  }, [page, limit]);
+
+  <span class="tok-key">return</span> { ...data, loading, error };
+}</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">UsersPage.jsx (raw)</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">UsersPage</span>() {
+  <span class="tok-key">const</span> [page, setPage] = <span class="tok-cmd">useState</span>(<span class="tok-num">1</span>);
+  <span class="tok-key">const</span> { users, total, loading, error } = <span class="tok-cmd">usePaginatedUsers</span>(page, <span class="tok-num">10</span>);
+
+  <span class="tok-key">if</span> (error) <span class="tok-key">return</span> &lt;p&gt;Error: {error.message}&lt;/p&gt;;
+  <span class="tok-key">if</span> (loading &amp;&amp; !users.length) <span class="tok-key">return</span> &lt;p&gt;Loading…&lt;/p&gt;;
+
+  <span class="tok-key">const</span> totalPages = Math.<span class="tok-cmd">ceil</span>(total / <span class="tok-num">10</span>);
+
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;ul style={{ opacity: loading ? <span class="tok-num">0.5</span> : <span class="tok-num">1</span> }}&gt;
+        {users.<span class="tok-cmd">map</span>(u =&gt; &lt;li key={u.id}&gt;{u.name}&lt;/li&gt;)}
+      &lt;/ul&gt;
+
+      &lt;button disabled={page === <span class="tok-num">1</span>} onClick={() =&gt; <span class="tok-cmd">setPage</span>(p =&gt; p - <span class="tok-num">1</span>)}&gt;Prev&lt;/button&gt;
+      &lt;span&gt;Page {page} of {totalPages}&lt;/span&gt;
+      &lt;button disabled={page &gt;= totalPages} onClick={() =&gt; <span class="tok-cmd">setPage</span>(p =&gt; p + <span class="tok-num">1</span>)}&gt;Next&lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+  </div>
+
+  <p>Notice <code>loading &amp;&amp; !users.length</code> — the full spinner only shows on the very first load. On page changes, the previous users stay visible with reduced opacity while the next page loads. Without that, the list flashes empty on every page change, and the user sees a jarring spinner each time.</p>
+
+  <h3>Same pagination, with TanStack Query</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">UsersPage.jsx (TQ)</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useQuery, keepPreviousData } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+<span class="tok-key">import</span> { useState } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">UsersPage</span>() {
+  <span class="tok-key">const</span> [page, setPage] = <span class="tok-cmd">useState</span>(<span class="tok-num">1</span>);
+
+  <span class="tok-key">const</span> { data, isLoading, isError, isFetching } = <span class="tok-cmd">useQuery</span>({
+    <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'users'</span>, { page }],
+    <span class="tok-cmd">queryFn</span>: ({ signal }) =&gt;
+      <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/users?page=${page}&amp;limit=10`</span>, { signal })
+        .<span class="tok-cmd">then</span>(r =&gt; r.<span class="tok-cmd">json</span>()),
+    <span class="tok-cmd">placeholderData</span>: keepPreviousData,  <span class="tok-com">// show previous page while next loads</span>
+  });
+
+  <span class="tok-key">if</span> (isLoading) <span class="tok-key">return</span> &lt;p&gt;Loading…&lt;/p&gt;;
+  <span class="tok-key">if</span> (isError) <span class="tok-key">return</span> &lt;p&gt;Something went wrong.&lt;/p&gt;;
+
+  <span class="tok-key">const</span> totalPages = Math.<span class="tok-cmd">ceil</span>(data.total / <span class="tok-num">10</span>);
+
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;ul style={{ opacity: isFetching ? <span class="tok-num">0.5</span> : <span class="tok-num">1</span> }}&gt;
+        {data.users.<span class="tok-cmd">map</span>(u =&gt; &lt;li key={u.id}&gt;{u.name}&lt;/li&gt;)}
+      &lt;/ul&gt;
+
+      &lt;button disabled={page === <span class="tok-num">1</span>} onClick={() =&gt; <span class="tok-cmd">setPage</span>(p =&gt; p - <span class="tok-num">1</span>)}&gt;Prev&lt;/button&gt;
+      &lt;span&gt;Page {page} of {totalPages}&lt;/span&gt;
+      &lt;button disabled={page &gt;= totalPages} onClick={() =&gt; <span class="tok-cmd">setPage</span>(p =&gt; p + <span class="tok-num">1</span>)}&gt;Next&lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+  </div>
+
+  <p>Same UI. What you don't have to write:</p>
+  <ul>
+    <li><code>useEffect</code>, <code>AbortController</code>, and manual state — TanStack Query handles all three.</li>
+    <li><code>isLoading</code> / <code>isFetching</code> / <code>isError</code> — free.</li>
+    <li><b>Cache</b> — going back to page 2 is instant, no request.</li>
+    <li><b><code>keepPreviousData</code></b> — the smooth "no flashing" UX with one option.</li>
+    <li><b>Automatic cancellation</b> — via the <code>signal</code> argument when the query key changes.</li>
+  </ul>
+
+  <div class="raw-vs-rtk">
+    <div class="rv-card raw">
+      <h5>Raw React</h5>
+      <ul>
+        <li>Manual loading / error / data state</li>
+        <li>Fetch inside <code>useEffect</code></li>
+        <li>Manual abort on unmount / dep change</li>
+        <li>No cache — same page refetches</li>
+        <li>Flicker unless you add the <code>loading &amp;&amp; !data</code> trick</li>
+      </ul>
+    </div>
+    <div class="rv-card rtk">
+      <h5>TanStack Query</h5>
+      <ul>
+        <li><code>isLoading</code>, <code>isError</code>, <code>data</code> from the hook</li>
+        <li>Just return a fetch — no effect</li>
+        <li><code>signal</code> handles cancellation</li>
+        <li>Caches every <code>[page]</code> — page-back is free</li>
+        <li><code>placeholderData: keepPreviousData</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="q-pag-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">Why is <code>placeholderData: keepPreviousData</code> important for a paginated table?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-pag-1', this, true)"><span class="opt-letter">A</span>It keeps the previous page visible while the new page loads — no flash of empty table, no jarring spinner.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-pag-1', this, false)"><span class="opt-letter">B</span>It caches all pages forever.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-pag-1-feedback"></div>
+    <div class="quiz-explain hidden">Without it, changing page flips the query state to "loading", and your component returns the spinner — wiping the table. With <code>keepPreviousData</code>, <code>data</code> is still the previous page, so the table stays rendered until the new data arrives. Same effect as <code>loading &amp;&amp; !data.length</code> in the raw version, but one line.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · INFINITE SCROLL ═══ -->
+<section class="section-block" id="infinite">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Infinite scroll</h2>
+      <p class="section-subtitle">raw implementation with IntersectionObserver · then useInfiniteQuery</p>
+    </div>
+  </div>
+
+  <p>Infinite scroll loads the next page automatically when the user scrolls near the bottom. The tricky parts are: (1) knowing when the user is near the bottom, and (2) appending new pages rather than replacing the current list.</p>
+
+  <h3>Detecting "near the bottom" — IntersectionObserver</h3>
+  <p>A sentinel element at the end of the list. When it enters the viewport, load the next page. This is dramatically cheaper than a scroll listener because it doesn't fire on every pixel.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useInfiniteScroll.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useEffect, useRef } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useInfiniteScroll</span>(callback, enabled = <span class="tok-key">true</span>) {
+  <span class="tok-key">const</span> sentinelRef = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    <span class="tok-key">if</span> (!enabled || !sentinelRef.current) <span class="tok-key">return</span>;
+
+    <span class="tok-key">const</span> observer = <span class="tok-key">new</span> <span class="tok-cmd">IntersectionObserver</span>(
+      entries =&gt; {
+        <span class="tok-key">if</span> (entries[<span class="tok-num">0</span>].isIntersecting) <span class="tok-cmd">callback</span>();
+      },
+      { rootMargin: <span class="tok-str">'200px'</span> }   <span class="tok-com">// start loading 200px before visible</span>
+    );
+
+    observer.<span class="tok-cmd">observe</span>(sentinelRef.current);
+    <span class="tok-key">return</span> () =&gt; observer.<span class="tok-cmd">disconnect</span>();
+  }, [enabled, callback]);
+
+  <span class="tok-key">return</span> sentinelRef;
+}</code></pre>
+  </div>
+
+  <h3>The full raw implementation</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">PostsFeed.jsx (raw)</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useState, useEffect, useCallback } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> { useInfiniteScroll } <span class="tok-key">from</span> <span class="tok-str">'./useInfiniteScroll'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">PostsFeed</span>() {
+  <span class="tok-key">const</span> [pages, setPages]         = <span class="tok-cmd">useState</span>([]);   <span class="tok-com">// array of pages</span>
+  <span class="tok-key">const</span> [nextPage, setNextPage]   = <span class="tok-cmd">useState</span>(<span class="tok-num">1</span>);
+  <span class="tok-key">const</span> [hasMore, setHasMore]     = <span class="tok-cmd">useState</span>(<span class="tok-key">true</span>);
+  <span class="tok-key">const</span> [loading, setLoading]     = <span class="tok-cmd">useState</span>(<span class="tok-key">false</span>);
+  <span class="tok-key">const</span> [error, setError]         = <span class="tok-cmd">useState</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-key">const</span> loadMore = <span class="tok-cmd">useCallback</span>(<span class="tok-key">async</span> () =&gt; {
+    <span class="tok-key">if</span> (loading || !hasMore) <span class="tok-key">return</span>;   <span class="tok-com">// guard double calls</span>
+    <span class="tok-cmd">setLoading</span>(<span class="tok-key">true</span>);
+    <span class="tok-key">try</span> {
+      <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/posts?page=${nextPage}&amp;limit=20`</span>);
+      <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed'</span>);
+      <span class="tok-key">const</span> data = <span class="tok-key">await</span> res.<span class="tok-cmd">json</span>();
+
+      <span class="tok-cmd">setPages</span>(prev =&gt; [...prev, data.posts]);   <span class="tok-com">// append the new page</span>
+      <span class="tok-cmd">setNextPage</span>(p =&gt; p + <span class="tok-num">1</span>);
+      <span class="tok-cmd">setHasMore</span>(data.hasMore);
+    } <span class="tok-key">catch</span> (err) {
+      <span class="tok-cmd">setError</span>(err);
+    } <span class="tok-key">finally</span> {
+      <span class="tok-cmd">setLoading</span>(<span class="tok-key">false</span>);
+    }
+  }, [loading, hasMore, nextPage]);
+
+  <span class="tok-com">// load first page on mount</span>
+  <span class="tok-cmd">useEffect</span>(() =&gt; { <span class="tok-cmd">loadMore</span>(); }, []);   <span class="tok-com">// eslint-disable-line</span>
+
+  <span class="tok-key">const</span> sentinelRef = <span class="tok-cmd">useInfiniteScroll</span>(loadMore, hasMore &amp;&amp; !loading);
+
+  <span class="tok-key">const</span> allPosts = pages.<span class="tok-cmd">flat</span>();
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;ul&gt;
+        {allPosts.<span class="tok-cmd">map</span>(p =&gt; &lt;li key={p.id}&gt;{p.title}&lt;/li&gt;)}
+      &lt;/ul&gt;
+
+      <span class="tok-com">{/* Sentinel — the observer watches this */}</span>
+      &lt;div ref={sentinelRef} /&gt;
+
+      {loading &amp;&amp; &lt;p&gt;Loading more…&lt;/p&gt;}
+      {error   &amp;&amp; &lt;p&gt;Error: {error.message}&lt;/p&gt;}
+      {!hasMore &amp;&amp; &lt;p&gt;You've reached the end.&lt;/p&gt;}
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>The guard is not optional.</strong> Without <code>if (loading || !hasMore) return</code>, the IntersectionObserver can fire multiple times before the first request resolves — the sentinel is still in view, and every observer callback triggers a new fetch. You end up with duplicated pages and duplicate React keys. The guard is what makes infinite scroll reliable.</div>
+  </div>
+
+  <h3>Same feed, with useInfiniteQuery</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">PostsFeed.jsx (TQ)</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useInfiniteQuery } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+<span class="tok-key">import</span> { useEffect, useRef } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">PostsFeed</span>() {
+  <span class="tok-key">const</span> {
+    data, fetchNextPage, hasNextPage, isFetchingNextPage, isError,
+  } = <span class="tok-cmd">useInfiniteQuery</span>({
+    <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'posts'</span>],
+    <span class="tok-cmd">queryFn</span>: <span class="tok-key">async</span> ({ pageParam = <span class="tok-num">1</span>, signal }) =&gt; {
+      <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/posts?page=${pageParam}&amp;limit=20`</span>, { signal });
+      <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed'</span>);
+      <span class="tok-key">return</span> res.<span class="tok-cmd">json</span>();
+    },
+    <span class="tok-cmd">initialPageParam</span>: <span class="tok-num">1</span>,
+    <span class="tok-cmd">getNextPageParam</span>: (lastPage, allPages) =&gt;
+      lastPage.hasMore ? allPages.length + <span class="tok-num">1</span> : <span class="tok-key">undefined</span>,
+  });
+
+  <span class="tok-com">// IntersectionObserver on a sentinel</span>
+  <span class="tok-key">const</span> sentinelRef = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    <span class="tok-key">const</span> el = sentinelRef.current;
+    <span class="tok-key">if</span> (!el || !hasNextPage) <span class="tok-key">return</span>;
+
+    <span class="tok-key">const</span> observer = <span class="tok-key">new</span> <span class="tok-cmd">IntersectionObserver</span>(
+      entries =&gt; {
+        <span class="tok-key">if</span> (entries[<span class="tok-num">0</span>].isIntersecting &amp;&amp; !isFetchingNextPage) {
+          <span class="tok-cmd">fetchNextPage</span>();
+        }
+      },
+      { rootMargin: <span class="tok-str">'200px'</span> }
+    );
+
+    observer.<span class="tok-cmd">observe</span>(el);
+    <span class="tok-key">return</span> () =&gt; observer.<span class="tok-cmd">disconnect</span>();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  <span class="tok-key">if</span> (isError) <span class="tok-key">return</span> &lt;p&gt;Error loading feed&lt;/p&gt;;
+
+  <span class="tok-key">const</span> allPosts = data?.pages.<span class="tok-cmd">flatMap</span>(p =&gt; p.posts) ?? [];
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;ul&gt;
+        {allPosts.<span class="tok-cmd">map</span>(p =&gt; &lt;li key={p.id}&gt;{p.title}&lt;/li&gt;)}
+      &lt;/ul&gt;
+      &lt;div ref={sentinelRef} /&gt;
+      {isFetchingNextPage &amp;&amp; &lt;p&gt;Loading more…&lt;/p&gt;}
+      {!hasNextPage &amp;&amp; &lt;p&gt;You've reached the end.&lt;/p&gt;}
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <p>The library handles: the pages array (you don't manage it), the next-page calculation (<code>getNextPageParam</code>), the has-next state (<code>hasNextPage</code>), the loading-next-page state (<code>isFetchingNextPage</code>), and deduplication when <code>fetchNextPage</code> is called twice.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Responsibility</th><th>Raw</th><th>TanStack Query</th></tr></thead>
+      <tbody>
+        <tr><td>Store all loaded pages</td><td><code>useState([])</code> + append</td><td><code>data.pages</code> auto-managed</td></tr>
+        <tr><td>Track next page number</td><td><code>useState(1)</code> + increment</td><td>Handled by <code>getNextPageParam</code></td></tr>
+        <tr><td>Know if more pages exist</td><td><code>useState(true)</code> + parse response</td><td><code>hasNextPage</code></td></tr>
+        <tr><td>Loading state per page</td><td><code>useState(false)</code></td><td><code>isFetchingNextPage</code></td></tr>
+        <tr><td>Cancel in-flight request on unmount</td><td>Manual <code>AbortController</code></td><td><code>signal</code> passed to <code>queryFn</code></td></tr>
+        <tr><td>Prevent double fetch</td><td><code>if (loading) return</code></td><td>Built in</td></tr>
+        <tr><td>Deduplicate concurrent fetches</td><td>Manual</td><td>Built in</td></tr>
+        <tr><td>Cache loaded pages between mounts</td><td>None — remount starts fresh</td><td>Full <code>gcTime</code>-window cache</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Cursor-based pagination is usually better than page numbers.</strong> For feeds where new items are being added constantly, <code>?page=2</code> can shift as new items arrive. Cursor pagination — <code>?after=lastSeenId</code> — guarantees each page picks up exactly where the previous one ended. In <code>useInfiniteQuery</code> that's just <code>getNextPageParam: (last) =&gt; last.nextCursor</code>.</div>
+  </div>
+
+  <div class="quiz-box" id="q-inf-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">Why use <code>IntersectionObserver</code> instead of a scroll listener for infinite scroll?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-inf-1', this, false)"><span class="opt-letter">A</span>Because scroll events are deprecated.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-inf-1', this, true)"><span class="opt-letter">B</span>Because IntersectionObserver only fires when the sentinel actually enters the viewport, instead of firing on every scroll event (which is 60+ times per second).</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-inf-1-feedback"></div>
+    <div class="quiz-explain hidden">A scroll listener fires on every scroll event — hundreds per second. You'd need to throttle it, and even then you're doing math on every tick. IntersectionObserver asks the browser to notify you only when the state changes, which is a completely different performance class.</div>
+  </div>
+
+  <div class="quiz-box" id="q-inf-2">
+    <div class="quiz-label">Quick check · 08</div>
+    <div class="quiz-question">You notice duplicate items after scrolling fast. What is the most likely cause?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-inf-2', this, true)"><span class="opt-letter">A</span>Multiple fetches fired for the same page — the loading guard didn't prevent concurrent calls.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-inf-2', this, false)"><span class="opt-letter">B</span>The React keys are wrong.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-inf-2-feedback"></div>
+    <div class="quiz-explain hidden">IntersectionObserver can fire twice before the first request resolves. Without <code>if (loading) return;</code> (raw) or <code>isFetchingNextPage</code> guard (TQ), you append the same page twice. The duplicate keys are a symptom, not the cause.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · COMBINING THEM ═══ -->
+<section class="section-block" id="combining">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Combining all four</h2>
+      <p class="section-subtitle">a real search + filter + infinite feed</p>
+    </div>
+  </div>
+
+  <p>Real features don't use one pattern — they use all four at once. Here's a search bar with debounce, an infinite feed with TanStack Query, a memoized row component, and lazy-loaded images. This is the shape of most real "list + search" screens.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">RealFeed.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useState, useEffect, useRef, memo } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> { useInfiniteQuery } <span class="tok-key">from</span> <span class="tok-str">'@tanstack/react-query'</span>;
+<span class="tok-key">import</span> { useDebouncedValue } <span class="tok-key">from</span> <span class="tok-str">'./useDebouncedValue'</span>;
+
+<span class="tok-com">// 1. Memoize the row — scrolling re-renders the list, rows should skip</span>
+<span class="tok-key">const</span> Row = React.<span class="tok-cmd">memo</span>(<span class="tok-key">function</span>({ post }) {
+  <span class="tok-key">return</span> (
+    &lt;li&gt;
+      &lt;img src={post.thumbnail} loading=<span class="tok-str">"lazy"</span> alt=<span class="tok-str">""</span> /&gt;
+      &lt;h3&gt;{post.title}&lt;/h3&gt;
+    &lt;/li&gt;
+  );
+});
+
+<span class="tok-key">function</span> <span class="tok-cmd">RealFeed</span>() {
+  <span class="tok-key">const</span> [query, setQuery] = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+
+  <span class="tok-com">// 2. Debounce the search input</span>
+  <span class="tok-key">const</span> debounced = <span class="tok-cmd">useDebouncedValue</span>(query, <span class="tok-num">400</span>);
+
+  <span class="tok-key">const</span> {
+    data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching,
+  } = <span class="tok-cmd">useInfiniteQuery</span>({
+    <span class="tok-com">// 3. Query key includes the debounced search — cache per search term</span>
+    <span class="tok-cmd">queryKey</span>: [<span class="tok-str">'feed'</span>, debounced],
+    <span class="tok-cmd">queryFn</span>: ({ pageParam = <span class="tok-num">1</span>, signal }) =&gt;
+      <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/posts?q=${encodeURIComponent(debounced)}&amp;page=${pageParam}`</span>, { signal })
+        .<span class="tok-cmd">then</span>(r =&gt; r.<span class="tok-cmd">json</span>()),
+    <span class="tok-cmd">initialPageParam</span>: <span class="tok-num">1</span>,
+    <span class="tok-cmd">getNextPageParam</span>: (last, all) =&gt; last.hasMore ? all.length + <span class="tok-num">1</span> : <span class="tok-key">undefined</span>,
+  });
+
+  <span class="tok-com">// 4. Infinite scroll sentinel</span>
+  <span class="tok-key">const</span> sentinel = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    <span class="tok-key">const</span> el = sentinel.current;
+    <span class="tok-key">if</span> (!el || !hasNextPage || isFetchingNextPage) <span class="tok-key">return</span>;
+
+    <span class="tok-key">const</span> io = <span class="tok-key">new</span> <span class="tok-cmd">IntersectionObserver</span>(
+      ([e]) =&gt; { <span class="tok-key">if</span> (e.isIntersecting) <span class="tok-cmd">fetchNextPage</span>(); },
+      { rootMargin: <span class="tok-str">'200px'</span> }
+    );
+    io.<span class="tok-cmd">observe</span>(el);
+    <span class="tok-key">return</span> () =&gt; io.<span class="tok-cmd">disconnect</span>();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  <span class="tok-key">const</span> posts = data?.pages.<span class="tok-cmd">flatMap</span>(p =&gt; p.posts) ?? [];
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;input
+        value={query}
+        onChange={e =&gt; <span class="tok-cmd">setQuery</span>(e.target.value)}
+        placeholder=<span class="tok-str">"Search posts…"</span>
+      /&gt;
+      {isFetching &amp;&amp; &lt;small&gt;Searching…&lt;/small&gt;}
+
+      &lt;ul&gt;{posts.<span class="tok-cmd">map</span>(p =&gt; &lt;Row key={p.id} post={p} /&gt;)}&lt;/ul&gt;
+      &lt;div ref={sentinel} /&gt;
+
+      {isFetchingNextPage &amp;&amp; &lt;p&gt;Loading more…&lt;/p&gt;}
+      {!hasNextPage &amp;&amp; posts.length &gt; <span class="tok-num">0</span> &amp;&amp; &lt;p&gt;End of results.&lt;/p&gt;}
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <p>Every pattern is doing one job:</p>
+  <ul>
+    <li><b>Debounce</b> — one request per ~400ms of typing, not per keystroke.</li>
+    <li><b>Infinite scroll</b> — next page loads when the user is 200px from the end.</li>
+    <li><b>Memo</b> — <code>Row</code> doesn't re-render for rows whose <code>post</code> object is unchanged.</li>
+    <li><b>Native lazy loading</b> — <code>&lt;img loading="lazy"&gt;</code> defers offscreen image downloads (browser feature, no React code needed).</li>
+    <li><b>TanStack Query</b> — caches each <code>['feed', query]</code>, so switching back to a prior search shows results instantly while refreshing in the background.</li>
+  </ul>
+</section>
+
+<!-- ═══ 08 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>React.memo</code> without memoizing props</td><td>Child re-renders anyway — memo compares references</td><td><code>useMemo</code> / <code>useCallback</code> on unstable props, or stop creating them inline</td></tr>
+        <tr><td><code>useCallback</code> with a dependency that changes every render</td><td>Callback reference changes every render — memoization does nothing</td><td>Use functional updaters so the callback doesn't need to close over state</td></tr>
+        <tr><td>Debouncing without cancelling the previous request</td><td>Race — old response arrives after new one and overwrites it</td><td><code>AbortController</code> (raw) or TanStack Query's <code>signal</code></td></tr>
+        <tr><td>Debouncing the wrong thing</td><td>Search debounced but the query string still passed — every keystroke still triggers a request</td><td>Debounce the value (<code>useDebouncedValue</code>) and depend on that</td></tr>
+        <tr><td>Lazy loading without <code>Suspense</code></td><td>React throws a runtime error</td><td>Wrap in <code>&lt;Suspense&gt;</code> with a fallback, or put one at the router level</td></tr>
+        <tr><td>Lazy loading the above-the-fold component</td><td>User sees a spinner instead of content</td><td>Only lazy-load below-fold or route-level components</td></tr>
+        <tr><td>Flicker on page change</td><td>Table blanks between pages</td><td>Raw: <code>loading &amp;&amp; !data.length</code>; TQ: <code>placeholderData: keepPreviousData</code></td></tr>
+        <tr><td>Infinite scroll fires multiple times for the same page</td><td>Duplicate items in the list</td><td>Guard with <code>if (loading || !hasMore) return;</code> (raw) or <code>isFetchingNextPage</code> (TQ)</td></tr>
+        <tr><td>Scroll listener for infinite scroll</td><td>Dropped frames — fires hundreds of times per second</td><td><code>IntersectionObserver</code> on a sentinel element</td></tr>
+        <tr><td>Missing <code>key</code> in the map</td><td>Bugs on reorder; state attaches to wrong row</td><td>Stable id from data</td></tr>
+        <tr><td>Fetching in an effect without cleanup</td><td>State updates after unmount; warnings in dev</td><td><code>AbortController</code> + <code>return () =&gt; controller.abort()</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Profile before optimizing.</strong> The four patterns above are not "improvements you should always add". They are solutions to specific measured problems. A React DevTools Profiler run tells you whether re-renders or network is the actual bottleneck. If the app is already fast, adding memoization, debouncing, or code-splitting makes the code harder to read and buys you nothing.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">memoization · throttle/debounce · lazy loading · pagination · infinite scroll</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What's the difference between React.memo, useMemo, and useCallback?</span></summary><div class="qa-body"><p><code>React.memo</code> wraps a <b>component</b> and skips rendering it if props are shallow-equal. <code>useMemo</code> caches the <b>result</b> of a computation between renders. <code>useCallback</code> caches a <b>function reference</b>. All three are memoization, but they cache different things — mixing them up is the source of most "memo isn't helping" bugs.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>When should you NOT use useMemo or useCallback?</span></summary><div class="qa-body"><p>When the computation is cheap. The comparison itself costs something — for a small array map or a filter over 5 items, recomputing is faster than the check. Also: don't wrap every function in <code>useCallback</code>; if the function isn't passed to a memoized child or used in a dependency array, memoizing it has zero benefit and adds noise.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>Why does React.memo sometimes not prevent re-renders?</span></summary><div class="qa-body"><p>If a prop is a new reference every render (an inline object <code>{a: 1}</code>, an inline array, or an inline function <code>() =&gt; doThing()</code>), <code>Object.is</code> comparison always fails, so memo can't help. Fix: memoize the prop with <code>useMemo</code>/<code>useCallback</code>, or move the value out of the render.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>Explain debounce vs throttle.</span></summary><div class="qa-body"><p><b>Debounce</b> runs the function only after `wait` ms of silence — every new event resets the timer. Great for search inputs. <b>Throttle</b> runs at most once every `wait` ms, on a schedule. Great for scroll and resize handlers. Debounce is "wait until done"; throttle is "run on a cadence".</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>How would you implement debounce in React?</span></summary><div class="qa-body"><p>Two options. (1) A <code>useDebouncedValue</code> hook that returns a delayed copy of the value: store it in state, update it in <code>setTimeout</code> inside <code>useEffect</code>, clear the timeout in cleanup. Then depend on the debounced value in a fetch effect. (2) A <code>debounce(fn, wait)</code> utility wrapped in <code>useMemo</code> (or a ref) so it isn't recreated every render. The hook version is idiomatic in React because it fits the render model.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>Is debounce enough to fix the search race condition?</span></summary><div class="qa-body"><p>No. Debounce reduces the number of requests but doesn't order their responses. Two requests can be in flight if the network is slow, and an old response can arrive after a new one — overwriting fresher data. Fix with <code>AbortController</code> (cancel the previous), an ignore flag (check <code>ignore</code> before setState), or a request id. TanStack Query's <code>signal</code> argument gives you cancellation for free.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What does React.lazy do?</span></summary><div class="qa-body"><p>It wraps a dynamic <code>import()</code> so React can treat the module as a component. On first render, React calls the import, gets a promise, and suspends rendering until the module resolves. The nearest <code>&lt;Suspense&gt;</code> ancestor shows its fallback during the wait. The bundler splits the module into its own chunk, so it isn't in the initial bundle.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>Where should you place Suspense boundaries?</span></summary><div class="qa-body"><p>At boundaries the user perceives — around routes (one boundary at the router level), around modals and tabs that only load on demand. Don't put a boundary on every component (you'll see spinners flash in weird places) and don't lazy-load above-the-fold content (the user sees a spinner instead of content).</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>What is route-level code splitting, and why is it the highest-impact split?</span></summary><div class="qa-body"><p>Lazy-loading each route's component so its JS is only downloaded when that route is visited. It's the highest-impact split because most apps have many routes the user never visits in a session — bundling them all forces every user to download code for pages they won't see. Splitting by route means the first screen loads only the first route's code.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>How would you implement pagination in React?</span></summary><div class="qa-body"><p>State: <code>page</code> and <code>pageSize</code>. Effect (or query hook) fetches <code>/api/items?page=X&amp;limit=Y</code> on page change. Render a page-boundary UI with prev/next disabled at the ends. Important detail: show the full spinner only on first load (<code>loading &amp;&amp; !data.length</code>) — otherwise the list flashes empty on every page change. TanStack Query handles this with <code>placeholderData: keepPreviousData</code> and caches each page.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>How would you implement infinite scroll?</span></summary><div class="qa-body"><p>Two things: a sentinel element at the end of the list, and an <code>IntersectionObserver</code> that fires a "load more" callback when the sentinel enters the viewport. The callback appends the new page to state. Guard with <code>if (loading || !hasMore) return;</code> to prevent duplicate fetches. In TanStack Query, use <code>useInfiniteQuery</code> — pages array, <code>fetchNextPage</code>, <code>hasNextPage</code>, and <code>isFetchingNextPage</code> are provided; you only write the observer.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>Why use IntersectionObserver instead of a scroll listener?</span></summary><div class="qa-body"><p>A scroll listener fires hundreds of times per second — you'd need to throttle it, and even then you're doing math on every tick. IntersectionObserver asks the browser to notify you only when the observed element enters/exits the viewport — one callback per state change. Massive performance win, and the code is simpler.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q13</span><span>How do you prevent duplicate items in infinite scroll?</span></summary><div class="qa-body"><p>Two things. (1) Guard the fetch: <code>if (loading || !hasMore) return;</code> — because IntersectionObserver can fire multiple times before the request resolves. (2) If your API can return overlapping items (e.g. new posts pushed while you paginate), de-dupe by id — <code>[...new Map([...pages.flat()].map(p =&gt; [p.id, p])).values()]</code>, or use cursor pagination which guarantees each page picks up after the previous one.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q14</span><span>What's the difference between page-based and cursor-based pagination?</span></summary><div class="qa-body"><p>Page-based: <code>?page=2&amp;limit=10</code>, offset math on the server (<code>LIMIT/OFFSET</code>). Simple but suffers from shifting when rows are added/removed — a page-2 request can return duplicates or skips. Cursor-based: <code>?after=lastId</code>, server returns rows after that id. Stable, but no "jump to page 5". Feeds and infinite scroll typically want cursor pagination; admin tables with "Page 3 of 20" want page-based.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q15</span><span>What does TanStack Query's useInfiniteQuery give you over manually tracking pages?</span></summary><div class="qa-body"><p>It stores the pages array, computes the next page param via <code>getNextPageParam</code>, exposes <code>hasNextPage</code>, <code>isFetchingNextPage</code>, and <code>fetchNextPage</code> — all without you writing the state machine. It also caches the whole paginated result across mounts, deduplicates concurrent fetches, and passes a <code>signal</code> to cancel the in-flight request. You only provide <code>queryFn</code> and <code>getNextPageParam</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q16</span><span>You notice a React list re-renders on every keystroke in a search input. What's the diagnosis?</span></summary><div class="qa-body"><p>The search input's state lives in the same component that renders the list. Every keystroke updates state → re-renders the whole component → the list reconciles. Fixes: (1) put the search state in a child so the input's state doesn't re-render the list (or split into sibling components); (2) memoize the list component with <code>React.memo</code> and stable props; (3) debounce the value so state only changes after 300ms of typing. All three can be needed at once.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Frontend · Performance</span>
+  <span>memo · throttle · debounce · lazy · pagination · infinite scroll</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>

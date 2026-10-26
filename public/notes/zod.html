@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zod — the complete guide · Sheryians</title>
+<meta name="description" content="Zod from basics to advanced — every schema type, refinement, transformation, discriminated union, error handling, and frontend + backend patterns with React Hook Form and Express.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:18ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+.tok-type{color:#E5C07B;font-weight:500}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.toc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:24px 0 40px}
+.toc a{display:block;padding:10px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--paper2);text-decoration:none;color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;transition:border-color .2s,color .2s}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+.toc a .n{color:var(--accent);font-weight:600;margin-right:6px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols,.toc{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Validation · Types · Full-stack</div>
+  <h1><em>Zod</em> — validate once, trust everywhere</h1>
+  <p class="hero-desc">The schema library that both validates data at runtime AND infers static TypeScript types from the same definition. From <code>z.string()</code> to discriminated unions, then applied on the backend (Express) and the frontend (React + react-hook-form).</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Basics → advanced</span>
+    <span class="hero-tag">parse / safeParse</span>
+    <span class="hero-tag">transform · refine · pipe</span>
+    <span class="hero-tag">Discriminated unions</span>
+    <span class="hero-tag">Express middleware</span>
+    <span class="hero-tag">react-hook-form resolver</span>
+    <span class="hero-tag">z.infer</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#why"><span class="n">01</span>Why Zod exists</a>
+  <a href="#install"><span class="n">02</span>Install &amp; first schema</a>
+  <a href="#primitives"><span class="n">03</span>Primitives</a>
+  <a href="#strings"><span class="n">04</span>String validations</a>
+  <a href="#numbers"><span class="n">05</span>Numbers &amp; dates</a>
+  <a href="#objects"><span class="n">06</span>Objects</a>
+  <a href="#arrays"><span class="n">07</span>Arrays &amp; tuples</a>
+  <a href="#unions"><span class="n">08</span>Unions &amp; literals</a>
+  <a href="#optional"><span class="n">09</span>Optional &amp; nullable</a>
+  <a href="#parse"><span class="n">10</span>parse vs safeParse</a>
+  <a href="#infer"><span class="n">11</span>Type inference</a>
+  <a href="#refine"><span class="n">12</span>refine &amp; superRefine</a>
+  <a href="#transform"><span class="n">13</span>Transform</a>
+  <a href="#discriminated"><span class="n">14</span>Discriminated unions</a>
+  <a href="#recursive"><span class="n">15</span>Recursive schemas</a>
+  <a href="#effects"><span class="n">16</span>preprocess &amp; pipe</a>
+  <a href="#errors"><span class="n">17</span>Error handling</a>
+  <a href="#backend"><span class="n">18</span>Backend: Express</a>
+  <a href="#frontend"><span class="n">19</span>Frontend: React + RHF</a>
+  <a href="#shared"><span class="n">20</span>Shared schemas</a>
+  <a href="#pitfalls"><span class="n">21</span>Pitfalls</a>
+  <a href="#interview"><span class="n">22</span>Interview questions</a>
+</nav>
+
+<!-- ═══ 01 · WHY ═══ -->
+<section class="section-block" id="why">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">Why Zod exists</h2>
+      <p class="section-subtitle">TypeScript disappears at runtime · validation belongs at the boundary</p>
+    </div>
+  </div>
+
+  <p class="lead">Here's the fundamental problem Zod solves. TypeScript types are <b>erased at compile time</b> — they exist only while you're writing the code. When your Express server receives a request, it has no idea whether the body matches your <code>User</code> type. <code>JSON.parse</code> returns <code>any</code>. Whatever shape the client sent is now in your database.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">the gap</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">interface</span> <span class="tok-type">User</span> {
+  email: <span class="tok-type">string</span>;
+  age: <span class="tok-type">number</span>;
+}
+
+app.<span class="tok-cmd">post</span>(<span class="tok-str">'/users'</span>, (req, res) =&gt; {
+  <span class="tok-key">const</span> user: <span class="tok-type">User</span> = req.body;  <span class="tok-com">// TypeScript says this is fine</span>
+  <span class="tok-com">// but req.body could be { email: 42, age: "hello" } at runtime</span>
+  <span class="tok-com">// and TypeScript will NEVER check</span>
+});</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one thing Zod does</div>
+    <div class="concept-box-text"><p>Zod defines a <b>schema</b> — a runtime object that knows how to validate data. The same schema also <b>produces a TypeScript type</b> via <code>z.infer</code>. So one definition gives you both:</p><p>· a function that checks data at runtime<br>· a TypeScript type you use everywhere else</p><p>There is exactly one source of truth. If the schema changes, the type changes. If the type changes, validation changes. Drift is impossible.</p></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>TypeScript alone</th><th>TypeScript + Zod</th></tr></thead>
+      <tbody>
+        <tr><td>Types at compile time</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Validation at runtime</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Trusts external input</td><td>Yes (danger)</td><td>No — validates first</td></tr>
+        <tr><td>Frontend + backend agree</td><td>Only by convention</td><td>Same schema imported on both sides</td></tr>
+        <tr><td>Error messages for the user</td><td>You write them by hand</td><td>Come from the schema</td></tr>
+        <tr><td>Works with form libraries</td><td>No direct integration</td><td>First-class via <code>@hookform/resolvers</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-why-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">Your TypeScript interface says <code>age: number</code>, but the client sends <code>"22"</code> (a string). What does TypeScript do at runtime?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-why-1', this, false)"><span class="opt-letter">A</span>It throws a <code>TypeError</code>.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-why-1', this, true)"><span class="opt-letter">B</span>Nothing. Types are erased. The string sails through into your code and blows up much later.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-why-1-feedback"></div>
+    <div class="quiz-explain hidden">TypeScript compiles to JavaScript with the types stripped out. At runtime there is no <code>age: number</code> constraint — just the value the client sent. Zod adds a runtime check at the boundary so the string fails immediately with a clear error, before it reaches your logic.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · INSTALL ═══ -->
+<section class="section-block" id="install">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Install &amp; first schema</h2>
+      <p class="section-subtitle">npm install · define · parse · infer</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>npm install zod</code></pre>
+  </div>
+
+  <p>A schema is built from primitives, chained with validations, and then used to parse data. Parsing returns the typed value if the data is valid, and throws (or returns an error result) if not.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">first-schema.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { z } <span class="tok-key">from</span> <span class="tok-str">'zod'</span>;
+
+<span class="tok-com">// 1. Define the schema</span>
+<span class="tok-key">const</span> userSchema = z.<span class="tok-cmd">object</span>({
+  name:  z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">2</span>),
+  email: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(),
+  age:   z.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">min</span>(<span class="tok-num">0</span>),
+});
+
+<span class="tok-com">// 2. Infer the TypeScript type from it</span>
+<span class="tok-key">type</span> <span class="tok-type">User</span> = z.<span class="tok-cmd">infer</span>&lt;<span class="tok-key">typeof</span> userSchema&gt;;
+<span class="tok-com">// { name: string; email: string; age: number }</span>
+
+<span class="tok-com">// 3. Validate data at runtime</span>
+<span class="tok-key">const</span> input = { name: <span class="tok-str">'Aarav'</span>, email: <span class="tok-str">'a@x.com'</span>, age: <span class="tok-num">22</span> };
+<span class="tok-key">const</span> user = userSchema.<span class="tok-cmd">parse</span>(input);    <span class="tok-com">// typed User</span>
+
+<span class="tok-key">const</span> bad = { name: <span class="tok-str">'A'</span>, email: <span class="tok-str">'nope'</span>, age: -<span class="tok-num">5</span> };
+userSchema.<span class="tok-cmd">parse</span>(bad);   <span class="tok-com">// throws ZodError with three issues</span></code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Two outputs from one definition.</strong> <code>z.infer&lt;typeof schema&gt;</code> gives you the TypeScript type. <code>schema.parse(data)</code> gives you runtime validation. Use both. Never hand-write a TypeScript interface that duplicates a schema — the schema is the source of truth.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · PRIMITIVES ═══ -->
+<section class="section-block" id="primitives">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Primitives</h2>
+      <p class="section-subtitle">the building blocks</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Schema</th><th>Inferred type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>z.string()</code></td><td><code>string</code></td><td>Chainable validations — see §04</td></tr>
+        <tr><td><code>z.number()</code></td><td><code>number</code></td><td>Rejects <code>NaN</code> and <code>Infinity</code> by default</td></tr>
+        <tr><td><code>z.boolean()</code></td><td><code>boolean</code></td><td></td></tr>
+        <tr><td><code>z.bigint()</code></td><td><code>bigint</code></td><td></td></tr>
+        <tr><td><code>z.date()</code></td><td><code>Date</code></td><td>Rejects invalid dates</td></tr>
+        <tr><td><code>z.symbol()</code></td><td><code>symbol</code></td><td></td></tr>
+        <tr><td><code>z.undefined()</code></td><td><code>undefined</code></td><td></td></tr>
+        <tr><td><code>z.null()</code></td><td><code>null</code></td><td></td></tr>
+        <tr><td><code>z.void()</code></td><td><code>void</code></td><td>Accepts <code>undefined</code></td></tr>
+        <tr><td><code>z.any()</code></td><td><code>any</code></td><td>Accepts anything — avoid in real schemas</td></tr>
+        <tr><td><code>z.unknown()</code></td><td><code>unknown</code></td><td>Accepts anything but requires narrowing before use</td></tr>
+        <tr><td><code>z.never()</code></td><td><code>never</code></td><td>Accepts nothing — useful in union exclusion</td></tr>
+        <tr><td><code>z.nan()</code></td><td><code>number</code> (NaN only)</td><td></td></tr>
+        <tr><td><code>z.literal(value)</code></td><td>that exact literal</td><td>e.g. <code>z.literal('admin')</code> → <code>'admin'</code></td></tr>
+        <tr><td><code>z.enum(['a', 'b'])</code></td><td><code>'a' | 'b'</code></td><td>Literal union</td></tr>
+        <tr><td><code>z.nativeEnum(MyEnum)</code></td><td>TS enum members</td><td>For existing TypeScript enums</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">primitives.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>z.<span class="tok-cmd">string</span>().<span class="tok-cmd">parse</span>(<span class="tok-str">'hello'</span>);
+z.<span class="tok-cmd">number</span>().<span class="tok-cmd">parse</span>(<span class="tok-num">42</span>);
+z.<span class="tok-cmd">boolean</span>().<span class="tok-cmd">parse</span>(<span class="tok-key">true</span>);
+z.<span class="tok-cmd">date</span>().<span class="tok-cmd">parse</span>(<span class="tok-key">new</span> <span class="tok-cmd">Date</span>());
+
+z.<span class="tok-cmd">literal</span>(<span class="tok-str">'admin'</span>).<span class="tok-cmd">parse</span>(<span class="tok-str">'admin'</span>);         <span class="tok-com">// ok</span>
+z.<span class="tok-cmd">literal</span>(<span class="tok-str">'admin'</span>).<span class="tok-cmd">parse</span>(<span class="tok-str">'user'</span>);          <span class="tok-com">// throws</span>
+
+z.<span class="tok-cmd">enum</span>([<span class="tok-str">'active'</span>, <span class="tok-str">'inactive'</span>]).<span class="tok-cmd">parse</span>(<span class="tok-str">'active'</span>);  <span class="tok-com">// 'active' | 'inactive'</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>z.number()</code> rejects <code>"42"</code>.</strong> If your API sends numbers as strings (common with query params — <code>?limit=10</code> becomes <code>"10"</code>), wrap with <code>z.coerce.number()</code>. Don't confuse the two: <code>z.number()</code> is strict, <code>z.coerce.number()</code> casts first, then validates. See §16 for coercion.</div>
+  </div>
+
+  <div class="quiz-box" id="q-prim-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">What type does <code>z.enum(['light', 'dark'])</code> infer?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-prim-1', this, true)"><span class="opt-letter">A</span><code>'light' | 'dark'</code> — a literal union.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-prim-1', this, false)"><span class="opt-letter">B</span><code>string</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-prim-1-feedback"></div>
+    <div class="quiz-explain hidden">Enums narrow the type to the exact members. You get autocomplete on the two allowed values, and any other string fails validation. That's the whole reason to use <code>z.enum</code> instead of <code>z.string()</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · STRINGS ═══ -->
+<section class="section-block" id="strings">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">String validations</h2>
+      <p class="section-subtitle">min · max · length · email · url · uuid · regex · trim</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">strings.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// length</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">2</span>);                  <span class="tok-com">// at least 2 chars</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">max</span>(<span class="tok-num">100</span>);                <span class="tok-com">// at most 100</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">length</span>(<span class="tok-num">10</span>);               <span class="tok-com">// exactly 10</span>
+
+<span class="tok-com">// format</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>();
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">url</span>();
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">uuid</span>();
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">cuid</span>();
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">datetime</span>();
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">ip</span>();
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">regex</span>(/^[A-Z]{3}-\d{4}$/);   <span class="tok-com">// custom pattern</span>
+
+<span class="tok-com">// content checks</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">startsWith</span>(<span class="tok-str">'https://'</span>);
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">endsWith</span>(<span class="tok-str">'.pdf'</span>);
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">includes</span>(<span class="tok-str">'admin'</span>);
+
+<span class="tok-com">// transformation</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">trim</span>();                     <span class="tok-com">// strips whitespace before further checks</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">toLowerCase</span>();
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">toUpperCase</span>();
+
+<span class="tok-com">// combine</span>
+z.<span class="tok-cmd">string</span>()
+  .<span class="tok-cmd">trim</span>()
+  .<span class="tok-cmd">min</span>(<span class="tok-num">2</span>, <span class="tok-str">'Name must be at least 2 characters'</span>)
+  .<span class="tok-cmd">max</span>(<span class="tok-num">80</span>, <span class="tok-str">'Name must be under 80 characters'</span>);
+
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(<span class="tok-str">'Please enter a valid email'</span>);</code></pre>
+  </div>
+
+  <h3>Custom error messages</h3>
+  <p>Every validator takes an optional message as the last argument, or an object with <code>message</code> (and optionally other data for error maps):</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">custom-messages.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">8</span>, <span class="tok-str">'Password must be at least 8 characters'</span>);
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>({ <span class="tok-cmd">message</span>: <span class="tok-str">'That email looks invalid'</span> });
+
+<span class="tok-com">// `required_error` fires when the value is missing entirely</span>
+z.<span class="tok-cmd">string</span>({ <span class="tok-cmd">required_error</span>: <span class="tok-str">'Name is required'</span> })
+  .<span class="tok-cmd">min</span>(<span class="tok-num">2</span>, { <span class="tok-cmd">message</span>: <span class="tok-str">'Too short'</span> });</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-str-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">You want to strip leading/trailing spaces from a name <em>and</em> enforce a minimum length. Which order?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-str-1', this, false)"><span class="opt-letter">A</span><code>z.string().min(2).trim()</code></button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-str-1', this, true)"><span class="opt-letter">B</span><code>z.string().trim().min(2)</code></button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-str-1-feedback"></div>
+    <div class="quiz-explain hidden">Chained validators run in order. <code>.trim()</code> first strips whitespace; then <code>.min(2)</code> checks the trimmed result. With <code>.min(2).trim()</code>, the length check happens before trimming — <code>'  a'</code> (length 3) would pass min(2) and then trim to <code>'a'</code> (length 1, invalid).</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · NUMBERS & DATES ═══ -->
+<section class="section-block" id="numbers">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Numbers &amp; dates</h2>
+      <p class="section-subtitle">int · positive · min/max · date ranges</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">numbers.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// numeric checks</span>
+z.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>();
+z.<span class="tok-cmd">number</span>().<span class="tok-cmd">positive</span>();       <span class="tok-com">// &gt; 0</span>
+z.<span class="tok-cmd">number</span>().<span class="tok-cmd">nonnegative</span>();    <span class="tok-com">// &gt;= 0</span>
+z.<span class="tok-cmd">number</span>().<span class="tok-cmd">negative</span>();       <span class="tok-com">// &lt; 0</span>
+z.<span class="tok-cmd">number</span>().<span class="tok-cmd">min</span>(<span class="tok-num">0</span>).<span class="tok-cmd">max</span>(<span class="tok-num">150</span>);
+z.<span class="tok-cmd">number</span>().<span class="tok-cmd">multipleOf</span>(<span class="tok-num">5</span>);
+z.<span class="tok-cmd">number</span>().<span class="tok-cmd">finite</span>();
+
+<span class="tok-com">// dates</span>
+z.<span class="tok-cmd">date</span>().<span class="tok-cmd">min</span>(<span class="tok-key">new</span> <span class="tok-cmd">Date</span>(<span class="tok-str">'2000-01-01'</span>));
+z.<span class="tok-cmd">date</span>().<span class="tok-cmd">max</span>(<span class="tok-key">new</span> <span class="tok-cmd">Date</span>());              <span class="tok-com">// not in the future</span></code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Money in Zod.</strong> Don't validate money with <code>z.number()</code> — floating-point numbers can't represent decimals exactly. Store in paise/cents as integers (and validate with <code>z.number().int().nonnegative()</code>), or use a string with a regex for exact decimal representation. Postgres <code>NUMERIC</code> columns + string schemas are the safest combination.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · OBJECTS ═══ -->
+<section class="section-block" id="objects">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Objects</h2>
+      <p class="section-subtitle">z.object · strip vs strict vs passthrough · extend · merge · pick · omit</p>
+    </div>
+  </div>
+
+  <p>Objects are where Zod shines most. A schema is a shape; Zod validates the shape and provides <b>three different policies</b> for extra fields you didn't define.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">objects.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> userSchema = z.<span class="tok-cmd">object</span>({
+  name:  z.<span class="tok-cmd">string</span>(),
+  email: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(),
+  age:   z.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">positive</span>(),
+});
+
+userSchema.<span class="tok-cmd">parse</span>({
+  name: <span class="tok-str">'Aarav'</span>, email: <span class="tok-str">'a@x.com'</span>, age: <span class="tok-num">22</span>,
+  role: <span class="tok-str">'admin'</span>,       <span class="tok-com">// extra field</span>
+});
+<span class="tok-com">// result: { name, email, age }  (role is dropped)</span></code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Method</th><th>Behaviour on extra fields</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td><code>z.object({...})</code></td><td><b>Strips</b> them silently</td><td>Default — you don't want to accept unknown data</td></tr>
+        <tr><td><code>.strict()</code></td><td><b>Errors</b> on any extra field</td><td>You want to catch typos and unsupported fields</td></tr>
+        <tr><td><code>.passthrough()</code></td><td><b>Keeps</b> them in the result</td><td>You're extending a partial shape and preserving fields</td></tr>
+        <tr><td><code>.catchall(schema)</code></td><td>Validates extras against a schema</td><td>Objects with a known base + arbitrary additional data</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">strict vs strip vs passthrough</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> strict = userSchema.<span class="tok-cmd">strict</span>();
+strict.<span class="tok-cmd">parse</span>({ ..., role: <span class="tok-str">'admin'</span> });      <span class="tok-com">// throws: unrecognized key</span>
+
+<span class="tok-key">const</span> pass = userSchema.<span class="tok-cmd">passthrough</span>();
+pass.<span class="tok-cmd">parse</span>({ ..., role: <span class="tok-str">'admin'</span> });        <span class="tok-com">// { ..., role: 'admin' }</span>
+
+<span class="tok-key">const</span> withMeta = userSchema.<span class="tok-cmd">catchall</span>(z.<span class="tok-cmd">unknown</span>());
+withMeta.<span class="tok-cmd">parse</span>({ ..., anything: <span class="tok-num">42</span> });   <span class="tok-com">// keeps extras</span></code></pre>
+  </div>
+
+  <h3>Extend, merge, pick, omit, partial, required</h3>
+  <p>Object schemas compose. Every method returns a new schema — the original is unchanged.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">composition.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Extend — add fields</span>
+<span class="tok-key">const</span> adminSchema = userSchema.<span class="tok-cmd">extend</span>({
+  role:     z.<span class="tok-cmd">literal</span>(<span class="tok-str">'admin'</span>),
+  permissions: z.<span class="tok-cmd">array</span>(z.<span class="tok-cmd">string</span>()),
+});
+
+<span class="tok-com">// Merge — combine two schemas</span>
+<span class="tok-key">const</span> withTimestamps = userSchema.<span class="tok-cmd">merge</span>(z.<span class="tok-cmd">object</span>({
+  createdAt: z.<span class="tok-cmd">date</span>(),
+  updatedAt: z.<span class="tok-cmd">date</span>(),
+}));
+
+<span class="tok-com">// Pick — keep only some fields</span>
+<span class="tok-key">const</span> userPreview = userSchema.<span class="tok-cmd">pick</span>({ name: <span class="tok-key">true</span>, email: <span class="tok-key">true</span> });
+
+<span class="tok-com">// Omit — drop some fields</span>
+<span class="tok-key">const</span> userCreate = userSchema.<span class="tok-cmd">omit</span>({ age: <span class="tok-key">true</span> });
+
+<span class="tok-com">// Partial — all fields optional (update payloads)</span>
+<span class="tok-key">const</span> userUpdate = userSchema.<span class="tok-cmd">partial</span>();
+
+<span class="tok-com">// Required — all fields required (even previously optional)</span>
+<span class="tok-key">const</span> userRequired = userSchema.<span class="tok-cmd">required</span>();
+
+<span class="tok-com">// DeepPartial — recurse into nested objects</span>
+<span class="tok-key">const</span> deepPartial = nestedSchema.<span class="tok-cmd">deepPartial</span>();</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The most useful pattern for APIs</div>
+    <div class="concept-box-text"><p>One base schema for the entity, then derive the API shapes:</p><p><code>createSchema = base.omit({ id: true, createdAt: true })</code><br><code>updateSchema = createSchema.partial()</code><br><code>responseSchema = base.extend({ id: z.string().uuid() })</code></p><p>Change the base once, and create/update/response are always in sync. Never hand-write three schemas that are almost the same.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-obj-1">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">Your server schema is <code>z.object({ email: z.string().email() })</code>. A client sends <code>{ email: 'a@x.com', admin: true }</code>. What does <code>parse</code> return?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-obj-1', this, true)"><span class="opt-letter">A</span><code>{ email: 'a@x.com' }</code> — <code>admin</code> is stripped. This protects against privilege escalation.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-obj-1', this, false)"><span class="opt-letter">B</span><code>{ email: 'a@x.com', admin: true }</code> — everything passes through.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-obj-1-feedback"></div>
+    <div class="quiz-explain hidden">The default behaviour is <b>strip</b> — unknown keys are removed. This is a security feature: if the client sends <code>admin: true</code> but your schema doesn't include <code>admin</code>, it never reaches your code. Use <code>.strict()</code> to error instead of strip.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · ARRAYS ═══ -->
+<section class="section-block" id="arrays">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Arrays &amp; tuples</h2>
+      <p class="section-subtitle">z.array · min · max · length · nonempty · tuples</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">arrays.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// basic array</span>
+z.<span class="tok-cmd">array</span>(z.<span class="tok-cmd">string</span>());
+z.<span class="tok-cmd">array</span>(z.<span class="tok-cmd">number</span>()).<span class="tok-cmd">min</span>(<span class="tok-num">1</span>);
+z.<span class="tok-cmd">array</span>(z.<span class="tok-cmd">string</span>()).<span class="tok-cmd">max</span>(<span class="tok-num">10</span>);
+z.<span class="tok-cmd">array</span>(z.<span class="tok-cmd">string</span>()).<span class="tok-cmd">length</span>(<span class="tok-num">5</span>);
+z.<span class="tok-cmd">array</span>(z.<span class="tok-cmd">string</span>()).<span class="tok-cmd">nonempty</span>();      <span class="tok-com">// at least one item</span>
+
+<span class="tok-com">// array of objects</span>
+z.<span class="tok-cmd">array</span>(z.<span class="tok-cmd">object</span>({ id: z.<span class="tok-cmd">number</span>(), name: z.<span class="tok-cmd">string</span>() }));
+
+<span class="tok-com">// tuple — fixed length, fixed position types</span>
+<span class="tok-key">const</span> point = z.<span class="tok-cmd">tuple</span>([z.<span class="tok-cmd">number</span>(), z.<span class="tok-cmd">number</span>()]);
+point.<span class="tok-cmd">parse</span>([<span class="tok-num">10</span>, <span class="tok-num">20</span>]);        <span class="tok-com">// ok</span>
+point.<span class="tok-cmd">parse</span>([<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>]);     <span class="tok-com">// throws</span>
+
+<span class="tok-com">// array with refine — unique items</span>
+z.<span class="tok-cmd">array</span>(z.<span class="tok-cmd">string</span>()).<span class="tok-cmd">refine</span>(
+  arr =&gt; <span class="tok-key">new</span> <span class="tok-cmd">Set</span>(arr).size === arr.length,
+  <span class="tok-str">'Items must be unique'</span>
+);</code></pre>
+  </div>
+
+  <h3>Records (dynamic-key objects)</h3>
+  <p>When you need an object whose keys you don't know in advance — like a map of settings, or a lookup table:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">records.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>z.<span class="tok-cmd">record</span>(z.<span class="tok-cmd">string</span>(), z.<span class="tok-cmd">number</span>());       <span class="tok-com">// Record&lt;string, number&gt;</span>
+z.<span class="tok-cmd">record</span>(z.<span class="tok-cmd">enum</span>([<span class="tok-str">'light'</span>, <span class="tok-str">'dark'</span>]), z.<span class="tok-cmd">string</span>());
+
+<span class="tok-com">// You can restrict key names with a regex</span>
+z.<span class="tok-cmd">record</span>(z.<span class="tok-cmd">string</span>().<span class="tok-cmd">regex</span>(/^[a-z]+$/), z.<span class="tok-cmd">string</span>());</code></pre>
+  </div>
+</section>
+
+<!-- ═══ 08 · UNIONS ═══ -->
+<section class="section-block" id="unions">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Unions, intersections &amp; literals</h2>
+      <p class="section-subtitle">z.union · z.intersection · z.discriminatedUnion</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">unions.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Union — any one of these</span>
+z.<span class="tok-cmd">union</span>([z.<span class="tok-cmd">string</span>(), z.<span class="tok-cmd">number</span>()]);       <span class="tok-com">// string | number</span>
+
+<span class="tok-com">// Intersection — all of these (object merge)</span>
+z.<span class="tok-cmd">intersection</span>(
+  z.<span class="tok-cmd">object</span>({ id: z.<span class="tok-cmd">number</span>() }),
+  z.<span class="tok-cmd">object</span>({ name: z.<span class="tok-cmd">string</span>() })
+);                                      <span class="tok-com">// { id: number; name: string }</span>
+
+<span class="tok-com">// Literal</span>
+z.<span class="tok-cmd">literal</span>(<span class="tok-str">'admin'</span>);                    <span class="tok-com">// 'admin'</span>
+z.<span class="tok-cmd">literal</span>(<span class="tok-key">null</span>);                       <span class="tok-com">// null</span>
+
+<span class="tok-com">// Enum</span>
+z.<span class="tok-cmd">enum</span>([<span class="tok-str">'pending'</span>, <span class="tok-str">'active'</span>, <span class="tok-str">'inactive'</span>]);</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Union vs Discriminated union.</strong> <code>z.union([A, B])</code> tries A, then B, then C — the first one that validates wins. <code>z.discriminatedUnion('type', [A, B, C])</code> looks at the <code>type</code> field first, then checks <em>only</em> the matching schema. Discriminated unions are much faster and produce better error messages. Use them whenever your union members have a shared literal field — see §14.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · OPTIONAL / NULLABLE ═══ -->
+<section class="section-block" id="optional">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Optional, nullable &amp; default</h2>
+      <p class="section-subtitle">the three-way split that trips everyone up</p>
+    </div>
+  </div>
+
+  <p>Three separate concepts. Mixing them up is the most common Zod mistake.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Method</th><th>Accepts</th><th>Inferred type</th></tr></thead>
+      <tbody>
+        <tr><td><code>.optional()</code></td><td>The value, or <code>undefined</code> (or the key missing)</td><td><code>T | undefined</code></td></tr>
+        <tr><td><code>.nullable()</code></td><td>The value, or <code>null</code></td><td><code>T | null</code></td></tr>
+        <tr><td><code>.nullish()</code></td><td>The value, <code>null</code>, or <code>undefined</code></td><td><code>T | null | undefined</code></td></tr>
+        <tr><td><code>.default(x)</code></td><td>The value, or nothing (uses <code>x</code>)</td><td><code>T</code> (never missing — has default)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">optional-nullable.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>z.<span class="tok-cmd">string</span>().<span class="tok-cmd">optional</span>().<span class="tok-cmd">parse</span>(<span class="tok-key">undefined</span>);   <span class="tok-com">// ok → undefined</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">optional</span>().<span class="tok-cmd">parse</span>(<span class="tok-key">null</span>);        <span class="tok-com">// throws — null is not undefined</span>
+
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">nullable</span>().<span class="tok-cmd">parse</span>(<span class="tok-key">null</span>);        <span class="tok-com">// ok → null</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">nullable</span>().<span class="tok-cmd">parse</span>(<span class="tok-key">undefined</span>);   <span class="tok-com">// throws</span>
+
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">nullish</span>().<span class="tok-cmd">parse</span>(<span class="tok-key">null</span>);        <span class="tok-com">// ok</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">nullish</span>().<span class="tok-cmd">parse</span>(<span class="tok-key">undefined</span>);   <span class="tok-com">// ok</span>
+
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">default</span>(<span class="tok-str">'anonymous'</span>).<span class="tok-cmd">parse</span>(<span class="tok-key">undefined</span>);   <span class="tok-com">// 'anonymous'</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Optional in a JSON body vs FormData.</strong> A missing field in JSON is <code>undefined</code>. But when a form submits <code>email=</code> with no value, the field is the empty string <code>""</code>, not <code>undefined</code>. A schema like <code>z.string().email().optional()</code> accepts <code>undefined</code> but rejects <code>""</code>. Preprocess empty strings to <code>undefined</code> if this matters (see §16).</div>
+  </div>
+
+  <div class="quiz-box" id="q-opt-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question"><code>z.string().optional().parse(null)</code>. What happens?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-opt-1', this, false)"><span class="opt-letter">A</span>Returns <code>null</code>.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-opt-1', this, true)"><span class="opt-letter">B</span>Throws — <code>optional</code> allows <code>undefined</code>, not <code>null</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-opt-1-feedback"></div>
+    <div class="quiz-explain hidden">Optional and nullable are different. To accept both, use <code>.nullish()</code>. This is why APIs frequently document <code>null | T</code> and <code>undefined | T</code> as distinct — and why Zod forces you to be precise about which one you mean.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · PARSE ═══ -->
+<section class="section-block" id="parse">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">parse vs safeParse</h2>
+      <p class="section-subtitle">throwing vs returning · when to use which</p>
+    </div>
+  </div>
+
+  <p>Zod has two ways to run a schema against data. Choosing wrong makes your code either ugly or fragile.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Method</th><th>On success</th><th>On failure</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr><td><code>.parse(data)</code></td><td>Returns the parsed value</td><td><b>Throws</b> <code>ZodError</code></td><td>Data you expect to be valid — config files, internal transforms, cases where you'll wrap in try/catch anyway</td></tr>
+        <tr><td><code>.safeParse(data)</code></td><td><code>{ success: true, data }</code></td><td><code>{ success: false, error }</code></td><td>External input where invalid data is normal — request bodies, form submissions, API responses</td></tr>
+        <tr><td><code>.parseAsync(data)</code></td><td>Promise resolving to value</td><td>Rejects</td><td>Schemas with async refinements (§12)</td></tr>
+        <tr><td><code>.safeParseAsync(data)</code></td><td>Promise of <code>{ success, data }</code></td><td>Promise of <code>{ success: false, error }</code></td><td>Async refinements + normal-invalid path</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">parse-and-safe.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> schema = z.<span class="tok-cmd">object</span>({ email: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>() });
+
+<span class="tok-com">// parse — throws on failure</span>
+<span class="tok-key">try</span> {
+  <span class="tok-key">const</span> result = schema.<span class="tok-cmd">parse</span>(input);
+  console.<span class="tok-cmd">log</span>(result.email);
+} <span class="tok-key">catch</span> (err) {
+  <span class="tok-key">if</span> (err <span class="tok-key">instanceof</span> z.ZodError) {
+    console.<span class="tok-cmd">log</span>(err.errors);
+  }
+}
+
+<span class="tok-com">// safeParse — returns a discriminated result</span>
+<span class="tok-key">const</span> result = schema.<span class="tok-cmd">safeParse</span>(input);
+<span class="tok-key">if</span> (result.success) {
+  console.<span class="tok-cmd">log</span>(result.data.email);    <span class="tok-com">// typed</span>
+} <span class="tok-key">else</span> {
+  console.<span class="tok-cmd">log</span>(result.error.errors);  <span class="tok-com">// array of issues</span>
+}</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Rule of thumb</div>
+    <div class="concept-box-text"><p><b><code>parse</code></b> for data you have no reason to doubt — an object you constructed in code, a config file you control, a response from your own service that you're about to use internally. <b><code>safeParse</code></b> for anything you don't control — request bodies from clients, third-party API responses, form submissions, environment variables. Error handling with <code>safeParse</code> is clean; with <code>parse</code> you end up wrapping everything in try/catch.</p></div>
+  </div>
+</section>
+
+<!-- ═══ 11 · INFERENCE ═══ -->
+<section class="section-block" id="infer">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Type inference with z.infer</h2>
+      <p class="section-subtitle">the schema IS the type</p>
+    </div>
+  </div>
+
+  <p>You almost never hand-write a TypeScript interface alongside a Zod schema. Use <code>z.infer</code> instead.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">infer.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> userSchema = z.<span class="tok-cmd">object</span>({
+  id:        z.<span class="tok-cmd">string</span>().<span class="tok-cmd">uuid</span>(),
+  email:     z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(),
+  age:       z.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">positive</span>(),
+  nickname:  z.<span class="tok-cmd">string</span>().<span class="tok-cmd">optional</span>(),
+  role:      z.<span class="tok-cmd">enum</span>([<span class="tok-str">'user'</span>, <span class="tok-str">'admin'</span>]),
+  createdAt: z.<span class="tok-cmd">date</span>(),
+});
+
+<span class="tok-key">type</span> <span class="tok-type">User</span> = z.<span class="tok-cmd">infer</span>&lt;<span class="tok-key">typeof</span> userSchema&gt;;
+<span class="tok-com">// type User = {</span>
+<span class="tok-com">//   id: string;</span>
+<span class="tok-com">//   email: string;</span>
+<span class="tok-com">//   age: number;</span>
+<span class="tok-com">//   nickname?: string;</span>
+<span class="tok-com">//   role: 'user' | 'admin';</span>
+<span class="tok-com">//   createdAt: Date;</span>
+<span class="tok-com">// }</span>
+
+<span class="tok-com">// Input type — useful when transforms change the shape</span>
+<span class="tok-key">type</span> <span class="tok-type">UserInput</span> = z.<span class="tok-cmd">input</span>&lt;<span class="tok-key">typeof</span> userSchema&gt;;
+<span class="tok-key">type</span> <span class="tok-type">UserOutput</span> = z.<span class="tok-cmd">output</span>&lt;<span class="tok-key">typeof</span> userSchema&gt;;
+<span class="tok-com">// for schemas without transforms, input === output</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Don't duplicate types.</strong> If you have both <code>interface User { ... }</code> and <code>const userSchema = z.object({ ... })</code>, they will drift. One of them will eventually be updated and the other won't. Delete the interface and use <code>z.infer</code>. This is the single most important discipline when using Zod in a TypeScript codebase.</div>
+  </div>
+</section>
+
+<!-- ═══ 12 · REFINE ═══ -->
+<section class="section-block" id="refine">
+  <div class="section-header">
+    <div class="section-num-big">12</div>
+    <div>
+      <h2 class="section-title">refine &amp; superRefine</h2>
+      <p class="section-subtitle">custom validation logic · multiple issues · field-level paths</p>
+    </div>
+  </div>
+
+  <p>Built-in validations cover formats. When you need <em>logic</em> — password match, cross-field checks, business rules — you add a refinement.</p>
+
+  <h3>refine — one custom rule</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">refine.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// single rule</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">refine</span>(
+  (val) =&gt; val === <span class="tok-str">'admin'</span> || val === <span class="tok-str">'user'</span>,
+  { <span class="tok-cmd">message</span>: <span class="tok-str">'Role must be admin or user'</span> }
+);
+
+<span class="tok-com">// multiple rules, one field</span>
+z.<span class="tok-cmd">string</span>()
+  .<span class="tok-cmd">min</span>(<span class="tok-num">8</span>)
+  .<span class="tok-cmd">refine</span>((pw) =&gt; /[A-Z]/.test(pw), { <span class="tok-cmd">message</span>: <span class="tok-str">'Must contain an uppercase letter'</span> })
+  .<span class="tok-cmd">refine</span>((pw) =&gt; /\d/.test(pw),    { <span class="tok-cmd">message</span>: <span class="tok-str">'Must contain a digit'</span> });
+
+<span class="tok-com">// refine can look at other fields — pass the whole object</span>
+<span class="tok-key">const</span> passwordSchema = z.<span class="tok-cmd">object</span>({
+  password:        z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">8</span>),
+  confirmPassword: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">8</span>),
+}).<span class="tok-cmd">refine</span>((data) =&gt; data.password === data.confirmPassword, {
+  <span class="tok-cmd">message</span>: <span class="tok-str">'Passwords do not match'</span>,
+  <span class="tok-cmd">path</span>:    [<span class="tok-str">'confirmPassword'</span>],   <span class="tok-com">// attach the error to this field</span>
+});</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>The <code>path</code> option is critical for forms.</strong> Without it, a cross-field refinement error attaches to the whole object — <code>errors</code> in react-hook-form shows nothing useful. With <code>path: ['confirmPassword']</code>, the error appears right under the confirm-password input where the user needs to see it.</div>
+  </div>
+
+  <h3>superRefine — multiple issues from one refinement</h3>
+  <p><code>refine</code> adds one error per call. <code>superRefine</code> gives you a raw <code>ctx</code> so you can add as many issues as you need, with per-field paths.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">superRefine.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> passwordSchema = z.<span class="tok-cmd">object</span>({
+  password:        z.<span class="tok-cmd">string</span>(),
+  confirmPassword: z.<span class="tok-cmd">string</span>(),
+}).<span class="tok-cmd">superRefine</span>((data, ctx) =&gt; {
+  <span class="tok-key">if</span> (data.password.length &lt; <span class="tok-num">8</span>) {
+    ctx.<span class="tok-cmd">addIssue</span>({
+      <span class="tok-cmd">code</span>: z.ZodIssueCode.custom,
+      <span class="tok-cmd">message</span>: <span class="tok-str">'Password must be at least 8 characters'</span>,
+      <span class="tok-cmd">path</span>: [<span class="tok-str">'password'</span>],
+    });
+  }
+  <span class="tok-key">if</span> (!/[A-Z]/.test(data.password)) {
+    ctx.<span class="tok-cmd">addIssue</span>({
+      <span class="tok-cmd">code</span>: z.ZodIssueCode.custom,
+      <span class="tok-cmd">message</span>: <span class="tok-str">'Password must contain an uppercase letter'</span>,
+      <span class="tok-cmd">path</span>: [<span class="tok-str">'password'</span>],
+    });
+  }
+  <span class="tok-key">if</span> (data.password !== data.confirmPassword) {
+    ctx.<span class="tok-cmd">addIssue</span>({
+      <span class="tok-cmd">code</span>: z.ZodIssueCode.custom,
+      <span class="tok-cmd">message</span>: <span class="tok-str">'Passwords do not match'</span>,
+      <span class="tok-cmd">path</span>: [<span class="tok-str">'confirmPassword'</span>],
+    });
+  }
+});</code></pre>
+  </div>
+
+  <h3>Async refinements</h3>
+  <p>Check uniqueness against the database (email already taken, username exists) with an async refine:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">async-refine.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> userSchema = z.<span class="tok-cmd">object</span>({
+  email: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(),
+}).<span class="tok-cmd">refine</span>(
+  <span class="tok-key">async</span> (data) =&gt; {
+    <span class="tok-key">const</span> exists = <span class="tok-key">await</span> User.<span class="tok-cmd">findOne</span>({ email: data.email });
+    <span class="tok-key">return</span> !exists;
+  },
+  { <span class="tok-cmd">message</span>: <span class="tok-str">'Email already in use'</span>, <span class="tok-cmd">path</span>: [<span class="tok-str">'email'</span>] }
+);
+
+<span class="tok-com">// MUST use parseAsync / safeParseAsync</span>
+<span class="tok-key">const</span> result = <span class="tok-key">await</span> userSchema.<span class="tok-cmd">safeParseAsync</span>(data);</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-refine-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">A cross-field validation fails ("passwords do not match"), but the error doesn't show under any input in your form. What's missing?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-refine-1', this, false)"><span class="opt-letter">A</span>Nothing — cross-field errors always show under the whole form.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-refine-1', this, true)"><span class="opt-letter">B</span>The <code>path</code> option — without it, the error attaches to the object, not to a field.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-refine-1-feedback"></div>
+    <div class="quiz-explain hidden">Form libraries read errors by field name. Without <code>path</code>, the error is a top-level issue and has no field to display. With <code>path: ['confirmPassword']</code>, RHF puts it on the confirm field.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · TRANSFORM ═══ -->
+<section class="section-block" id="transform">
+  <div class="section-header">
+    <div class="section-num-big">13</div>
+    <div>
+      <h2 class="section-title">transform</h2>
+      <p class="section-subtitle">convert during validation · trim · parse ints · normalise emails</p>
+    </div>
+  </div>
+
+  <p><code>.transform()</code> lets the schema <b>change the value</b> as part of validation. The type of the result is whatever the transform returns, not the input type.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">transform.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// lowercase emails</span>
+<span class="tok-key">const</span> emailSchema = z.<span class="tok-cmd">string</span>()
+  .<span class="tok-cmd">email</span>()
+  .<span class="tok-cmd">transform</span>((s) =&gt; s.<span class="tok-cmd">toLowerCase</span>());
+<span class="tok-com">// input type: string, output type: string</span>
+<span class="tok-com">// parse('AARAV@X.COM') → 'aarav@x.com'</span>
+
+<span class="tok-com">// trim strings</span>
+z.<span class="tok-cmd">string</span>().<span class="tok-cmd">trim</span>();     <span class="tok-com">// shorthand for transform(s =&gt; s.trim())</span>
+
+<span class="tok-com">// parse a number from a string</span>
+<span class="tok-key">const</span> quantitySchema = z.<span class="tok-cmd">string</span>()
+  .<span class="tok-cmd">transform</span>((s) =&gt; <span class="tok-cmd">Number</span>(s))
+  .<span class="tok-cmd">refine</span>((n) =&gt; !<span class="tok-cmd">isNaN</span>(n), { <span class="tok-cmd">message</span>: <span class="tok-str">'Not a number'</span> });
+<span class="tok-com">// input: string, output: number</span>
+
+<span class="tok-com">// convert comma-separated string to array</span>
+<span class="tok-key">const</span> tagsSchema = z.<span class="tok-cmd">string</span>()
+  .<span class="tok-cmd">transform</span>((s) =&gt; s.<span class="tok-cmd">split</span>(<span class="tok-str">','</span>).<span class="tok-cmd">map</span>((x) =&gt; x.<span class="tok-cmd">trim</span>()).<span class="tok-cmd">filter</span>(<span class="tok-cmd">Boolean</span>));
+<span class="tok-com">// parse('a, b, c') → ['a', 'b', 'c']</span></code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Input vs Output types</div>
+    <div class="concept-box-text"><p>When a schema has a transform, the input type and the output type differ:</p><p><code>z.infer&lt;typeof schema&gt;</code> → the <b>output</b> type (what comes out)<br><code>z.input&lt;typeof schema&gt;</code> → the <b>input</b> type (what goes in)</p><p>For a form, <code>useForm</code> needs both: the form's internal values match the input type (e.g. a string the user typed), and the submit handler receives the output type (e.g. the parsed number).</p></div>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Don't transform to a different type in a form field.</strong> If the user is typing into a text input and your schema transforms the string to a number, the input will show a number — but the input's <code>value</code> prop expects a string. React will warn and the input breaks. Use transform for the final submit payload, or use <code>z.coerce</code> with care and pass strings to the input. See §19 for the react-hook-form pattern.</div>
+  </div>
+
+  <div class="quiz-box" id="q-trans-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">You have <code>z.string().transform(s =&gt; Number(s))</code>. What is <code>z.infer&lt;typeof schema&gt;</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-trans-1', this, false)"><span class="opt-letter">A</span><code>string</code> — the input type.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-trans-1', this, true)"><span class="opt-letter">B</span><code>number</code> — the output type, which is what <code>parse</code> returns.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-trans-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>z.infer</code> gives the output type. Use <code>z.input</code> if you need the input type. For a form, both matter — <code>useForm</code>'s values match the input, and the submit handler receives the output.</div>
+  </div>
+</section>
+
+<!-- ═══ 14 · DISCRIMINATED ═══ -->
+<section class="section-block" id="discriminated">
+  <div class="section-header">
+    <div class="section-num-big">14</div>
+    <div>
+      <h2 class="section-title">Discriminated unions</h2>
+      <p class="section-subtitle">the cleanest way to model state, events, API responses</p>
+    </div>
+  </div>
+
+  <p>A discriminated union is a union of object schemas that all share one literal field — the "discriminant". Zod uses that field to pick the right schema immediately, without trying each one in turn.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">discriminated.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> paymentSchema = z.<span class="tok-cmd">discriminatedUnion</span>(<span class="tok-str">'method'</span>, [
+  z.<span class="tok-cmd">object</span>({
+    method: z.<span class="tok-cmd">literal</span>(<span class="tok-str">'card'</span>),
+    cardNumber: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">length</span>(<span class="tok-num">16</span>),
+    cvv:        z.<span class="tok-cmd">string</span>().<span class="tok-cmd">length</span>(<span class="tok-num">3</span>),
+    expiry:     z.<span class="tok-cmd">string</span>().<span class="tok-cmd">regex</span>(/^\d{2}\/\d{2}$/),
+  }),
+  z.<span class="tok-cmd">object</span>({
+    method: z.<span class="tok-cmd">literal</span>(<span class="tok-str">'upi'</span>),
+    upiId:  z.<span class="tok-cmd">string</span>().<span class="tok-cmd">regex</span>(/^[\w.-]+@[\w]+$/),
+  }),
+  z.<span class="tok-cmd">object</span>({
+    method: z.<span class="tok-cmd">literal</span>(<span class="tok-str">'cod'</span>),
+    note:   z.<span class="tok-cmd">string</span>().<span class="tok-cmd">optional</span>(),
+  }),
+]);
+
+<span class="tok-key">type</span> <span class="tok-type">Payment</span> = z.<span class="tok-cmd">infer</span>&lt;<span class="tok-key">typeof</span> paymentSchema&gt;;
+
+<span class="tok-com">// TypeScript narrows automatically</span>
+<span class="tok-key">function</span> <span class="tok-cmd">handle</span>(p: <span class="tok-type">Payment</span>) {
+  <span class="tok-key">switch</span> (p.method) {
+    <span class="tok-key">case</span> <span class="tok-str">'card'</span>: <span class="tok-key">return</span> p.cardNumber;    <span class="tok-com">// TS knows this field exists</span>
+    <span class="tok-key">case</span> <span class="tok-str">'upi'</span>:  <span class="tok-key">return</span> p.upiId;         <span class="tok-com">// and this one</span>
+    <span class="tok-key">case</span> <span class="tok-str">'cod'</span>:  <span class="tok-key">return</span> p.note;          <span class="tok-com">// and this one</span>
+  }
+}</code></pre>
+  </div>
+
+  <h3>Why it beats <code>z.union</code></h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th><code>z.union([A, B, C])</code></th><th><code>z.discriminatedUnion('type', [A, B, C])</code></th></tr></thead>
+      <tbody>
+        <tr><td>Speed</td><td>Tries A, then B, then C</td><td>Looks at the discriminant and picks the right one</td></tr>
+        <tr><td>Error messages</td><td>"Did not match any union member" — vague</td><td>"cardNumber must be 16 characters" — precise</td></tr>
+        <tr><td>Narrowing</td><td>Works, but the compiler can't always tell which member</td><td>Perfect — TypeScript narrows on the discriminant</td></tr>
+        <tr><td>When to use</td><td>Members without a shared literal tag</td><td>Anything that has a shared literal field (almost always)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Where you'll actually use this</div>
+    <div class="concept-box-text"><p>· <b>API responses</b> — <code>{ status: 'success', data } | { status: 'error', message }</code><br>· <b>Form state</b> — <code>{ step: 'input' } | { step: 'processing' } | { step: 'done', id }</code><br>· <b>Events</b> — analytics events with different payloads per type<br>· <b>Payments / checkout</b> — different fields per payment method<br>· <b>Notifications</b> — different data per notification kind</p></div>
+  </div>
+</section>
+
+<!-- ═══ 15 · RECURSIVE ═══ -->
+<section class="section-block" id="recursive">
+  <div class="section-header">
+    <div class="section-num-big">15</div>
+    <div>
+      <h2 class="section-title">Recursive schemas</h2>
+      <p class="section-subtitle">z.lazy · trees, categories, comment threads</p>
+    </div>
+  </div>
+
+  <p>A recursive schema refers to itself. Since you can't use a variable before it's defined, wrap the schema in <code>z.lazy(() =&gt; ...)</code> to defer evaluation.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">recursive.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">type</span> <span class="tok-type">Category</span> = {
+  name:     <span class="tok-type">string</span>;
+  children: <span class="tok-type">Category</span>[];
+};
+
+<span class="tok-key">const</span> categorySchema: z.<span class="tok-type">ZodType</span>&lt;<span class="tok-type">Category</span>&gt; = z.<span class="tok-cmd">lazy</span>(() =&gt;
+  z.<span class="tok-cmd">object</span>({
+    name:     z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">1</span>),
+    children: z.<span class="tok-cmd">array</span>(categorySchema),   <span class="tok-com">// refers to itself</span>
+  })
+);
+
+<span class="tok-com">// Now validates a tree of any depth</span>
+categorySchema.<span class="tok-cmd">parse</span>({
+  name: <span class="tok-str">'Electronics'</span>,
+  children: [
+    { name: <span class="tok-str">'Phones'</span>, children: [{ name: <span class="tok-str">'Android'</span>, children: [] }] },
+    { name: <span class="tok-str">'Laptops'</span>, children: [] },
+  ],
+});</code></pre>
+  </div>
+
+  <h3>Recursive comments</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">comments.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">interface</span> <span class="tok-type">Comment</span> {
+  id:       <span class="tok-type">string</span>;
+  body:     <span class="tok-type">string</span>;
+  author:   <span class="tok-type">string</span>;
+  replies:  <span class="tok-type">Comment</span>[];
+}
+
+<span class="tok-key">const</span> commentSchema: z.<span class="tok-type">ZodType</span>&lt;<span class="tok-type">Comment</span>&gt; = z.<span class="tok-cmd">lazy</span>(() =&gt;
+  z.<span class="tok-cmd">object</span>({
+    id:      z.<span class="tok-cmd">string</span>(),
+    body:    z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">1</span>),
+    author:  z.<span class="tok-cmd">string</span>(),
+    replies: z.<span class="tok-cmd">array</span>(commentSchema),
+  })
+);</code></pre>
+  </div>
+</section>
+
+<!-- ═══ 16 · EFFECTS ═══ -->
+<section class="section-block" id="effects">
+  <div class="section-header">
+    <div class="section-num-big">16</div>
+    <div>
+      <h2 class="section-title">preprocess, coerce &amp; pipe</h2>
+      <p class="section-subtitle">prepare data before validation · run schemas in sequence</p>
+    </div>
+  </div>
+
+  <h3>z.preprocess — prepare data before validation</h3>
+  <p>Useful when the incoming data is almost the right shape. You can convert it into the shape the schema expects before any validators run.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">preprocess.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// empty strings become undefined (so optional() works with form data)</span>
+<span class="tok-key">const</span> optionalString = z.<span class="tok-cmd">preprocess</span>(
+  (val) =&gt; (val === <span class="tok-str">''</span> ? <span class="tok-key">undefined</span> : val),
+  z.<span class="tok-cmd">string</span>().<span class="tok-cmd">optional</span>()
+);
+
+<span class="tok-com">// parse JSON string into an object before validating</span>
+<span class="tok-key">const</span> jsonString = z.<span class="tok-cmd">preprocess</span>(
+  (val) =&gt; {
+    <span class="tok-key">if</span> (<span class="tok-key">typeof</span> val === <span class="tok-str">'string'</span>) {
+      <span class="tok-key">try</span> { <span class="tok-key">return</span> JSON.<span class="tok-cmd">parse</span>(val); } <span class="tok-key">catch</span> { <span class="tok-key">return</span> val; }
+    }
+    <span class="tok-key">return</span> val;
+  },
+  z.<span class="tok-cmd">object</span>({ a: z.<span class="tok-cmd">number</span>() })
+);</code></pre>
+  </div>
+
+  <h3>z.coerce — auto-cast, then validate</h3>
+  <p>For values that come in the wrong type but are trivially convertible — query strings, form fields, headers.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">coerce.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">number</span>().<span class="tok-cmd">parse</span>(<span class="tok-str">'42'</span>);       <span class="tok-com">// 42</span>
+z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">boolean</span>().<span class="tok-cmd">parse</span>(<span class="tok-str">'true'</span>);    <span class="tok-com">// true</span>
+z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">date</span>().<span class="tok-cmd">parse</span>(<span class="tok-str">'2024-01-01'</span>); <span class="tok-com">// Date</span>
+z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">bigint</span>().<span class="tok-cmd">parse</span>(<span class="tok-str">'123'</span>);     <span class="tok-com">// 123n</span>
+
+<span class="tok-com">// Useful for query params and env vars</span>
+<span class="tok-key">const</span> paginationSchema = z.<span class="tok-cmd">object</span>({
+  page:  z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">min</span>(<span class="tok-num">1</span>).<span class="tok-cmd">default</span>(<span class="tok-num">1</span>),
+  limit: z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">max</span>(<span class="tok-num">100</span>).<span class="tok-cmd">default</span>(<span class="tok-num">10</span>),
+});
+
+<span class="tok-com">// Express: req.query is always strings</span>
+paginationSchema.<span class="tok-cmd">parse</span>({ page: <span class="tok-str">'2'</span>, limit: <span class="tok-str">'20'</span> });
+<span class="tok-com">// { page: 2, limit: 20 }</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>z.coerce.number().parse("")</code> returns <code>0</code>.</strong> Because <code>Number("") === 0</code>. That's often not what you want for a form field left empty. Handle it with preprocess (empty string → undefined) or by not coercing on form fields, and using string-based schemas there instead.</div>
+  </div>
+
+  <h3>z.pipe — chain schemas</h3>
+  <p>Pipe runs schema A first, then schema B on A's output. Different from <code>.transform()</code>: you can use a full Zod schema (with its own validations) as the second stage.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">pipe.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// string → parse int → validate int range</span>
+<span class="tok-key">const</span> pageParam = z.<span class="tok-cmd">string</span>()
+  .<span class="tok-cmd">regex</span>(/^\d+$/, <span class="tok-str">'Must be a number'</span>)
+  .<span class="tok-cmd">pipe</span>(z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">min</span>(<span class="tok-num">1</span>));
+
+pageParam.<span class="tok-cmd">parse</span>(<span class="tok-str">'5'</span>);    <span class="tok-com">// 5</span>
+pageParam.<span class="tok-cmd">parse</span>(<span class="tok-str">'abc'</span>);  <span class="tok-com">// throws "Must be a number"</span></code></pre>
+  </div>
+</section>
+
+<!-- ═══ 17 · ERRORS ═══ -->
+<section class="section-block" id="errors">
+  <div class="section-header">
+    <div class="section-num-big">17</div>
+    <div>
+      <h2 class="section-title">Error handling</h2>
+      <p class="section-subtitle">ZodError · flatten · format · field errors · global error map</p>
+    </div>
+  </div>
+
+  <p>When a schema fails, Zod throws (or returns) a <code>ZodError</code> whose <code>.errors</code> property is an array of <code>ZodIssue</code> objects, one per failure. Two helpers turn that into shapes you actually want.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">error-shape.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> schema = z.<span class="tok-cmd">object</span>({
+  email: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(),
+  age:   z.<span class="tok-cmd">number</span>().<span class="tok-cmd">min</span>(<span class="tok-num">18</span>),
+});
+
+<span class="tok-key">const</span> result = schema.<span class="tok-cmd">safeParse</span>({ email: <span class="tok-str">'bad'</span>, age: <span class="tok-num">10</span> });
+<span class="tok-key">if</span> (!result.success) {
+  console.<span class="tok-cmd">log</span>(result.error.errors);
+  <span class="tok-com">// [</span>
+  <span class="tok-com">//   { code: 'invalid_string', path: ['email'], message: 'Invalid email' },</span>
+  <span class="tok-com">//   { code: 'too_small', path: ['age'], minimum: 18, type: 'number', message: 'Number must be greater than or equal to 18' }</span>
+  <span class="tok-com">// ]</span>
+}
+
+<span class="tok-com">// .flatten() — the most useful shape for forms and API responses</span>
+<span class="tok-key">const</span> flat = result.error.<span class="tok-cmd">flatten</span>();
+<span class="tok-com">// {</span>
+<span class="tok-com">//   formErrors: [],</span>
+<span class="tok-com">//   fieldErrors: {</span>
+<span class="tok-com">//     email: ['Invalid email'],</span>
+<span class="tok-com">//     age: ['Number must be greater than or equal to 18'],</span>
+<span class="tok-com">//   }</span>
+<span class="tok-com">// }</span>
+
+<span class="tok-com">// .format() — nested, matching the input shape</span>
+<span class="tok-key">const</span> fmt = result.error.<span class="tok-cmd">format</span>();
+<span class="tok-com">// { _errors: [], email: { _errors: ['Invalid email'] }, age: { _errors: [...] } }</span></code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Helper</th><th>Shape</th><th>Best for</th></tr></thead>
+      <tbody>
+        <tr><td><code>error.errors</code></td><td>Flat array of <code>ZodIssue</code></td><td>Logging, mapping to something custom</td></tr>
+        <tr><td><code>error.flatten()</code></td><td><code>{ formErrors, fieldErrors }</code></td><td><b>Forms</b>, simple API error responses</td></tr>
+        <tr><td><code>error.format()</code></td><td>Nested by field path</td><td>Deeply nested data where you want to display field-by-field</td></tr>
+        <tr><td><code>error.issues</code></td><td>Same as <code>.errors</code> (Zod 4 alias)</td><td>Modern code</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Custom error messages globally</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">global-error-map.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>z.<span class="tok-cmd">setErrorMap</span>((issue, ctx) =&gt; {
+  <span class="tok-key">if</span> (issue.code === z.ZodIssueCode.invalid_type) {
+    <span class="tok-key">if</span> (issue.expected === <span class="tok-str">'string'</span>) {
+      <span class="tok-key">return</span> { <span class="tok-cmd">message</span>: <span class="tok-str">'This field must be text'</span> };
+    }
+  }
+  <span class="tok-key">return</span> { <span class="tok-cmd">message</span>: ctx.defaultError };
+});
+
+<span class="tok-com">// Or configure on a single schema (Zod 4):</span>
+<span class="tok-key">const</span> schema = z.<span class="tok-cmd">object</span>({...}, { <span class="tok-cmd">errorMap</span>: myMap });</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-err-1">
+    <div class="quiz-label">Quick check · 08</div>
+    <div class="quiz-question">You're returning validation errors from an Express API to the frontend. Which shape is most useful?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-err-1', this, true)"><span class="opt-letter">A</span><code>error.flatten().fieldErrors</code> — a map from field name to messages, ready for the frontend to display under each field.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-err-1', this, false)"><span class="opt-letter">B</span>The raw <code>ZodError</code> as-is.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-err-1-feedback"></div>
+    <div class="quiz-explain hidden">The raw error is an array of issues with paths as arrays — awkward to consume. <code>flatten().fieldErrors</code> gives <code>{ email: ['Invalid'], age: ['Too short'] }</code>, which is exactly what both a form and a simple frontend error display need.</div>
+  </div>
+</section>
+
+<!-- ═══ 18 · BACKEND ═══ -->
+<section class="section-block" id="backend">
+  <div class="section-header">
+    <div class="section-num-big">18</div>
+    <div>
+      <h2 class="section-title">Backend: Express with Zod</h2>
+      <p class="section-subtitle">validating body, query, params · a reusable middleware · typed handler</p>
+    </div>
+  </div>
+
+  <p>The pattern that scales: <b>one middleware</b> that takes schemas for <code>body</code>, <code>query</code>, and <code>params</code>, validates each, and passes the typed, parsed data to the handler via <code>req.validated</code>.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/validate.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { z } <span class="tok-key">from</span> <span class="tok-str">'zod'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">validate</span>(schemas) {
+  <span class="tok-key">return</span> (req, res, next) =&gt; {
+    <span class="tok-key">const</span> errors = {};
+
+    <span class="tok-key">for</span> (<span class="tok-key">const</span> source <span class="tok-key">of</span> [<span class="tok-str">'body'</span>, <span class="tok-str">'query'</span>, <span class="tok-str">'params'</span>]) {
+      <span class="tok-key">if</span> (!schemas[source]) <span class="tok-key">continue</span>;
+
+      <span class="tok-key">const</span> result = schemas[source].<span class="tok-cmd">safeParse</span>(req[source]);
+      <span class="tok-key">if</span> (!result.success) {
+        Object.<span class="tok-cmd">assign</span>(errors, result.error.<span class="tok-cmd">flatten</span>().fieldErrors);
+      } <span class="tok-key">else</span> {
+        <span class="tok-key">if</span> (!req.validated) req.validated = {};
+        req.validated[source] = result.data;
+      }
+    }
+
+    <span class="tok-key">if</span> (Object.<span class="tok-cmd">keys</span>(errors).length &gt; <span class="tok-num">0</span>) {
+      <span class="tok-key">return</span> res.<span class="tok-cmd">status</span>(<span class="tok-num">400</span>).<span class="tok-cmd">json</span>({ <span class="tok-cmd">message</span>: <span class="tok-str">'Validation failed'</span>, errors });
+    }
+    <span class="tok-cmd">next</span>();
+  };
+}</code></pre>
+  </div>
+
+  <h3>Using it — a full users route</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/routes/users.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { z } <span class="tok-key">from</span> <span class="tok-str">'zod'</span>;
+<span class="tok-key">import</span> express <span class="tok-key">from</span> <span class="tok-str">'express'</span>;
+<span class="tok-key">import</span> { validate } <span class="tok-key">from</span> <span class="tok-str">'../middleware/validate.js'</span>;
+<span class="tok-key">import</span> User <span class="tok-key">from</span> <span class="tok-str">'../models/User.js'</span>;
+
+<span class="tok-key">const</span> router = express.<span class="tok-cmd">Router</span>();
+
+<span class="tok-key">const</span> createUserSchema = z.<span class="tok-cmd">object</span>({
+  name:     z.<span class="tok-cmd">string</span>().<span class="tok-cmd">trim</span>().<span class="tok-cmd">min</span>(<span class="tok-num">2</span>).<span class="tok-cmd">max</span>(<span class="tok-num">80</span>),
+  email:    z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>().<span class="tok-cmd">transform</span>(s =&gt; s.<span class="tok-cmd">toLowerCase</span>()),
+  password: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">8</span>).<span class="tok-cmd">regex</span>(/[A-Z]/).<span class="tok-cmd">regex</span>(/\d/),
+  age:      z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">min</span>(<span class="tok-num">0</span>).<span class="tok-cmd">max</span>(<span class="tok-num">150</span>).<span class="tok-cmd">optional</span>(),
+});
+
+<span class="tok-key">const</span> listQuerySchema = z.<span class="tok-cmd">object</span>({
+  page:  z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">min</span>(<span class="tok-num">1</span>).<span class="tok-cmd">default</span>(<span class="tok-num">1</span>),
+  limit: z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">number</span>().<span class="tok-cmd">int</span>().<span class="tok-cmd">min</span>(<span class="tok-num">1</span>).<span class="tok-cmd">max</span>(<span class="tok-num">100</span>).<span class="tok-cmd">default</span>(<span class="tok-num">20</span>),
+});
+
+<span class="tok-key">const</span> idParamSchema = z.<span class="tok-cmd">object</span>({
+  id: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">regex</span>(/^[a-f\d]{24}$/i, <span class="tok-str">'Invalid user id'</span>),
+});
+
+router.<span class="tok-cmd">post</span>(
+  <span class="tok-str">'/users'</span>,
+  <span class="tok-cmd">validate</span>({ <span class="tok-cmd">body</span>: createUserSchema }),
+  <span class="tok-key">async</span> (req, res) =&gt; {
+    <span class="tok-key">const</span> user = <span class="tok-key">await</span> User.<span class="tok-cmd">create</span>(req.validated.body);
+    res.<span class="tok-cmd">status</span>(<span class="tok-num">201</span>).<span class="tok-cmd">json</span>({ user });
+  }
+);
+
+router.<span class="tok-cmd">get</span>(
+  <span class="tok-str">'/users'</span>,
+  <span class="tok-cmd">validate</span>({ <span class="tok-cmd">query</span>: listQuerySchema }),
+  <span class="tok-key">async</span> (req, res) =&gt; {
+    <span class="tok-key">const</span> { page, limit } = req.validated.query;
+    <span class="tok-key">const</span> users = <span class="tok-key">await</span> User.<span class="tok-cmd">find</span>().<span class="tok-cmd">skip</span>((page - <span class="tok-num">1</span>) * limit).<span class="tok-cmd">limit</span>(limit);
+    res.<span class="tok-cmd">json</span>({ users, page, limit });
+  }
+);
+
+router.<span class="tok-cmd">get</span>(
+  <span class="tok-str">'/users/:id'</span>,
+  <span class="tok-cmd">validate</span>({ <span class="tok-cmd">params</span>: idParamSchema }),
+  <span class="tok-key">async</span> (req, res) =&gt; {
+    <span class="tok-key">const</span> user = <span class="tok-key">await</span> User.<span class="tok-cmd">findById</span>(req.validated.params.id);
+    <span class="tok-key">if</span> (!user) <span class="tok-key">return</span> res.<span class="tok-cmd">status</span>(<span class="tok-num">404</span>).<span class="tok-cmd">json</span>({ <span class="tok-cmd">message</span>: <span class="tok-str">'Not found'</span> });
+    res.<span class="tok-cmd">json</span>({ user });
+  }
+);</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Why <code>req.validated</code> instead of overwriting <code>req.body</code></div>
+    <div class="concept-box-text"><p>You could overwrite <code>req.body</code> with <code>result.data</code>. Two reasons to use <code>req.validated</code> instead: (1) the parsed data has transforms applied (lowercased email, coerced numbers), and you want that <b>separate</b> from the raw input for logging and debugging; (2) some middleware runs after yours (rate limiting, logging) and expects the original <code>req.body</code> untouched. Keeping both means you can read the raw value if you need it.</p></div>
+  </div>
+
+  <h3>Environment variables</h3>
+  <p>This is where Zod earns its place immediately. Parsing <code>process.env</code> once at startup catches every missing or malformed environment variable before your app ever serves a request.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/config/env.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { z } <span class="tok-key">from</span> <span class="tok-str">'zod'</span>;
+<span class="tok-key">import</span> dotenv <span class="tok-key">from</span> <span class="tok-str">'dotenv'</span>;
+dotenv.<span class="tok-cmd">config</span>();
+
+<span class="tok-key">const</span> envSchema = z.<span class="tok-cmd">object</span>({
+  NODE_ENV:     z.<span class="tok-cmd">enum</span>([<span class="tok-str">'development'</span>, <span class="tok-str">'test'</span>, <span class="tok-str">'production'</span>]).<span class="tok-cmd">default</span>(<span class="tok-str">'development'</span>),
+  PORT:         z.<span class="tok-cmd">coerce</span>.<span class="tok-cmd">number</span>().<span class="tok-cmd">default</span>(<span class="tok-num">3000</span>),
+  DATABASE_URL: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">url</span>().<span class="tok-cmd">startsWith</span>(<span class="tok-str">'postgres'</span>),
+  JWT_SECRET:   z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">32</span>, <span class="tok-str">'JWT_SECRET must be at least 32 characters'</span>),
+  REDIS_URL:    z.<span class="tok-cmd">string</span>().<span class="tok-cmd">url</span>().<span class="tok-cmd">optional</span>(),
+});
+
+<span class="tok-key">const</span> parsed = envSchema.<span class="tok-cmd">safeParse</span>(process.env);
+
+<span class="tok-key">if</span> (!parsed.success) {
+  console.<span class="tok-cmd">error</span>(<span class="tok-str">'❌ Invalid environment variables:'</span>);
+  console.<span class="tok-cmd">error</span>(parsed.error.<span class="tok-cmd">flatten</span>().fieldErrors);
+  process.<span class="tok-cmd">exit</span>(<span class="tok-num">1</span>);
+}
+
+<span class="tok-key">export const</span> env = parsed.data;</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Fail fast.</strong> This file is imported once at startup. If <code>JWT_SECRET</code> is missing or too short, the process exits before serving a request. Without this, your app would run fine until the first login attempt, then crash — the "silent failure" that takes hours to debug.</div>
+  </div>
+
+  <div class="quiz-box" id="q-back-1">
+    <div class="quiz-label">Quick check · 09</div>
+    <div class="quiz-question">Why is validating <code>req.body</code> with Zod better than trusting the TypeScript <code>Body</code> type?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-back-1', this, true)"><span class="opt-letter">A</span>Because TypeScript types don't exist at runtime — the body could be anything the client sent. Zod checks it before it reaches business logic.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-back-1', this, false)"><span class="opt-letter">B</span>Because Zod is faster than TypeScript.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-back-1-feedback"></div>
+    <div class="quiz-explain hidden">The compiler can't know what arrives over HTTP. Zod is the runtime gatekeeper that makes the TypeScript type actually true — the handler can trust the parsed data because Zod verified it.</div>
+  </div>
+</section>
+
+<!-- ═══ 19 · FRONTEND ═══ -->
+<section class="section-block" id="frontend">
+  <div class="section-header">
+    <div class="section-num-big">19</div>
+    <div>
+      <h2 class="section-title">Frontend: React + react-hook-form</h2>
+      <p class="section-subtitle">zodResolver · typed form values · per-field errors</p>
+    </div>
+  </div>
+
+  <p>The standard integration is <code>@hookform/resolvers/zod</code>. It turns a Zod schema into a resolver that react-hook-form uses for validation, and it wires per-field errors automatically.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>npm install react-hook-form @hookform/resolvers zod</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">RegisterForm.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useForm } <span class="tok-key">from</span> <span class="tok-str">'react-hook-form'</span>;
+<span class="tok-key">import</span> { zodResolver } <span class="tok-key">from</span> <span class="tok-str">'@hookform/resolvers/zod'</span>;
+<span class="tok-key">import</span> { z } <span class="tok-key">from</span> <span class="tok-str">'zod'</span>;
+
+<span class="tok-key">const</span> schema = z.<span class="tok-cmd">object</span>({
+  name:     z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">2</span>, <span class="tok-str">'Name must be at least 2 characters'</span>),
+  email:    z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(<span class="tok-str">'Enter a valid email'</span>),
+  password: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">8</span>, <span class="tok-str">'Password must be at least 8 characters'</span>),
+  confirm:  z.<span class="tok-cmd">string</span>(),
+}).<span class="tok-cmd">refine</span>((d) =&gt; d.password === d.confirm, {
+  <span class="tok-cmd">message</span>: <span class="tok-str">'Passwords do not match'</span>,
+  <span class="tok-cmd">path</span>: [<span class="tok-str">'confirm'</span>],
+});
+
+<span class="tok-key">type</span> <span class="tok-type">RegisterInput</span> = z.<span class="tok-cmd">infer</span>&lt;<span class="tok-key">typeof</span> schema&gt;;
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">RegisterForm</span>() {
+  <span class="tok-key">const</span> {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = <span class="tok-cmd">useForm</span>&lt;<span class="tok-type">RegisterInput</span>&gt;({
+    <span class="tok-cmd">resolver</span>: <span class="tok-cmd">zodResolver</span>(schema),
+    <span class="tok-cmd">mode</span>: <span class="tok-str">'onTouched'</span>,
+  });
+
+  <span class="tok-key">const</span> onSubmit = <span class="tok-key">async</span> (data: <span class="tok-type">RegisterInput</span>) =&gt; {
+    <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/auth/register'</span>, data);
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input {...register(<span class="tok-str">'name'</span>)} /&gt;
+      {errors.name &amp;&amp; &lt;p&gt;{errors.name.message}&lt;/p&gt;}
+
+      &lt;input {...register(<span class="tok-str">'email'</span>)} /&gt;
+      {errors.email &amp;&amp; &lt;p&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;input type=<span class="tok-str">"password"</span> {...register(<span class="tok-str">'password'</span>)} /&gt;
+      {errors.password &amp;&amp; &lt;p&gt;{errors.password.message}&lt;/p&gt;}
+
+      &lt;input type=<span class="tok-str">"password"</span> {...register(<span class="tok-str">'confirm'</span>)} /&gt;
+      {errors.confirm &amp;&amp; &lt;p&gt;{errors.confirm.message}&lt;/p&gt;}
+
+      &lt;button disabled={isSubmitting}&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h3>Displaying server-side errors</h3>
+  <p>Zod validates on the client, but the server also validates. When the server says "email already taken", you need to display it on the same field.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">server-error.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> { register, handleSubmit, setError, formState: { errors } } = <span class="tok-cmd">useForm</span>({
+  <span class="tok-cmd">resolver</span>: <span class="tok-cmd">zodResolver</span>(schema),
+});
+
+<span class="tok-key">const</span> onSubmit = <span class="tok-key">async</span> (data) =&gt; {
+  <span class="tok-key">try</span> {
+    <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/auth/register'</span>, data);
+  } <span class="tok-key">catch</span> (err) {
+    <span class="tok-key">const</span> serverErrors = err.response?.data?.errors;   <span class="tok-com">// { email: ['Email already in use'] }</span>
+    <span class="tok-key">if</span> (serverErrors) {
+      <span class="tok-key">for</span> (<span class="tok-key">const</span> [field, messages] <span class="tok-key">of</span> Object.<span class="tok-cmd">entries</span>(serverErrors)) {
+        <span class="tok-cmd">setError</span>(field, { <span class="tok-cmd">message</span>: messages[<span class="tok-num">0</span>] });
+      }
+    }
+  }
+};</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Two layers of validation, one schema</div>
+    <div class="concept-box-text"><p>The <b>client</b> validates for UX — instant feedback, no round-trip. The <b>server</b> validates for trust — the client can be bypassed. Both use the <b>same schema</b>, imported from a shared file. The client can't send something the server rejects for format reasons; the server catches everything the client couldn't (like uniqueness against the database).</p></div>
+  </div>
+</section>
+
+<!-- ═══ 20 · SHARED ═══ -->
+<section class="section-block" id="shared">
+  <div class="section-header">
+    <div class="section-num-big">20</div>
+    <div>
+      <h2 class="section-title">Shared schemas — one source of truth</h2>
+      <p class="section-subtitle">monorepo vs shared folder · the pattern that eliminates drift</p>
+    </div>
+  </div>
+
+  <p>This is the payoff. In a MERN app with separate frontend and backend, the shared schemas folder is what stops the two sides from drifting.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">shared/</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>shared/
+├── package.json
+└── src/
+    ├── user.ts
+    └── post.ts
+
+backend/
+├── package.json       <span class="tok-com">// depends on: "@myapp/shared": "workspace:*"</span>
+└── src/
+    └── routes/
+
+frontend/
+├── package.json       <span class="tok-com">// depends on: "@myapp/shared": "workspace:*"</span>
+└── src/</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">shared/src/user.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { z } <span class="tok-key">from</span> <span class="tok-str">'zod'</span>;
+
+<span class="tok-key">export const</span> createUserSchema = z.<span class="tok-cmd">object</span>({
+  name:     z.<span class="tok-cmd">string</span>().<span class="tok-cmd">trim</span>().<span class="tok-cmd">min</span>(<span class="tok-num">2</span>, <span class="tok-str">'Name must be at least 2 characters'</span>),
+  email:    z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(<span class="tok-str">'Enter a valid email'</span>).<span class="tok-cmd">transform</span>(s =&gt; s.<span class="tok-cmd">toLowerCase</span>()),
+  password: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">8</span>, <span class="tok-str">'Password must be at least 8 characters'</span>),
+});
+
+<span class="tok-key">export type</span> <span class="tok-type">CreateUserInput</span> = z.<span class="tok-cmd">input</span>&lt;<span class="tok-key">typeof</span> createUserSchema&gt;;
+<span class="tok-key">export type</span> <span class="tok-type">CreateUserOutput</span> = z.<span class="tok-cmd">output</span>&lt;<span class="tok-key">typeof</span> createUserSchema&gt;;</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">backend/route.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { createUserSchema } <span class="tok-key">from</span> <span class="tok-str">'@myapp/shared/user'</span>;
+
+router.<span class="tok-cmd">post</span>(<span class="tok-str">'/users'</span>, <span class="tok-cmd">validate</span>({ <span class="tok-cmd">body</span>: createUserSchema }), <span class="tok-key">async</span> (req, res) =&gt; {
+  <span class="tok-key">const</span> user = <span class="tok-key">await</span> User.<span class="tok-cmd">create</span>(req.validated.body);
+  res.<span class="tok-cmd">json</span>(user);
+});</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">frontend/RegisterForm.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { createUserSchema, <span class="tok-key">type</span> <span class="tok-type">CreateUserInput</span> } <span class="tok-key">from</span> <span class="tok-str">'@myapp/shared/user'</span>;
+
+<span class="tok-key">const</span> { register, handleSubmit, formState: { errors } } = <span class="tok-cmd">useForm</span>&lt;<span class="tok-type">CreateUserInput</span>&gt;({
+  <span class="tok-cmd">resolver</span>: <span class="tok-cmd">zodResolver</span>(createUserSchema),
+});</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">What this achieves</div>
+    <div class="concept-box-text"><p>The exact same schema drives: the client form validation, the client's TypeScript type, the server's request validation, and the server's TypeScript type. Change <code>min(2)</code> to <code>min(3)</code> in the shared file, and both sides update at the next build. There is no "the frontend allows 2 characters but the server requires 3" bug — ever.</p></div>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Don't put frontend-only or backend-only logic in the shared schema.</strong> The shared schema must contain only the shape and rules that both sides agree on. Uniqueness checks (which require the database), password hashing, and access control belong on the backend. If a rule is truly frontend-only (like "confirm passwords match" if you never check it server-side), keep it in the frontend form schema, and merge it with the shared schema using <code>.extend()</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 21 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">21</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Hand-writing an interface alongside a schema</td><td>They drift over time</td><td><code>z.infer</code> from the schema</td></tr>
+        <tr><td>Using <code>parse</code> for user input without try/catch</td><td>Uncaught exception crashes the request</td><td><code>safeParse</code> for external input</td></tr>
+        <tr><td>Zod schema default strips extra fields</td><td>Silent removal — sometimes surprising</td><td>Aware of this. Use <code>.strict()</code> to error instead, <code>.passthrough()</code> to keep</td></tr>
+        <tr><td><code>z.coerce.number()</code> on <code>""</code></td><td>Returns <code>0</code> — not what you expect for an empty form field</td><td>Preprocess empty strings to undefined, or use <code>z.string()</code> for form fields</td></tr>
+        <tr><td>Forgetting <code>path</code> in cross-field refinements</td><td>Error has no field — form shows nothing</td><td><code>path: ['confirmPassword']</code></td></tr>
+        <tr><td>Using <code>z.union</code> instead of <code>z.discriminatedUnion</code></td><td>Slow validation, vague error messages, poor narrowing</td><td>Discriminated union when a shared tag exists</td></tr>
+        <tr><td>Not using <code>safeParseAsync</code> for async refine</td><td>"Async refinement in sync parse" throws</td><td><code>safeParseAsync</code> / <code>parseAsync</code></td></tr>
+        <tr><td>Transforming a form field's value</td><td>Input shows the transformed value — breaks controlled inputs</td><td>Use <code>z.input</code> for the form type, do transforms server-side</td></tr>
+        <tr><td>Duplicating validation rules on client and server</td><td>Client allows what server rejects, or vice versa</td><td>Share the schema; extend per-side if needed</td></tr>
+        <tr><td>Deep <code>.optional()</code> everywhere</td><td>You lose the shape — every consumer needs null checks</td><td>Only optional what's genuinely optional</td></tr>
+        <tr><td>Validating environment variables lazily</td><td>Missing <code>JWT_SECRET</code> crashes on first login, hours later</td><td>Validate <code>process.env</code> at startup, exit on failure</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Zod's default strip is a security feature.</strong> If you define <code>z.object({ name, email })</code> and the client sends <code>{ name, email, role: 'admin', isVerified: true }</code>, those extra fields are <b>removed</b> before your handler sees them. This prevents mass assignment attacks. Never use <code>.passthrough()</code> on a schema whose output you feed into <code>User.create()</code> — you'll let clients set fields they shouldn't.</div>
+</div>
+
+<!-- ═══ 22 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">22</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is Zod, and what does it solve?</span></summary><div class="qa-body"><p>A TypeScript-first schema declaration library. It validates data at runtime and infers TypeScript types from the same schema. It solves the gap between "TypeScript knows the type" and "data at runtime is guaranteed to match" — the gap that exists because TypeScript types are erased during compilation. With Zod, one definition gives both the compile-time type and the runtime check.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>How does Zod work with TypeScript?</span></summary><div class="qa-body"><p>You define a schema, and <code>z.infer&lt;typeof schema&gt;</code> gives you the TypeScript type. The schema is the single source of truth — both the runtime behaviour and the compile-time type come from it. Change the schema, and the type changes. No drift.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>What's the difference between parse and safeParse?</span></summary><div class="qa-body"><p><code>parse</code> returns the parsed value or throws a <code>ZodError</code>. <code>safeParse</code> returns a discriminated result — <code>{ success: true, data }</code> or <code>{ success: false, error }</code>. Use <code>safeParse</code> for external input (request bodies, form submissions) because invalid data is normal and shouldn't throw. Use <code>parse</code> for internal data you expect to be valid, when you're already in a try/catch.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What's the difference between optional, nullable, and nullish?</span></summary><div class="qa-body"><p><code>.optional()</code> allows the value or <code>undefined</code> (or the key missing). <code>.nullable()</code> allows the value or <code>null</code>. <code>.nullish()</code> allows the value, <code>null</code>, or <code>undefined</code>. They're separate concerns; conflating them is the most common Zod mistake.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>What does z.object do with extra fields by default?</span></summary><div class="qa-body"><p>It <b>strips</b> them — they're silently removed from the parsed output. This is the default and it's a security feature: if your schema is <code>{ name, email }</code> and the client sends <code>{ name, email, role: 'admin' }</code>, <code>role</code> never reaches your handler. Use <code>.strict()</code> to error on extras, or <code>.passthrough()</code> to keep them (be careful with the latter).</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>How would you validate a form in React using Zod?</span></summary><div class="qa-body"><p>Use <code>react-hook-form</code> with <code>zodResolver(schema)</code>. Register fields with <code>register('fieldName')</code>. RHF runs the schema on submit (and on change if <code>mode</code> says so), populates <code>formState.errors</code> from the Zod issues, and calls your submit handler with the parsed data if valid. Cross-field refinements work as long as you add <code>path</code> so the error lands on the right field.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>How would you validate a request body in Express using Zod?</span></summary><div class="qa-body"><p>Write a middleware that takes schemas for <code>body</code>, <code>query</code>, <code>params</code>. For each, <code>safeParse</code> the corresponding <code>req</code> property. If it fails, respond <code>400</code> with <code>error.flatten().fieldErrors</code>. If it passes, attach the parsed data to <code>req.validated</code> and call <code>next()</code>. The handler reads <code>req.validated.body</code> and can trust it's typed and valid.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>What is a discriminated union, and why is it better than a plain union?</span></summary><div class="qa-body"><p>A union of object schemas that all have a shared literal field (the discriminant, like <code>type</code> or <code>method</code>). Zod reads that field to pick the right schema — faster, better error messages ("cardNumber must be 16 chars" instead of "did not match any union member"), and TypeScript narrows perfectly on the discriminant. Use it whenever members have a shared literal tag.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>What's the difference between refine and transform?</span></summary><div class="qa-body"><p><code>refine</code> adds a <b>rule</b> — it returns a boolean and either passes or adds an error. The value is unchanged. <code>transform</code> <b>changes the value</b> — the schema's output type becomes whatever the transform returns. Often you use both: transform first (e.g. trim, lowercase), then refine (e.g. "must contain a digit").</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>How do you handle async validation (like checking if an email is already taken)?</span></summary><div class="qa-body"><p>Use <code>.refine(async (data) =&gt; ..., { message, path })</code>. Then <code>parseAsync</code> or <code>safeParseAsync</code> — sync <code>parse</code> throws on async refinements. On the frontend with react-hook-form + zodResolver, the resolver already awaits async refinements. But beware: async refinements run on every validation pass, so debounce the input or do the check in the submit handler to avoid hammering the DB.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>What is <code>z.input</code> vs <code>z.infer</code>?</span></summary><div class="qa-body"><p><code>z.infer&lt;T&gt;</code> (aka <code>z.output</code>) is the type that comes <em>out</em> of <code>parse</code> — after transforms. <code>z.input&lt;T&gt;</code> is the type that goes <em>in</em>. When a schema has transforms, they differ. In a form, you care about both: <code>useForm</code>'s values type is the input, the submit payload is the output. Most of the time (no transforms), they're identical.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>How do you share schemas between frontend and backend?</span></summary><div class="qa-body"><p>Put them in a shared package (monorepo workspace, or a folder published as a private npm package). Both the frontend and backend import from it. The client uses <code>zodResolver(schema)</code> for forms; the backend uses the same schema in a validation middleware. Changes to the schema update both sides, eliminating the "client allows X, server requires Y" class of bug.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q13</span><span>What is <code>.superRefine</code> used for?</span></summary><div class="qa-body"><p>Like <code>refine</code>, but gives you a raw <code>ctx</code> so you can add multiple issues from one refinement, each with its own path. It's the right tool when a single validation rule produces multiple independent errors (e.g. password strength rules), or when the shape of one error depends on another. <code>refine</code> adds one error per call; <code>superRefine</code> adds as many as you like.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q14</span><span>How do you validate environment variables with Zod?</span></summary><div class="qa-body"><p>Define a schema for the env vars you need, <code>safeParse(process.env)</code> at startup, and if it fails, log the errors and exit the process. Export the parsed object typed. This catches missing or malformed env vars before your app serves a single request, instead of failing hours later when the first endpoint that needs them is called.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q15</span><span>How would you validate a nested object where some parts are optional?</span></summary><div class="qa-body"><p>Mirror the nesting in the schema. Use <code>.optional()</code> on the nested object itself: <code>z.object({ address: z.object({ street: z.string() }).optional() })</code>. Or use <code>.partial()</code> on the nested schema if all its fields should be optional. Use <code>.deepPartial()</code> if the whole tree should be optional (PATCH payloads). Avoid making everything optional — say what's actually optional.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · TypeScript · Zod</span>
+  <span>schemas · parse · infer · refine · transform · Express · RHF</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+})();
+</script>
+</body>
+</html>

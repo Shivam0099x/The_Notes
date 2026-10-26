@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>npm, pnpm &amp; Yarn — the complete guide · Sheryians</title>
+<meta name="description" content="npm, pnpm, and Yarn explained in depth — dependency storage, lockfiles, speed, disk efficiency, monorepos, and how to choose.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:18ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.pm-card{border:1px solid var(--rule);border-radius:10px;padding:18px 20px;margin:16px 0;background:var(--paper)}
+.pm-card.pm-npm{border-left:4px solid var(--accent3)}
+.pm-card.pm-yarn{border-left:4px solid var(--accent2)}
+.pm-card.pm-pnpm{border-left:4px solid var(--accent)}
+.pm-card h4{margin:0 0 8px;font-family:'Fraunces',Georgia,serif;font-size:16px;font-weight:600;color:var(--ink);text-transform:none;letter-spacing:0}
+.pm-card p{font-size:13.5px;margin:0 0 8px}
+.pm-card p:last-child{margin:0}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Tooling · Node.js · Monorepos</div>
+  <h1><em>npm</em>, <em>pnpm</em> &amp; <em>Yarn</em></h1>
+  <p class="hero-desc">Three package managers, one ecosystem. How each one stores dependencies, why it exists, how fast it is, and — most importantly — how to choose the right one for your project and defend the choice in an interview.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Dependency storage</span>
+    <span class="hero-tag">Lockfiles</span>
+    <span class="hero-tag">Phantom dependencies</span>
+    <span class="hero-tag">Monorepo support</span>
+    <span class="hero-tag">Speed &amp; disk</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · THE PROBLEM ═══ -->
+<section class="section-block" id="why">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">Why package managers matter</h2>
+      <p class="section-subtitle">sourcing · versioning · the two problems every package manager solves</p>
+    </div>
+  </div>
+
+  <p class="lead">Every Node.js project depends on other people's code. A package manager does two things: it <b>sources</b> those dependencies (downloads them from a registry) and it <b>manages their versions</b> (so a build on your laptop matches a build in CI matches a build on your colleague's machine). [citation:2]</p>
+
+  <p>But the way each manager <em>stores</em> those dependencies on disk is where they diverge wildly — and it's the single biggest source of their differences in speed, disk usage, and correctness.</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The three files you must know</div>
+    <div class="concept-box-text"><p><code>package.json</code> — declares your dependencies (ranges, not exact versions).<br><code>package-lock.json</code> / <code>yarn.lock</code> / <code>pnpm-lock.yaml</code> — pins the exact versions of every dependency <em>and their transitive dependencies</em> so installs are reproducible.<br><code>node_modules/</code> — the actual files on disk. Never commit it.</p></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Problem</th><th>What a manager does</th></tr></thead>
+      <tbody>
+        <tr><td>Downloading dependencies</td><td>Fetches from the npm registry (or a mirror), caches them</td></tr>
+        <tr><td>Version consistency</td><td>A lockfile records exact resolved versions — everyone installs the same tree</td></tr>
+        <tr><td>Deduplication</td><td>Multiple packages may need the same dependency — the manager decides how many copies exist</td></tr>
+        <tr><td>Isolation</td><td>Can your code import a package it never declared? This is the "phantom dependency" problem</td></tr>
+        <tr><td>Monorepos</td><td>Managing several packages in one repo, linked together</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 02 · NPM ═══ -->
+<section class="section-block" id="npm">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">npm — the default</h2>
+      <p class="section-subtitle">the original · flat node_modules · phantom dependencies</p>
+    </div>
+  </div>
+
+  <div class="pm-card pm-npm">
+    <h4>What it is</h4>
+    <p>npm ships with Node.js. Every Node developer has it. It's the oldest (2010), the largest ecosystem, and the most universally supported — some tools <em>assume</em> an npm-style <code>node_modules</code> layout. [citation:1][citation:2]</p>
+  </div>
+
+  <h3>How npm stores dependencies — the flat tree</h3>
+  <p>Since npm v3, dependencies are <b>hoisted</b> to the top of <code>node_modules</code> whenever possible. If you install package A that depends on lodash, and package B that also depends on lodash, npm will put <em>one</em> lodash at the top and both A and B will use it. [citation:15]</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">npm's flat node_modules</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>node_modules/
+├── A/
+├── B/
+└── lodash/        <span class="tok-com">// one copy, shared by A and B</span></code></pre>
+  </div>
+
+  <p>This solved the old npm v2 problem where nested <code>node_modules</code> folders made paths so deep that Windows couldn't handle them. But it created a new problem: <b>phantom dependencies</b>.</p>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Phantom dependencies.</strong> Because everything is hoisted, your code can <code>import lodash from 'lodash'</code> even if you never declared lodash in your <code>package.json</code> — because some other package installed it and hoisted it. It works until that other package changes or removes lodash, and then your code breaks with no obvious reason. [citation:5][citation:15]</p></div>
+  </div>
+
+  <h3>Where npm does well</h3>
+  <ul>
+    <li><b>Zero setup</b> — it's already there.</li>
+    <li><b>Universal compatibility</b> — every tool, every CI, every tutorial assumes npm works.</li>
+    <li><b>Workspaces</b> — npm has native workspace support since v7, though less feature-rich than Yarn's or pnpm's. [citation:7]</li>
+    <li><b>Predictable</b> — the flat layout is what most of the ecosystem was built against.</li>
+  </ul>
+
+  <h3>Where npm struggles</h3>
+  <ul>
+    <li><b>Slow cold installs</b> — it downloads and writes more than pnpm, and the flat tree has to be recomputed.</li>
+    <li><b>Disk waste</b> — multi-version dependencies still result in duplicates. The cache helps, but the <code>node_modules</code> folder itself is bloated.</li>
+    <li><b>Phantom dependencies</b> — the flat layout doesn't enforce that you declared what you import.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">npm commands</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>npm install                    <span class="tok-com">// install everything from package.json</span>
+npm install express            <span class="tok-com">// add a dependency</span>
+npm install -D typescript      <span class="tok-com">// add a dev dependency</span>
+npm install -g nodemon         <span class="tok-com">// global install</span>
+npm run dev                    <span class="tok-com">// run a script from package.json</span>
+npm ci                         <span class="tok-com">// clean install from lockfile (CI)</span>
+npx create-react-app my-app    <span class="tok-com">// run a package without installing globally</span></code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong><code>npm ci</code> in CI.</strong> Never run <code>npm install</code> in a CI pipeline — it can modify the lockfile and resolve different versions. <code>npm ci</code> installs exactly what the lockfile says, fails if <code>package.json</code> and the lockfile disagree, and is faster because it skips resolution. </p>
+  </div>
+</section>
+
+<!-- ═══ 03 · YARN ═══ -->
+<section class="section-block" id="yarn">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Yarn — the challenger, then the reinventor</h2>
+      <p class="section-subtitle">Classic vs Berry · PnP · workspaces · resolutions</p>
+    </div>
+  </div>
+
+  <div class="pm-card pm-yarn">
+    <h4>What it is</h4>
+    <p>Yarn was released by Facebook in 2016 to fix npm's problems: slow installs and non-deterministic version resolution. It introduced the <code>yarn.lock</code> lockfile and parallel downloads. Then it evolved. Today "Yarn" means two different things — Classic (v1) and Berry (v2+). [citation:4][citation:10]</p>
+  </div>
+
+  <h3>Yarn Classic (v1) — the npm-but-better era</h3>
+  <p>Yarn v1 uses the same flat <code>node_modules</code> layout as npm, with the same phantom dependency problem. Its advantages were speed (parallel installs, aggressive caching) and deterministic lockfiles. It's been in maintenance mode since 2020. [citation:4]</p>
+
+  <h3>Yarn Berry (v2+) — the reinvention</h3>
+  <p>Berry introduced <b>Plug'n'Play (PnP)</b> as the default install strategy. Instead of writing a <code>node_modules</code> folder, Yarn stores a <code>.pnp.cjs</code> file that maps every dependency to its exact location in the cache, and patches Node's module resolution to use that map. [citation:1][citation:10]</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Yarn PnP — no node_modules</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>Project/
+├── .pnp.cjs               <span class="tok-com">// the resolution map</span>
+├── .yarn/cache/           <span class="tok-com">// the actual packages (can be committed)</span>
+├── package.json
+└── yarn.lock
+
+<span class="tok-com">// No node_modules/ folder at all</span></code></pre>
+  </div>
+
+  <h3>What PnP gives you</h3>
+  <ul>
+    <li><b>No phantom dependencies</b> — the loader enforces your declared tree. If you didn't declare it, you can't import it. [citation:1]</li>
+    <li><b>Zero-installs</b> — commit the cache, and a fresh clone needs no install step at all.</li>
+    <li><b>Speed</b> — no filesystem writes means very fast installs. [citation:1]</li>
+  </ul>
+
+  <h3>What PnP costs you</h3>
+  <ul>
+    <li><b>Ecosystem compatibility.</b> Some tools break because they assume a real <code>node_modules</code> folder. Many teams fall back to Yarn's <code>nodeLinker: node-modules</code> mode, which behaves like npm. [citation:5]</li>
+    <li><b>Debugging is different</b> — you can't open <code>node_modules</code> and look at a package. You use <code>yarn unplug</code> to extract one.</li>
+  </ul>
+
+  <h3>Yarn's monorepo strengths</h3>
+  <p>Yarn Berry has the most opinionated workspace tooling: <b>constraints</b> (lint your entire dependency tree), <b>workspace profiles</b>, the <b>catalog: protocol</b> for sharing versions across workspaces, and a built-in <b>task runner</b> for running commands across packages. [citation:1]</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Yarn commands</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>yarn                           <span class="tok-com">// install</span>
+yarn add express               <span class="tok-com">// add a dependency</span>
+yarn add -D typescript         <span class="tok-com">// dev dependency</span>
+yarn dlx create-react-app      <span class="tok-com">// Berry equivalent of npx</span>
+yarn set version berry         <span class="tok-com">// upgrade a project to Berry</span>
+yarn unplug lodash             <span class="tok-com">// extract a package out of PnP cache</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Which Yarn are you using?</strong> <code>yarn --version</code> — if it says <code>1.x</code>, you're on Classic. If it says <code>2.x</code>, <code>3.x</code>, or <code>4.x</code>, you're on Berry. The audit command changed: Classic uses <code>yarn audit</code>, Berry uses <code>yarn npm audit</code>. A CI pipeline that kept <code>yarn audit</code> after migrating to Berry has been silently doing nothing. [citation:9]</p>
+  </div>
+</section>
+
+<!-- ═══ 04 · PNPM ═══ -->
+<section class="section-block" id="pnpm">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">pnpm — the efficient one</h2>
+      <p class="section-subtitle">content-addressable store · hard links · symlinks · strict by default</p>
+    </div>
+  </div>
+
+  <div class="pm-card pm-pnpm">
+    <h4>What it is</h4>
+    <p>pnpm ("performant npm") takes a fundamentally different approach: it stores every file <b>once</b> in a global content-addressable store, and every project's <code>node_modules</code> contains <b>hard links</b> to those files, arranged into a dependency tree using <b>symlinks</b>. [citation:3][citation:8]</p>
+  </div>
+
+  <h3>How pnpm stores dependencies — the layered approach</h3>
+  <div class="stepper" data-stepper="pnpm-store" data-steps="5">
+    <div class="stepper-head"><span class="stepper-title">pnpm's install in five steps</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">what happens</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">download to global store</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">hard-link into project</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">build nested tree with symlinks</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">symlink top-level deps</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">result</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">isolated, efficient node_modules</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">disk usage</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">global store</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">one copy per version, shared across all projects</div></div>
+            <div class="stat" data-show="2-5"><div class="stat-label">project node_modules</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">hard links — no extra bytes for the file contents</div></div>
+            <div class="stat" data-show="3-5"><div class="stat-label">directory structure</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">symlinks — cheap</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">phantom deps</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">blocked by isolation</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>Every package version is downloaded <b>once</b> to a global content-addressable store (usually under <code>~/.local/share/pnpm/store</code> or similar). Files are identified by their content hash, so the same file is never stored twice. [citation:3]</li>
+      <li>When you install in a project, pnpm doesn't copy files — it creates <b>hard links</b> from the store into a hidden <code>node_modules/.pnpm</code> folder. Hard links share the same inode on disk, so the file contents occupy zero additional space. [citation:8]</li>
+      <li>Inside <code>node_modules/.pnpm</code>, pnpm builds the actual dependency tree using <b>symlinks</b>. Each package's own <code>node_modules</code> contains symlinks to its dependencies, matching Node's module resolution algorithm. [citation:8]</li>
+      <li>Your project's top-level <code>node_modules</code> gets symlinks only to your <em>direct</em> dependencies. That's why pnpm blocks phantom dependencies: if you didn't declare it, there's no symlink at the top level. [citation:8]</li>
+      <li>The result: a <code>node_modules</code> folder that's a fraction of the size (often 50%+ smaller), installs faster (no file copying for already-cached packages), and can't import packages you never declared. The trade-off is a slightly more complex <code>node_modules</code> structure to look at. [citation:5]</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 5</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>Where pnpm does well</h3>
+  <ul>
+    <li><b>Disk efficiency</b> — hard links + global store mean multiple projects share dependency files. [citation:5]</li>
+    <li><b>Speed</b> — the fastest of the three for most cold installs, because there's no file copying for cached packages. [citation:10]</li>
+    <li><b>Strictness</b> — symlink-based isolation prevents phantom dependencies without needing a custom Node loader (unlike Yarn PnP). [citation:1]</li>
+    <li><b>Monorepo support</b> — excellent, with <code>pnpm-workspace.yaml</code> and a catalog for shared versions.</li>
+  </ul>
+
+  <h3>Where pnpm struggles</h3>
+  <ul>
+    <li><b>Compatibility with broken packages.</b> Some packages in the wild import dependencies they didn't declare. pnpm's strictness breaks them. There's a <code>hoist</code> escape hatch, but it reintroduces the problem. [citation:8]</li>
+    <li><b>Not shipped with Node.</b> Requires a separate install (<code>corepack enable</code> or a direct install).</li>
+    <li><b>Symlink-based <code>node_modules</code> can confuse debugging tools</b> that expect real files.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">pnpm commands</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>pnpm install                   <span class="tok-com">// install</span>
+pnpm add express               <span class="tok-com">// add a dependency</span>
+pnpm add -D typescript         <span class="tok-com">// dev dependency</span>
+pnpm dlx create-react-app      <span class="tok-com">// equivalent of npx</span>
+pnpm store path                <span class="tok-com">// where is the global store?</span>
+pnpm store prune               <span class="tok-com">// clean unused packages from the store</span>
+pnpm -w add lodash              <span class="tok-com">// add to the workspace root</span></code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-pnpm-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">Why does pnpm's <code>node_modules</code> use both hard links <em>and</em> symlinks?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-pnpm-1', this, false)"><span class="opt-letter">A</span>Hard links save disk space; symlinks are for performance.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-pnpm-1', this, true)"><span class="opt-letter">B</span>Hard links reuse file contents from the global store without duplicating bytes; symlinks build the dependency tree so Node can resolve modules correctly.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-pnpm-1-feedback"></div>
+    <div class="quiz-explain hidden">Two separate problems: storing files once (solved by hard links to a content-addressable store) and representing a dependency graph on disk (solved by symlinks that mirror Node's resolution). One without the other would break either disk efficiency or correctness.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · HEAD TO HEAD ═══ -->
+<section class="section-block" id="compare">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Head to head</h2>
+      <p class="section-subtitle">storage · speed · disk · phantom deps · monorepos · CI</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>npm</th><th>Yarn Classic (v1)</th><th>Yarn Berry (v2+)</th><th>pnpm</th></tr></thead>
+      <tbody>
+        <tr><td><b>node_modules layout</b></td><td>Flat (hoisted)</td><td>Flat (hoisted)</td><td>PnP (no node_modules) or flat (fallback)</td><td>Nested tree via symlinks + hard links</td></tr>
+        <tr><td><b>Phantom dependencies</b></td><td>Yes — the classic problem</td><td>Yes</td><td>No (PnP enforces declared tree)</td><td>No (symlink isolation)</td></tr>
+        <tr><td><b>Disk efficiency</b></td><td>Low — duplicates across projects</td><td>Low</td><td>High — cache can be shared/committed</td><td><b>Highest</b> — one copy per version, shared across all projects</td></tr>
+        <tr><td><b>Cold install speed</b></td><td>Slowest</td><td>Faster than npm (parallel)</td><td>Fast (PnP), slower if using node_modules fallback</td><td><b>Fastest</b> (no file copying for cached packages)</td></tr>
+        <tr><td><b>Ecosystem compat</b></td><td><b>Perfect</b> — the default</td><td>Perfect</td><td>Good but imperfect (PnP breaks some tools)</td><td>Very good; rare packages that misuse deps can break</td></tr>
+        <tr><td><b>Monorepo tooling</b></td><td>Basic workspaces</td><td>Basic workspaces</td><td><b>Richest</b> — constraints, catalog, task runner</td><td><b>Excellent</b> — workspaces + catalog</td></tr>
+        <tr><td><b>Setup</b></td><td>Built-in</td><td>Separate install</td><td>Separate install + per-project version pinning</td><td>Separate install (or corepack)</td></tr>
+        <tr><td><b>Lockfile</b></td><td><code>package-lock.json</code></td><td><code>yarn.lock</code></td><td><code>yarn.lock</code> (different format)</td><td><code>pnpm-lock.yaml</code></td></tr>
+        <tr><td><b>Active development</b></td><td>Yes</td><td>Maintenance mode since 2020</td><td>Yes</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one-line summary for each</div>
+    <div class="concept-box-text">
+      <p><b>npm</b> — the safe default. Everything works with it, because everything is built for it.</p>
+      <p><b>pnpm</b> — the efficient default. Fastest installs, smallest disk footprint, phantom dependencies blocked. The modern choice for new projects. </p>
+      <p><b>Yarn Berry</b> — the opinionated choice. PnP is elegant when it works, painful when it doesn't. Its monorepo tooling is genuinely best-in-class. [citation:1]</p>
+      <p><b>Yarn Classic</b> — legacy. If you're still on it, the only real reason is inertia.</p>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="q-cmp-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">Which manager solves the phantom dependency problem <em>without</em> requiring a custom Node.js loader?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-cmp-1', this, false)"><span class="opt-letter">A</span>Yarn PnP.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-cmp-1', this, true)"><span class="opt-letter">B</span>pnpm — its symlink isolation enforces declared dependencies using only the filesystem.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-cmp-1-feedback"></div>
+    <div class="quiz-explain hidden">Yarn PnP solves phantom deps by patching Node's module resolution with a loader. pnpm solves it structurally: only declared dependencies get a symlink at the top level, so undeclared imports fail with a normal "module not found" — no loader involved. [citation:1]</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · HOW TO CHOOSE ═══ -->
+<section class="section-block" id="choose">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">How to choose</h2>
+      <p class="section-subtitle">the decision framework · trade-offs · migration</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Your situation</th><th>Best choice</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>New project, no strong constraints</td><td><b>pnpm</b></td><td>Fastest, most disk-efficient, phantom deps blocked. The modern default for new projects. </td></tr>
+        <tr><td>Existing project on npm that works</td><td><b>Stay on npm</b> (or migrate to pnpm if disk/speed matter)</td><td>Don't churn a working pipeline for marginal gains. Migrate only if you have a reason. </td></tr>
+        <tr><td>Large monorepo</td><td><b>pnpm</b> or <b>Yarn Berry</b></td><td>Both have excellent workspace support. Yarn's constraints/catalog are more featureful; pnpm's are simpler and its install speed wins. [citation:1]</td></tr>
+        <tr><td>Docker / low-disk environments</td><td><b>pnpm</b></td><td>Hard links + shared store dramatically reduce image size and build time. [citation:5]</td></tr>
+        <tr><td>Team already knows Yarn Berry and it works</td><td><b>Stay on Yarn Berry</b></td><td>PnP + zero-installs is a legitimately good setup. Don't migrate for the sake of it.</td></tr>
+        <tr><td>Legacy project, old tooling, fragile CI</td><td><b>npm</b></td><td>Maximum compatibility. No surprises. [citation:5]</td></tr>
+        <tr><td>You need to publish packages and want reproducibility</td><td><b>pnpm</b></td><td>Strictness catches missing declarations before you publish.</td></tr>
+        <tr><td>Heavy security/audit requirements</td><td><b>npm</b> or <b>Yarn Berry</b></td><td>Both have mature audit tooling. Remember: <code>yarn npm audit</code> for Berry, <code>yarn audit</code> for Classic. [citation:9]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Migrating</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">npm → pnpm</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>rm -rf node_modules package-lock.json
+pnpm import                    <span class="tok-com">// reads package-lock.json and creates pnpm-lock.yaml</span>
+rm package-lock.json           <span class="tok-com">// after import succeeds</span>
+pnpm install</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Never mix package managers in one project.</strong> If <code>package-lock.json</code>, <code>yarn.lock</code>, and <code>pnpm-lock.yaml</code> all exist, different team members will get different trees depending on which command they run. Pick one, delete the other lockfiles, and add an <code>.npmrc</code> or <code>packageManager</code> field to enforce it. </p>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The trade-off in one sentence</div>
+    <div class="concept-box-text"><p><b>npm</b> trades speed and efficiency for universal compatibility. <b>pnpm</b> trades a slightly unusual <code>node_modules</code> layout for speed, disk savings, and strictness. <b>Yarn Berry</b> trades ecosystem compatibility for purity and monorepo tooling.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-choose-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">A team runs a 15-package monorepo and their CI builds are slow because every job downloads hundreds of MB of dependencies. Which manager is the strongest first choice?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-choose-1', this, true)"><span class="opt-letter">A</span>pnpm — its content-addressable store and hard links mean the same package version is only ever downloaded once per machine, and workspace installs are fast. [citation:5]</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-choose-1', this, false)"><span class="opt-letter">B</span>npm — it's the default, so it must be the fastest for monorepos.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-choose-1-feedback"></div>
+    <div class="quiz-explain hidden">pnpm was built for exactly this. npm's flat tree re-downloads and re-writes more per project. Yarn Berry with a committed cache is also strong, but pnpm's disk savings and install speed make it the safer default for a large repo. [citation:1][citation:5]</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Mixing package managers</td><td>Different team members get different dependency trees</td><td>Pick one, delete other lockfiles, enforce via <code>packageManager</code> field</td></tr>
+        <tr><td><code>npm install</code> in CI</td><td>Can modify the lockfile and resolve different versions</td><td><code>npm ci</code> (or <code>pnpm install --frozen-lockfile</code>, <code>yarn install --immutable</code>)</td></tr>
+        <tr><td>Relying on phantom dependencies</td><td>Code breaks when the hoisting changes</td><td>Declare every package you import. pnpm/PNP will force this</td></tr>
+        <tr><td>Committing <code>node_modules</code></td><td>Huge repo, platform-specific binaries break</td><td>Add to <code>.gitignore</code>. Commit lockfile instead</td></tr>
+        <tr><td>Confusing Yarn Classic and Berry</td><td><code>yarn audit</code> is a no-op on Berry [citation:9]</td><td>Check <code>yarn --version</code>; use <code>yarn npm audit</code> for Berry</td></tr>
+        <tr><td>PnP without checking ecosystem</td><td>Some tools break (they expect a real <code>node_modules</code>)</td><td>Test before adopting; fall back to <code>nodeLinker: node-modules</code> if needed [citation:5]</td></tr>
+        <tr><td>Using <code>pnpm add</code> in a workspace root without <code>-w</code></td><td>Package installed in the wrong place</td><td><code>pnpm -w add</code> for root, <code>pnpm --filter pkg add</code> for a specific workspace</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 08 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>Explain the difference between npm, Yarn, and pnpm.</span></summary><div class="qa-body"><p>All three install Node.js dependencies from the npm registry. <b>npm</b> is the default, using a flat hoisted <code>node_modules</code>. <b>Yarn</b> was built to fix npm's speed and version determinism — Classic (v1) uses a flat layout; Berry (v2+) defaults to Plug'n'Play (no <code>node_modules</code>, a resolution map instead). <b>pnpm</b> uses a global content-addressable store with hard links and symlinks to build a strict, nested <code>node_modules</code>. The core difference is how they store dependencies on disk, which drives their speed, disk usage, and whether phantom dependencies are possible.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>What are phantom dependencies, and which managers prevent them?</span></summary><div class="qa-body"><p>Phantom dependencies are packages your code can import without declaring them in <code>package.json</code>, because another package's dependency was hoisted to the top of <code>node_modules</code>. npm and Yarn Classic have this problem due to flat hoisting. pnpm prevents it through symlink isolation (only declared deps get a top-level link), and Yarn Berry prevents it through PnP's runtime enforcement of the declared tree. [citation:1][citation:5]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>How does pnpm achieve disk savings?</span></summary><div class="qa-body"><p>pnpm stores every package version once in a global content-addressable store. Project installs create <b>hard links</b> from the store into a hidden <code>node_modules/.pnpm</code> directory — hard links share the same inode on disk, so the file content takes zero additional space per project. <b>Symlinks</b> then build the dependency tree structure on top. The result is that ten projects using the same lodash version share one copy of lodash's files. [citation:3][citation:8]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What is Yarn's Plug'n'Play (PnP), and why doesn't everyone use it?</span></summary><div class="qa-body"><p>PnP replaces <code>node_modules</code> with a <code>.pnp.cjs</code> file that maps every dependency to its location in the Yarn cache, plus a Node loader that resolves imports through the map. Benefits: no phantom dependencies, faster installs (no filesystem writes), zero-installs (commit the cache). Downside: some tools assume a real <code>node_modules</code> folder and break. Adopting PnP requires testing your whole toolchain, which many teams won't do. [citation:1][citation:5]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>Why is <code>npm ci</code> preferred over <code>npm install</code> in CI?</span></summary><div class="qa-body"><p><code>npm ci</code> installs exactly what the lockfile specifies, without modifying it, and fails if the lockfile and <code>package.json</code> are out of sync. <code>npm install</code> may update the lockfile and resolve slightly different versions depending on the registry state. <code>npm ci</code> is also faster in CI because it skips resolution. </p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>Which package manager should a new monorepo use?</span></summary><div class="qa-body"><p>pnpm is the strongest default for most monorepos — fast installs, excellent workspace support, and its strictness catches missing dependency declarations early. Yarn Berry is a strong alternative if the team wants PnP's zero-installs and the more opinionated constraint/catalog tooling. npm workspaces work but are less feature-rich and slower at scale. [citation:1]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What's the difference between Yarn Classic and Yarn Berry?</span></summary><div class="qa-body"><p>Classic is v1 — a flat <code>node_modules</code> manager with parallel installs and <code>yarn.lock</code>. It's been in maintenance mode since 2020. Berry is v2+ — a rewrite with PnP as the default, a different lockfile format, built-in Node version management, richer workspace tooling, and different commands (e.g. <code>yarn npm audit</code> instead of <code>yarn audit</code>). They're effectively different tools that share a name. [citation:4][citation:9]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>How would you migrate a project from npm to pnpm?</span></summary><div class="qa-body"><p>Remove <code>node_modules</code> and keep <code>package-lock.json</code> temporarily. Run <code>pnpm import</code> to convert the npm lockfile into <code>pnpm-lock.yaml</code>. Delete <code>package-lock.json</code> and run <code>pnpm install</code>. Add an <code>.npmrc</code> or <code>packageManager</code> field to prevent accidental npm usage. Then update CI to use <code>pnpm install --frozen-lockfile</code>. Watch for phantom dependencies that were working silently before — pnpm will expose them, which is the point.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>Does pnpm use hard links or symlinks? Why both?</span></summary><div class="qa-body"><p>Both, for different reasons. <b>Hard links</b> connect a project's copy of a package file back to the single global store copy, saving disk space — the file content exists once. <b>Symlinks</b> build the dependency graph inside <code>node_modules</code> so Node's resolution algorithm finds the right package for each import. Hard links solve storage; symlinks solve resolution. [citation:8]</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>When would you NOT choose pnpm?</span></summary><div class="qa-body"><p>When the ecosystem compatibility cost outweighs the gains: a legacy project with tools that break on symlinked <code>node_modules</code>, a team already productive on Yarn Berry, or an environment that mandates npm (some hosting platforms assume it). Also when a package you depend on imports dependencies it didn't declare — pnpm will break it, and fixing someone else's package is not your job. [citation:5]</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Tooling · Package Managers</span>
+  <span>npm · Yarn · pnpm · lockfiles · monorepos</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>

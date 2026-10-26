@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>React — the complete note · Sheryians</title>
+<meta name="description" content="React from basics to advanced — JSX, hooks, CRUD with Axios, auth &amp; protected routes, React Router (browser + data), and internals (Fiber, reconciliation, render/commit).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:17ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+.tok-jsx{color:#E06C75}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+.phase{display:flex;gap:10px;align-items:center;padding:10px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;transition:all .3s}
+.phase.hl{background:rgba(200,75,31,.08);border-color:var(--accent)}
+.phase-name{font-weight:600;flex:1;color:var(--ink)}
+.phase-tag{font-size:10px;padding:2px 8px;border-radius:3px;background:var(--paper3);color:var(--muted)}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Frontend · React · MERN</div>
+  <h1><em>React</em> — the whole picture</h1>
+  <p class="hero-desc">From JSX and components to every hook worth knowing, then real CRUD against an Express API with Axios, auth with protected routes, React Router (both browser and data-router), and how React actually works under the hood.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">JSX → Hooks</span>
+    <span class="hero-tag">CRUD with Axios</span>
+    <span class="hero-tag">Auth &amp; protected routes</span>
+    <span class="hero-tag">React Router</span>
+    <span class="hero-tag">Reconciliation &amp; Fiber</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · WHAT ═══ -->
+<section class="section-block" id="what">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">What React is</h2>
+      <p class="section-subtitle">a library for building UI out of components · declarative · the mental model</p>
+    </div>
+  </div>
+
+  <p class="lead">React is a JavaScript library for building user interfaces out of <b>components</b> — small, reusable functions that take inputs (props) and return markup. You describe <em>what</em> the UI should look like for a given state, and React figures out the most efficient way to make the DOM match. That's what "declarative" means.</p>
+
+  <h3>The shift from imperative to declarative</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Imperative (plain JS)</th><th>Declarative (React)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>document.getElementById('c').textContent = count</code>; find the element, change it</td>
+          <td><code>&lt;p&gt;{count}&lt;/p&gt;</code>; just say what it should be</td>
+        </tr>
+        <tr>
+          <td>Remember which nodes need updating in which order</td>
+          <td>Let React decide — it has the full picture</td>
+        </tr>
+        <tr>
+          <td>Bugs from partial updates, stale references</td>
+          <td>Every render is a fresh description of the truth</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one sentence</div>
+    <div class="concept-box-text"><p>A React component is a <b>function that returns UI</b> as a function of its props and state. When state changes, React re-runs the function and reconciles the result with the real DOM, touching only what changed.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-what-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">What does "declarative UI" mean in React?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-what-1', this, false)"><span class="opt-letter">A</span>You write explicit instructions to update each DOM node yourself.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-what-1', this, true)"><span class="opt-letter">B</span>You describe what the UI should look like for the current state, and React updates the DOM to match.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-what-1-feedback"></div>
+    <div class="quiz-explain hidden">Declarative means describing <em>the result</em>, not the steps. React compares the description to what's on screen and updates the difference.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · SETUP ═══ -->
+<section class="section-block" id="setup">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Set up a React app</h2>
+      <p class="section-subtitle">Vite · folder layout · first component</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>npm create vite@latest my-app -- --template react
+<span class="tok-cmd">cd</span> my-app
+npm install
+npm run dev</code></pre>
+  </div>
+
+  <p>Vite is the modern default — fast dev server, instant HMR, no config unless you want it. The starting structure:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">folder layout</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>src/
+├── main.jsx        <span class="tok-com">// entry — mounts &lt;App /&gt; into #root</span>
+├── App.jsx         <span class="tok-com">// root component</span>
+└── components/     <span class="tok-com">// reusable pieces</span></code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/main.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> React <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> ReactDOM <span class="tok-key">from</span> <span class="tok-str">'react-dom/client'</span>;
+<span class="tok-key">import</span> App <span class="tok-key">from</span> <span class="tok-str">'./App'</span>;
+
+ReactDOM.<span class="tok-cmd">createRoot</span>(document.<span class="tok-cmd">getElementById</span>(<span class="tok-str">'root'</span>)).<span class="tok-cmd">render</span>(&lt;App /&gt;);</code></pre>
+  </div>
+</section>
+
+<!-- ═══ 03 · JSX ═══ -->
+<section class="section-block" id="jsx">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">JSX</h2>
+      <p class="section-subtitle">what it compiles to · expressions · conditionals · lists · fragments</p>
+    </div>
+  </div>
+
+  <p>JSX is HTML-looking syntax that compiles to <code>React.createElement()</code> calls. It's not a template language — it's JavaScript, so <em>everything you can do in JS, you can do inside <code>{ }</code></em>.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">jsx-to-js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// This JSX…</span>
+<span class="tok-key">const</span> el = &lt;h1 className=<span class="tok-str">"title"</span>&gt;Hello, {name}!&lt;/h1&gt;;
+
+<span class="tok-com">// …compiles to this</span>
+<span class="tok-key">const</span> el = React.<span class="tok-cmd">createElement</span>(
+  <span class="tok-str">'h1'</span>,
+  { className: <span class="tok-str">'title'</span> },
+  <span class="tok-str">'Hello, '</span>, name, <span class="tok-str">'!'</span>
+);</code></pre>
+  </div>
+
+  <h3>Expression, conditionals, lists</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">jsx.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">Card</span>({ user, isAdmin, tags }) {
+  <span class="tok-key">return</span> (
+    &lt;div className=<span class="tok-str">"card"</span>&gt;
+      {<span class="tok-com">/* expression */</span>}
+      &lt;h2&gt;{user.name.<span class="tok-cmd">toUpperCase</span>()}&lt;/h2&gt;
+
+      {<span class="tok-com">/* ternary */</span>}
+      &lt;p&gt;{isAdmin ? <span class="tok-str">'Admin'</span> : <span class="tok-str">'Member'</span>}&lt;/p&gt;
+
+      {<span class="tok-com">/* && for optional rendering */</span>}
+      {user.age &gt;= <span class="tok-num">18</span> &amp;&amp; &lt;p&gt;Adult&lt;/p&gt;}
+
+      {<span class="tok-com">/* list — each child needs a stable key */</span>}
+      &lt;ul&gt;
+        {tags.<span class="tok-cmd">map</span>(t =&gt; &lt;li key={t.id}&gt;{t.label}&lt;/li&gt;)}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h3>Fragments</h3>
+  <p>A component must return a single root. Use a fragment to return multiple siblings without adding a DOM node:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">fragments.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">return</span> (
+  &lt;&gt;
+    &lt;h1&gt;Title&lt;/h1&gt;
+    &lt;p&gt;Body&lt;/p&gt;
+  &lt;/&gt;
+);</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Three JSX rules you'll forget at least once.</strong> 1) <code>className</code>, not <code>class</code>. 2) Every element must be closed, even <code>&lt;img /&gt;</code> and <code>&lt;br /&gt;</code>. 3) Attribute names are camelCase — <code>onClick</code>, <code>htmlFor</code>, <code>tabIndex</code> — not the HTML lowercase versions.</div>
+  </div>
+
+  <div class="quiz-box" id="q-jsx-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">Why does <code>{items.map(x =&gt; &lt;li&gt;{x}</li&gt;)}</code> produce a React warning?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-jsx-1', this, true)"><span class="opt-letter">A</span>Each <code>&lt;li&gt;</code> is missing a <code>key</code> prop — React needs a stable identity for list items.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-jsx-1', this, false)"><span class="opt-letter">B</span><code>map</code> isn't allowed in JSX.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-jsx-1-feedback"></div>
+    <div class="quiz-explain hidden">Keys let React match items across renders. Without them React falls back to index-based matching, which causes bugs when the list reorders or items are added/removed.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · COMPONENTS ═══ -->
+<section class="section-block" id="components">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Components &amp; props</h2>
+      <p class="section-subtitle">function components · props · children · composition · one-way data flow</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">components.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// A component is just a function. Name it with a capital letter.</span>
+<span class="tok-key">function</span> <span class="tok-cmd">Greeting</span>({ name, emoji = <span class="tok-str">'👋'</span> }) {
+  <span class="tok-key">return</span> &lt;p&gt;Hi {name} {emoji}&lt;/p&gt;;
+}
+
+<span class="tok-com">// Usage — props look like HTML attributes</span>
+&lt;Greeting name=<span class="tok-str">"Aarav"</span> /&gt;
+&lt;Greeting name=<span class="tok-str">"Priya"</span> emoji=<span class="tok-str">"🎉"</span> /&gt;
+
+<span class="tok-com">// children — nested JSX is passed as a prop called `children`</span>
+<span class="tok-key">function</span> <span class="tok-cmd">Card</span>({ title, children }) {
+  <span class="tok-key">return</span> (
+    &lt;div className=<span class="tok-str">"card"</span>&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;div className=<span class="tok-str">"body"</span>&gt;{children}&lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+&lt;Card title=<span class="tok-str">"Hello"</span>&gt;&lt;p&gt;Anything goes here&lt;/p&gt;&lt;/Card&gt;</code></pre>
+  </div>
+
+  <h3>Props are read-only</h3>
+  <p>A component must never mutate its own props. If a child needs to change something, it calls a function passed down by the parent. This is <b>one-way data flow</b> — state always flows from parent to child, changes flow back up via callbacks.</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Composition beats inheritance</div>
+    <div class="concept-box-text"><p>React has no class inheritance for components. Instead, you compose: <code>&lt;Card&gt;</code> takes <code>children</code>, <code>&lt;Layout&gt;</code> takes content in slots. Everything flexible is built from composition, which is simpler and less error-prone than inheritance.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-comp-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">A child component wants to change a value that lives in the parent's state. What should it do?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-comp-1', this, false)"><span class="opt-letter">A</span>Modify the prop directly: <code>props.value = 'new'</code>.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-comp-1', this, true)"><span class="opt-letter">B</span>Call a function prop the parent passed down: <code>props.onChange('new')</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-comp-1-feedback"></div>
+    <div class="quiz-explain hidden">Props are read-only. The parent owns its state. To change it, the parent gives the child a callback that calls the parent's state setter. That's one-way flow with change events bubbling up via function props.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · STATE ═══ -->
+<section class="section-block" id="state">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">State — useState</h2>
+      <p class="section-subtitle">what triggers re-render · functional updates · state is a snapshot</p>
+    </div>
+  </div>
+
+  <p>State is data that changes over time and should trigger a re-render when it does. <code>useState</code> returns the current value and a setter function.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useState.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useState } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">Counter</span>() {
+  <span class="tok-key">const</span> [count, setCount] = <span class="tok-cmd">useState</span>(<span class="tok-num">0</span>);
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;p&gt;{count}&lt;/p&gt;
+      &lt;button onClick={() =&gt; <span class="tok-cmd">setCount</span>(count + <span class="tok-num">1</span>)}&gt;+1&lt;/button&gt;
+      &lt;button onClick={() =&gt; <span class="tok-cmd">setCount</span>(c =&gt; c + <span class="tok-num">1</span>)}&gt;+1 (functional)&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h3>Functional updates — when the new value depends on the old</h3>
+  <p><code>setCount(count + 1)</code> uses the value from the current render. <code>setCount(c =&gt; c + 1)</code> uses the latest value when the update runs. In an event that fires three times in one render, the first adds 1; the second adds 3.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">batching</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// ✗ Ends up +1, because all three use the same `count`</span>
+<span class="tok-cmd">setCount</span>(count + <span class="tok-num">1</span>);
+<span class="tok-cmd">setCount</span>(count + <span class="tok-num">1</span>);
+<span class="tok-cmd">setCount</span>(count + <span class="tok-num">1</span>);
+
+<span class="tok-com">// ✓ Ends up +3, because each sees the previous result</span>
+<span class="tok-cmd">setCount</span>(c =&gt; c + <span class="tok-num">1</span>);
+<span class="tok-cmd">setCount</span>(c =&gt; c + <span class="tok-num">1</span>);
+<span class="tok-cmd">setCount</span>(c =&gt; c + <span class="tok-num">1</span>);</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">State is a snapshot</div>
+    <div class="concept-box-text"><p>Inside a single render, <code>count</code> is constant — it's a snapshot of state at that render. Setting state schedules a new render; it doesn't change <code>count</code> in the current one. If you log <code>count</code> immediately after <code>setCount(count + 1)</code>, you see the old value.</p></div>
+  </div>
+
+  <h3>Updating objects and arrays</h3>
+  <p>Never mutate state directly — always create a new object or array:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">immutable updates</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// object</span>
+<span class="tok-cmd">setUser</span>(u =&gt; ({ ...u, name: <span class="tok-str">'Aarav'</span> }));
+
+<span class="tok-com">// array push</span>
+<span class="tok-cmd">setItems</span>(arr =&gt; [...arr, newItem]);
+
+<span class="tok-com">// array update by index</span>
+<span class="tok-cmd">setItems</span>(arr =&gt; arr.<span class="tok-cmd">map</span>((x, i) =&gt; i === idx ? { ...x, done: <span class="tok-key">true</span> } : x));
+
+<span class="tok-com">// array remove</span>
+<span class="tok-cmd">setItems</span>(arr =&gt; arr.<span class="tok-cmd">filter</span>(x =&gt; x.id !== id));</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-state-1">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">What does this log?</div>
+    <div class="quiz-question"><code>setCount(count + 1); console.log(count);</code></div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-state-1', this, false)"><span class="opt-letter">A</span>The new value.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-state-1', this, true)"><span class="opt-letter">B</span>The old value — <code>count</code> in this render is a snapshot; <code>setCount</code> schedules a new render.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-state-1-feedback"></div>
+    <div class="quiz-explain hidden">The current render is frozen. <code>setCount</code> queues an update that produces a future render with a new <code>count</code>. The local variable doesn't change retroactively.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · EFFECTS ═══ -->
+<section class="section-block" id="effects">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">useEffect — side effects</h2>
+      <p class="section-subtitle">dependencies · cleanup · avoiding loops · what belongs in effects</p>
+    </div>
+  </div>
+
+  <p>An <b>effect</b> is code that runs <em>after</em> the render, for things that reach outside React: fetching data, subscribing to events, timers, DOM APIs. <code>useEffect</code> takes a function and a dependency array.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useEffect patterns</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Run after EVERY render (rarely what you want)</span>
+<span class="tok-cmd">useEffect</span>(() =&gt; { <span class="tok-com">/* ... */</span> });
+
+<span class="tok-com">// Run ONCE on mount</span>
+<span class="tok-cmd">useEffect</span>(() =&gt; { <span class="tok-com">/* fetch initial data */</span> }, []);
+
+<span class="tok-com">// Run on mount AND whenever `userId` changes</span>
+<span class="tok-cmd">useEffect</span>(() =&gt; { <span class="tok-com">/* fetch this user */</span> }, [userId]);
+
+<span class="tok-com">// With cleanup — unsubscribe, cancel, clear</span>
+<span class="tok-cmd">useEffect</span>(() =&gt; {
+  <span class="tok-key">const</span> id = <span class="tok-cmd">setInterval</span>(tick, <span class="tok-num">1000</span>);
+  <span class="tok-key">return</span> () =&gt; <span class="tok-cmd">clearInterval</span>(id);   <span class="tok-com">// runs on unmount AND before next run</span>
+}, []);</code></pre>
+  </div>
+
+  <h3>The dependency array, precisely</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Deps</th><th>Effect runs</th></tr></thead>
+      <tbody>
+        <tr><td>Omitted</td><td>After every render</td></tr>
+        <tr><td><code>[]</code></td><td>Once on mount (and cleanup on unmount)</td></tr>
+        <tr><td><code>[a]</code></td><td>On mount + whenever <code>a</code> changes</td></tr>
+        <tr><td><code>[a, b]</code></td><td>On mount + whenever <code>a</code> or <code>b</code> changes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>The infinite loop.</strong> If you set state inside an effect and that state appears in its own deps, you'll loop forever. <code>useEffect(() =&gt; setX(x + 1), [x])</code> never stops. Fix: remove <code>x</code> from deps if it isn't needed, or use a functional update and only depend on the inputs that actually changed.</div>
+  </div>
+
+  <h3>What NOT to put in an effect</h3>
+  <ul>
+    <li><b>Derived values.</b> If <code>total = items.length</code>, don't store it in state — compute it in the render. State for derived data causes sync bugs.</li>
+    <li><b>Event handlers.</b> Attach them via JSX <code>onClick</code>, not via <code>addEventListener</code> in an effect.</li>
+    <li><b>Fetching on every keystroke.</b> Debounce the value first, then depend on the debounced value.</li>
+  </ul>
+
+  <div class="quiz-box" id="q-eff-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">What happens if you return a cleanup function from <code>useEffect</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-eff-1', this, true)"><span class="opt-letter">A</span>React calls it on unmount AND before the next run of the same effect.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-eff-1', this, false)"><span class="opt-letter">B</span>Only once, when the component unmounts.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-eff-1-feedback"></div>
+    <div class="quiz-explain hidden">Cleanup runs before the next run of the effect, and on unmount. That's how subscriptions stay correct across dep changes — old subscription is torn down, new one is set up.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · HOOKS TOUR ═══ -->
+<section class="section-block" id="hooks">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">The hooks tour</h2>
+      <p class="section-subtitle">useRef · useReducer · useMemo · useCallback · useContext · custom hooks</p>
+    </div>
+  </div>
+
+  <h3>useRef — a value that persists but doesn't trigger re-renders</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useRef.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// DOM ref</span>
+<span class="tok-key">const</span> inputRef = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+&lt;input ref={inputRef} /&gt;
+&lt;button onClick={() =&gt; inputRef.current.<span class="tok-cmd">focus</span>()}&gt;Focus&lt;/button&gt;
+
+<span class="tok-com">// Mutable box that survives renders</span>
+<span class="tok-key">const</span> renderCount = <span class="tok-cmd">useRef</span>(<span class="tok-num">0</span>);
+renderCount.current += <span class="tok-num">1</span>;   <span class="tok-com">// no re-render</span></code></pre>
+  </div>
+
+  <h3>useReducer — for complex state transitions</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useReducer.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">reducer</span>(state, action) {
+  <span class="tok-key">switch</span> (action.type) {
+    <span class="tok-key">case</span> <span class="tok-str">'increment'</span>: <span class="tok-key">return</span> { count: state.count + <span class="tok-num">1</span> };
+    <span class="tok-key">case</span> <span class="tok-str">'decrement'</span>: <span class="tok-key">return</span> { count: state.count - <span class="tok-num">1</span> };
+    <span class="tok-key">case</span> <span class="tok-str">'reset'</span>:     <span class="tok-key">return</span> { count: <span class="tok-num">0</span> };
+    <span class="tok-key">default</span>: <span class="tok-key">return</span> state;
+  }
+}
+
+<span class="tok-key">const</span> [state, dispatch] = <span class="tok-cmd">useReducer</span>(reducer, { count: <span class="tok-num">0</span> });
+<span class="tok-cmd">dispatch</span>({ type: <span class="tok-str">'increment'</span> });</code></pre>
+  </div>
+  <p>Use <code>useReducer</code> when state is a small state machine (loading / success / error) or when multiple pieces of state always update together.</p>
+
+  <h3>useMemo &amp; useCallback — memoize expensive work or stable references</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">memo.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// useMemo — cache the RESULT of a computation</span>
+<span class="tok-key">const</span> sorted = <span class="tok-cmd">useMemo</span>(() =&gt; [...items].<span class="tok-cmd">sort</span>((a, b) =&gt; a.score - b.score), [items]);
+
+<span class="tok-com">// useCallback — cache the FUNCTION itself (stable reference across renders)</span>
+<span class="tok-key">const</span> handleClick = <span class="tok-cmd">useCallback</span>(() =&gt; {
+  <span class="tok-cmd">setOpen</span>(o =&gt; !o);
+}, []);
+
+<span class="tok-com">// Common: pass a stable handler to a memoized child</span>
+<span class="tok-key">const</span> MemoizedChild = React.<span class="tok-cmd">memo</span>(Child);</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Don't wrap everything.</strong> <code>useMemo</code> and <code>useCallback</code> have a cost (comparison + cache). Use them when you've measured a slow render, or when a memoized child is re-rendering because a callback identity changed. Premature memoization makes code harder to read for no gain.</div>
+  </div>
+
+  <h3>useContext — share data without prop drilling</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useContext.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> ThemeContext = React.<span class="tok-cmd">createContext</span>(<span class="tok-str">'light'</span>);
+
+<span class="tok-com">// Provider at the top</span>
+&lt;ThemeContext.Provider value=<span class="tok-str">"dark"</span>&gt;
+  &lt;App /&gt;
+&lt;/ThemeContext.Provider&gt;
+
+<span class="tok-com">// Any descendant — however deep</span>
+<span class="tok-key">const</span> theme = React.<span class="tok-cmd">useContext</span>(ThemeContext);</code></pre>
+  </div>
+  <p>Context isn't a state manager — it's a way to pass a value through the tree. Pair it with <code>useState</code> or <code>useReducer</code> when the value needs to change.</p>
+
+  <h3>Custom hooks — reusing stateful logic</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useLocalStorage.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">useLocalStorage</span>(key, initial) {
+  <span class="tok-key">const</span> [value, setValue] = <span class="tok-cmd">useState</span>(() =&gt; {
+    <span class="tok-key">try</span> { <span class="tok-key">return</span> JSON.<span class="tok-cmd">parse</span>(localStorage.<span class="tok-cmd">getItem</span>(key)) ?? initial; }
+    <span class="tok-key">catch</span> { <span class="tok-key">return</span> initial; }
+  });
+
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    localStorage.<span class="tok-cmd">setItem</span>(key, JSON.<span class="tok-cmd">stringify</span>(value));
+  }, [key, value]);
+
+  <span class="tok-key">return</span> [value, setValue];
+}</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-hooks-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">What does <code>useRef</code> give you that <code>useState</code> doesn't?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-hooks-1', this, true)"><span class="opt-letter">A</span>A mutable value that persists across renders but does NOT trigger a re-render when it changes.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-hooks-1', this, false)"><span class="opt-letter">B</span>A way to store state that survives unmounts.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-hooks-1-feedback"></div>
+    <div class="quiz-explain hidden">Refs are for things you want to track without causing renders — DOM nodes, interval IDs, previous values, whether something has mounted.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · LISTS & KEYS ═══ -->
+<section class="section-block" id="keys">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Lists &amp; keys</h2>
+      <p class="section-subtitle">why keys exist · identity vs index · reordering bugs</p>
+    </div>
+  </div>
+
+  <p>A key is how React identifies which list item is which between renders. Without a stable key, React can't tell that a "rename" is a rename — it just sees a list of similar elements and reuses DOM nodes incorrectly.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">keys.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// ✓ Best: stable, unique id from the data</span>
+{items.<span class="tok-cmd">map</span>(item =&gt; &lt;Row key={item.id} item={item} /&gt;)}
+
+<span class="tok-com">// ✓ Acceptable: id doesn't exist, but list is static and never reorders</span>
+{items.<span class="tok-cmd">map</span>((item, i) =&gt; &lt;Row key={i} item={item} /&gt;)}
+
+<span class="tok-com">// ✗ Wrong: random keys force a full re-render of every row on every change</span>
+{items.<span class="tok-cmd">map</span>(item =&gt; &lt;Row key={Math.<span class="tok-cmd">random</span>()} item={item} /&gt;)}</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The index-key bug in one example</div>
+    <div class="concept-box-text"><p>You have <code>[A, B, C]</code> rendered with index keys 0, 1, 2. You delete A → list becomes <code>[B, C]</code>. React sees key 0 (was A, now B) and key 1 (was B, now C) and reuses the same DOM nodes — but their internal state (input value, focus, scroll) belonged to A and B. The values "shift up". The fix is a stable id per item.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-keys-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">A list of todos uses <code>key={index}</code> and each todo has a text input. When the user deletes the first todo, values shift up. Why?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-keys-1', this, true)"><span class="opt-letter">A</span>React matched DOM nodes by index, so the state that belonged to todo 1 is now attached to todo 2.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-keys-1', this, false)"><span class="opt-letter">B</span>The array is mutated directly.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-keys-1-feedback"></div>
+    <div class="quiz-explain hidden">Index keys are positional. Delete the first item and every following item's index shrinks by 1, so the DOM nodes get re-associated. Stable ids prevent this because the identity travels with the item.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · FORMS ═══ -->
+<section class="section-block" id="forms">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Forms — controlled components</h2>
+      <p class="section-subtitle">value + onChange · multi-field forms · validation · uncontrolled escape hatch</p>
+    </div>
+  </div>
+
+  <p>In a controlled component, the input's value lives in React state. The state is the single source of truth: it renders into the input, and every keystroke calls <code>onChange</code> which updates state.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">LoginForm.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">LoginForm</span>({ onSubmit }) {
+  <span class="tok-key">const</span> [form, setForm] = <span class="tok-cmd">useState</span>({ email: <span class="tok-str">''</span>, password: <span class="tok-str">''</span> });
+
+  <span class="tok-key">const</span> handleChange = e =&gt; {
+    <span class="tok-key">const</span> { name, value } = e.target;
+    <span class="tok-cmd">setForm</span>(f =&gt; ({ ...f, [name]: value }));
+  };
+
+  <span class="tok-key">const</span> handleSubmit = e =&gt; {
+    e.<span class="tok-cmd">preventDefault</span>();
+    <span class="tok-cmd">onSubmit</span>(form);
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input name=<span class="tok-str">"email"</span>    value={form.email}    onChange={handleChange} /&gt;
+      &lt;input name=<span class="tok-str">"password"</span> value={form.password} onChange={handleChange} type=<span class="tok-str">"password"</span> /&gt;
+      &lt;button type=<span class="tok-str">"submit"</span>&gt;Log in&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h3>Why controlled forms win</h3>
+  <ul>
+    <li><b>Validation while typing</b> — state has every keystroke.</li>
+    <li><b>Conditional rendering</b> — disable submit if email is empty, because you can read <code>form.email</code>.</li>
+    <li><b>Reset and prefill</b> — set state to initial values and inputs update.</li>
+    <li><b>Transform input</b> — uppercase, strip whitespace, format a phone number as they type.</li>
+  </ul>
+
+  <div class="quiz-box" id="q-form-1">
+    <div class="quiz-label">Quick check · 08</div>
+    <div class="quiz-question">What's missing if <code>&lt;input value={form.email} /&gt;</code> is "read-only" and ignores typing?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-form-1', this, false)"><span class="opt-letter">A</span><code>readOnly</code> attribute.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-form-1', this, true)"><span class="opt-letter">B</span>An <code>onChange</code> handler that updates state — otherwise the value never changes.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-form-1-feedback"></div>
+    <div class="quiz-explain hidden">A controlled input with a value but no <code>onChange</code> has no way to update. React warns about this explicitly. Add the handler and the input becomes editable again.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · CRUD WITH AXIOS ═══ -->
+<section class="section-block" id="crud">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">CRUD with Axios against a real API</h2>
+      <p class="section-subtitle">axios instance · loading/error · optimistic updates · refetch after mutation</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>npm install axios</code></pre>
+  </div>
+
+  <h3>One Axios instance, with the base URL and token</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">api.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> axios <span class="tok-key">from</span> <span class="tok-str">'axios'</span>;
+
+<span class="tok-key">export const</span> api = axios.<span class="tok-cmd">create</span>({
+  baseURL: <span class="tok-key">import</span>.meta.env.VITE_API_URL || <span class="tok-str">'/api'</span>,
+});
+
+<span class="tok-com">// attach the auth token to every request if present</span>
+api.interceptors.request.<span class="tok-cmd">use</span>(config =&gt; {
+  <span class="tok-key">const</span> token = localStorage.<span class="tok-cmd">getItem</span>(<span class="tok-str">'token'</span>);
+  <span class="tok-key">if</span> (token) config.headers.Authorization = <span class="tok-str">`Bearer ${token}`</span>;
+  <span class="tok-key">return</span> config;
+});</code></pre>
+  </div>
+
+  <h3>A reusable data-fetching hook</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">useTodos.js</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useState, useEffect } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> { api } <span class="tok-key">from</span> <span class="tok-str">'./api'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useTodos</span>() {
+  <span class="tok-key">const</span> [todos, setTodos] = <span class="tok-cmd">useState</span>([]);
+  <span class="tok-key">const</span> [loading, setLoading] = <span class="tok-cmd">useState</span>(<span class="tok-key">true</span>);
+  <span class="tok-key">const</span> [error, setError] = <span class="tok-cmd">useState</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-key">const</span> load = <span class="tok-key">async</span> () =&gt; {
+    <span class="tok-cmd">setLoading</span>(<span class="tok-key">true</span>);
+    <span class="tok-key">try</span> {
+      <span class="tok-key">const</span> { data } = <span class="tok-key">await</span> api.<span class="tok-cmd">get</span>(<span class="tok-str">'/todos'</span>);
+      <span class="tok-cmd">setTodos</span>(data);
+    } <span class="tok-key">catch</span> (err) {
+      <span class="tok-cmd">setError</span>(err.message);
+    } <span class="tok-key">finally</span> {
+      <span class="tok-cmd">setLoading</span>(<span class="tok-key">false</span>);
+    }
+  };
+
+  <span class="tok-cmd">useEffect</span>(() =&gt; { <span class="tok-cmd">load</span>(); }, []);
+
+  <span class="tok-com">// CREATE</span>
+  <span class="tok-key">const</span> create = <span class="tok-key">async</span> (title) =&gt; {
+    <span class="tok-key">const</span> { data } = <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/todos'</span>, { title });
+    <span class="tok-cmd">setTodos</span>(t =&gt; [...t, data]);
+  };
+
+  <span class="tok-com">// UPDATE</span>
+  <span class="tok-key">const</span> update = <span class="tok-key">async</span> (id, patch) =&gt; {
+    <span class="tok-key">const</span> { data } = <span class="tok-key">await</span> api.<span class="tok-cmd">patch</span>(<span class="tok-str">`/todos/${id}`</span>, patch);
+    <span class="tok-cmd">setTodos</span>(t =&gt; t.<span class="tok-cmd">map</span>(x =&gt; x.id === id ? data : x));
+  };
+
+  <span class="tok-com">// DELETE</span>
+  <span class="tok-key">const</span> remove = <span class="tok-key">async</span> (id) =&gt; {
+    <span class="tok-key">await</span> api.<span class="tok-cmd">delete</span>(<span class="tok-str">`/todos/${id}`</span>);
+    <span class="tok-cmd">setTodos</span>(t =&gt; t.<span class="tok-cmd">filter</span>(x =&gt; x.id !== id));
+  };
+
+  <span class="tok-key">return</span> { todos, loading, error, reload: load, create, update, remove };
+}</code></pre>
+  </div>
+
+  <h3>The component</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">TodosPage.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">export default function</span> <span class="tok-cmd">TodosPage</span>() {
+  <span class="tok-key">const</span> { todos, loading, error, create, update, remove } = <span class="tok-cmd">useTodos</span>();
+  <span class="tok-key">const</span> [title, setTitle] = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+
+  <span class="tok-key">if</span> (loading) <span class="tok-key">return</span> &lt;p&gt;Loading…&lt;/p&gt;;
+  <span class="tok-key">if</span> (error) <span class="tok-key">return</span> &lt;p&gt;Error: {error}&lt;/p&gt;;
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;form onSubmit={e =&gt; { e.<span class="tok-cmd">preventDefault</span>(); <span class="tok-cmd">create</span>(title); <span class="tok-cmd">setTitle</span>(<span class="tok-str">''</span>); }}&gt;
+        &lt;input value={title} onChange={e =&gt; <span class="tok-cmd">setTitle</span>(e.target.value)} /&gt;
+        &lt;button&gt;Add&lt;/button&gt;
+      &lt;/form&gt;
+      &lt;ul&gt;
+        {todos.<span class="tok-cmd">map</span>(t =&gt; (
+          &lt;li key={t.id}&gt;
+            &lt;input type=<span class="tok-str">"checkbox"</span> checked={t.done}
+              onChange={() =&gt; <span class="tok-cmd">update</span>(t.id, { done: !t.done })} /&gt;
+            {t.title}
+            &lt;button onClick={() =&gt; <span class="tok-cmd">remove</span>(t.id)}&gt;×&lt;/button&gt;
+          &lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>For production, consider TanStack Query.</strong> The hand-rolled <code>useTodos</code> above is perfect for learning and small apps. The moment you have multiple components fetching the same data, want cache + background refetch + dedup + optimistic updates for free, use TanStack Query (there's a dedicated note in this library).</div>
+  </div>
+
+  <div class="quiz-box" id="q-crud-1">
+    <div class="quiz-label">Quick check · 09</div>
+    <div class="quiz-question">After <code>POST /todos</code> succeeds, what should the UI do?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-crud-1', this, true)"><span class="opt-letter">A</span>Add the server's response to local state (or refetch the list) so the new item appears without a refresh.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-crud-1', this, false)"><span class="opt-letter">B</span>Do nothing — the user can refresh.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-crud-1-feedback"></div>
+    <div class="quiz-explain hidden">The whole point of optimistic or post-response updates is that the UI reflects the change instantly. Either push the server's returned item into state (which is what we do above) or refetch.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · AUTH ═══ -->
+<section class="section-block" id="auth">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Authentication in React</h2>
+      <p class="section-subtitle">auth context · storing the token · protected routes · refresh handling</p>
+    </div>
+  </div>
+
+  <p>Auth in a React app has three moving pieces: (1) a place to store the current user and token, (2) a login/logout flow, (3) a way to protect pages so unauthenticated users get redirected to login.</p>
+
+  <h3>1. Auth context</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">AuthContext.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { createContext, useContext, useState, useEffect } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+<span class="tok-key">import</span> { api } <span class="tok-key">from</span> <span class="tok-str">'./api'</span>;
+
+<span class="tok-key">const</span> AuthContext = <span class="tok-cmd">createContext</span>(<span class="tok-key">null</span>);
+
+<span class="tok-key">export function</span> <span class="tok-cmd">AuthProvider</span>({ children }) {
+  <span class="tok-key">const</span> [user, setUser]       = <span class="tok-cmd">useState</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">const</span> [loading, setLoading] = <span class="tok-cmd">useState</span>(<span class="tok-key">true</span>);
+
+  <span class="tok-com">// On mount, restore the session from the token</span>
+  <span class="tok-cmd">useEffect</span>(() =&gt; {
+    <span class="tok-key">const</span> token = localStorage.<span class="tok-cmd">getItem</span>(<span class="tok-str">'token'</span>);
+    <span class="tok-key">if</span> (!token) { <span class="tok-cmd">setLoading</span>(<span class="tok-key">false</span>); <span class="tok-key">return</span>; }
+
+    api.<span class="tok-cmd">get</span>(<span class="tok-str">'/auth/me'</span>)
+      .<span class="tok-cmd">then</span>(({ data }) =&gt; <span class="tok-cmd">setUser</span>(data))
+      .<span class="tok-cmd">catch</span>(() =&gt; localStorage.<span class="tok-cmd">removeItem</span>(<span class="tok-str">'token'</span>))
+      .<span class="tok-cmd">finally</span>(() =&gt; <span class="tok-cmd">setLoading</span>(<span class="tok-key">false</span>));
+  }, []);
+
+  <span class="tok-key">const</span> login = <span class="tok-key">async</span> (email, password) =&gt; {
+    <span class="tok-key">const</span> { data } = <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/auth/login'</span>, { email, password });
+    localStorage.<span class="tok-cmd">setItem</span>(<span class="tok-str">'token'</span>, data.token);
+    <span class="tok-cmd">setUser</span>(data.user);
+  };
+
+  <span class="tok-key">const</span> logout = () =&gt; {
+    localStorage.<span class="tok-cmd">removeItem</span>(<span class="tok-str">'token'</span>);
+    <span class="tok-cmd">setUser</span>(<span class="tok-key">null</span>);
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;AuthContext.Provider value={{ user, loading, login, logout }}&gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+}
+
+<span class="tok-key">export function</span> <span class="tok-cmd">useAuth</span>() {
+  <span class="tok-key">const</span> ctx = <span class="tok-cmd">useContext</span>(AuthContext);
+  <span class="tok-key">if</span> (!ctx) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'useAuth must be used within &lt;AuthProvider&gt;'</span>);
+  <span class="tok-key">return</span> ctx;
+}</code></pre>
+  </div>
+
+  <h3>2. Protected route</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">ProtectedRoute.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { Navigate, useLocation } <span class="tok-key">from</span> <span class="tok-str">'react-router-dom'</span>;
+<span class="tok-key">import</span> { useAuth } <span class="tok-key">from</span> <span class="tok-str">'./AuthContext'</span>;
+
+<span class="tok-key">export function</span> <span class="tok-cmd">ProtectedRoute</span>({ children }) {
+  <span class="tok-key">const</span> { user, loading } = <span class="tok-cmd">useAuth</span>();
+  <span class="tok-key">const</span> location = <span class="tok-cmd">useLocation</span>();
+
+  <span class="tok-key">if</span> (loading) <span class="tok-key">return</span> &lt;p&gt;Checking session…&lt;/p&gt;;
+  <span class="tok-key">if</span> (!user) <span class="tok-key">return</span> &lt;Navigate to=<span class="tok-str">"/login"</span> state={{ from: location }} replace /&gt;;
+
+  <span class="tok-key">return</span> children;
+}</code></pre>
+  </div>
+
+  <h3>3. Wire it up</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">App.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>&lt;AuthProvider&gt;
+  &lt;BrowserRouter&gt;
+    &lt;Routes&gt;
+      &lt;Route path=<span class="tok-str">"/login"</span>  element={&lt;Login /&gt;} /&gt;
+      &lt;Route path=<span class="tok-str">"/signup"</span> element={&lt;Signup /&gt;} /&gt;
+      &lt;Route path=<span class="tok-str">"/"</span> element={&lt;<span class="tok-cmd">ProtectedRoute</span>&gt;&lt;Dashboard /&gt;&lt;/<span class="tok-cmd">ProtectedRoute</span>&gt;} /&gt;
+      &lt;Route path=<span class="tok-str">"/todos"</span> element={&lt;<span class="tok-cmd">ProtectedRoute</span>&gt;&lt;TodosPage /&gt;&lt;/<span class="tok-cmd">ProtectedRoute</span>&gt;} /&gt;
+    &lt;/Routes&gt;
+  &lt;/BrowserRouter&gt;
+&lt;/AuthProvider&gt;</code></pre>
+  </div>
+
+  <h3>Login form that redirects back</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Login.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">Login</span>() {
+  <span class="tok-key">const</span> { login } = <span class="tok-cmd">useAuth</span>();
+  <span class="tok-key">const</span> navigate = <span class="tok-cmd">useNavigate</span>();
+  <span class="tok-key">const</span> location = <span class="tok-cmd">useLocation</span>();
+  <span class="tok-key">const</span> [email, setEmail] = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+  <span class="tok-key">const</span> [password, setPassword] = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+  <span class="tok-key">const</span> [error, setError] = <span class="tok-cmd">useState</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-key">const</span> submit = <span class="tok-key">async</span> e =&gt; {
+    e.<span class="tok-cmd">preventDefault</span>();
+    <span class="tok-key">try</span> {
+      <span class="tok-key">await</span> <span class="tok-cmd">login</span>(email, password);
+      <span class="tok-cmd">navigate</span>(location.state?.from?.pathname || <span class="tok-str">'/'</span>, { replace: <span class="tok-key">true</span> });
+    } <span class="tok-key">catch</span> (err) {
+      <span class="tok-cmd">setError</span>(err.response?.data?.message || <span class="tok-str">'Login failed'</span>);
+    }
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={submit}&gt;
+      &lt;input value={email} onChange={e =&gt; <span class="tok-cmd">setEmail</span>(e.target.value)} /&gt;
+      &lt;input type=<span class="tok-str">"password"</span> value={password} onChange={e =&gt; <span class="tok-cmd">setPassword</span>(e.target.value)} /&gt;
+      {error &amp;&amp; &lt;p&gt;{error}&lt;/p&gt;}
+      &lt;button&gt;Log in&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>localStorage</code> is XSS-readable.</strong> Any script that runs on your page can read the token. If your app has any XSS risk (user-generated HTML, unsanitized markdown, a compromised dependency), the token is one exploit away. For high-security apps, store tokens in <code>httpOnly</code> cookies set by the backend and use <code>withCredentials</code> on Axios. <code>localStorage</code> is fine for many internal apps — understand the trade-off.</div>
+  </div>
+
+  <div class="quiz-box" id="q-auth-1">
+    <div class="quiz-label">Quick check · 10</div>
+    <div class="quiz-question">Where should a protected route redirect an unauthenticated user?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-auth-1', this, true)"><span class="opt-letter">A</span>To <code>/login</code>, and remember the page they were trying to reach so you can send them back after login.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-auth-1', this, false)"><span class="opt-letter">B</span>To the home page with an alert.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-auth-1-feedback"></div>
+    <div class="quiz-explain hidden">Saving the intended destination (via router state or a query param) makes the login flow feel seamless — after logging in, the user lands exactly where they wanted to go.</div>
+  </div>
+</section>
+
+<!-- ═══ 12 · ROUTER ═══ -->
+<section class="section-block" id="router">
+  <div class="section-header">
+    <div class="section-num-big">12</div>
+    <div>
+      <h2 class="section-title">Routing — BrowserRouter &amp; the Data Router</h2>
+      <p class="section-subtitle">routes · nested · params · data loaders · actions · layouts</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>npm install react-router-dom</code></pre>
+  </div>
+
+  <h3>The classic browser router</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">routes.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { BrowserRouter, Routes, Route, Link, useParams, Outlet } <span class="tok-key">from</span> <span class="tok-str">'react-router-dom'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">App</span>() {
+  <span class="tok-key">return</span> (
+    &lt;BrowserRouter&gt;
+      &lt;nav&gt;
+        &lt;Link to=<span class="tok-str">"/"</span>&gt;Home&lt;/Link&gt;
+        &lt;Link to=<span class="tok-str">"/users"</span>&gt;Users&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;Routes&gt;
+        &lt;Route path=<span class="tok-str">"/"</span> element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=<span class="tok-str">"/users"</span> element={&lt;Users /&gt;}&gt;
+          &lt;Route path=<span class="tok-str">":id"</span> element={&lt;UserDetail /&gt;} /&gt;
+        &lt;/Route&gt;
+        &lt;Route path=<span class="tok-str">"*"</span> element={&lt;NotFound /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}
+
+<span class="tok-key">function</span> <span class="tok-cmd">UserDetail</span>() {
+  <span class="tok-key">const</span> { id } = <span class="tok-cmd">useParams</span>();
+  <span class="tok-key">return</span> &lt;p&gt;User #{id}&lt;/p&gt;;
+}</code></pre>
+  </div>
+
+  <p>Nested routes render the parent's component; the parent decides where children go with <code>&lt;Outlet /&gt;</code>:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">layout.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">UsersLayout</span>() {
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;h2&gt;Users&lt;/h2&gt;
+      &lt;Outlet /&gt;   <span class="tok-com">{/* renders the matched child route here */}</span>
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <h3>The data router — loaders &amp; actions</h3>
+  <p>React Router 6.4+ introduced a data router where each route can declare <code>loader</code> (fetch data <em>before</em> rendering) and <code>action</code> (handle form submissions). Data is available via <code>useLoaderData()</code>. It removes the fetch-in-useEffect dance.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">data-router.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> {
+  createBrowserRouter, RouterProvider,
+  useLoaderData, Form, redirect,
+} <span class="tok-key">from</span> <span class="tok-str">'react-router-dom'</span>;
+
+<span class="tok-key">async function</span> <span class="tok-cmd">todosLoader</span>() {
+  <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/todos'</span>);
+  <span class="tok-key">return</span> res.<span class="tok-cmd">json</span>();
+}
+
+<span class="tok-key">async function</span> <span class="tok-cmd">createTodoAction</span>({ request }) {
+  <span class="tok-key">const</span> form = <span class="tok-key">await</span> request.<span class="tok-cmd">formData</span>();
+  <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">'/api/todos'</span>, {
+    <span class="tok-cmd">method</span>: <span class="tok-str">'POST'</span>,
+    <span class="tok-cmd">body</span>: JSON.<span class="tok-cmd">stringify</span>({ title: form.<span class="tok-cmd">get</span>(<span class="tok-str">'title'</span>) }),
+    <span class="tok-cmd">headers</span>: { <span class="tok-str">'Content-Type'</span>: <span class="tok-str">'application/json'</span> },
+  });
+  <span class="tok-key">return</span> <span class="tok-cmd">redirect</span>(<span class="tok-str">'/todos'</span>);
+}
+
+<span class="tok-key">function</span> <span class="tok-cmd">Todos</span>() {
+  <span class="tok-key">const</span> todos = <span class="tok-cmd">useLoaderData</span>();
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;Form method=<span class="tok-str">"post"</span>&gt;
+        &lt;input name=<span class="tok-str">"title"</span> /&gt;
+        &lt;button&gt;Add&lt;/button&gt;
+      &lt;/Form&gt;
+      &lt;ul&gt;{todos.<span class="tok-cmd">map</span>(t =&gt; &lt;li key={t.id}&gt;{t.title}&lt;/li&gt;)}&lt;/ul&gt;
+    &lt;/&gt;
+  );
+}
+
+<span class="tok-key">const</span> router = <span class="tok-cmd">createBrowserRouter</span>([
+  {
+    <span class="tok-cmd">path</span>: <span class="tok-str">'/todos'</span>,
+    <span class="tok-cmd">element</span>: &lt;Todos /&gt;,
+    <span class="tok-cmd">loader</span>: todosLoader,
+    <span class="tok-cmd">action</span>: createTodoAction,
+  },
+]);
+
+<span class="tok-key">export default function</span> <span class="tok-cmd">App</span>() {
+  <span class="tok-key">return</span> &lt;<span class="tok-cmd">RouterProvider</span> router={router} /&gt;;
+}</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th><code>BrowserRouter</code> + <code>Routes</code></th><th><code>createBrowserRouter</code></th></tr></thead>
+      <tbody>
+        <tr><td>Fetching data</td><td>In the component via <code>useEffect</code></td><td>In a route <code>loader</code> before rendering</td></tr>
+        <tr><td>Forms</td><td>Manual <code>onSubmit</code></td><td>Route <code>action</code> + <code>&lt;Form&gt;</code></td></tr>
+        <tr><td>Error handling</td><td>Component-level</td><td>Route-level <code>errorElement</code></td></tr>
+        <tr><td>Best for</td><td>Small apps, quick start</td><td>Apps where data loading matters</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Use the data router when data fetching is a real concern.</strong> The loader runs before render, so there's no flash of "loading" — the page shows up with data already there. It also centralises error handling via <code>errorElement</code>. For a small app with two pages, the classic browser router is simpler.</div>
+  </div>
+
+  <div class="quiz-box" id="q-router-1">
+    <div class="quiz-label">Quick check · 11</div>
+    <div class="quiz-question">What does a route <code>loader</code> in the data router give you that a <code>useEffect</code> fetch doesn't?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-router-1', this, true)"><span class="opt-letter">A</span>The data is fetched <em>before</em> the component renders, so there's no loading flash and errors are handled at the route level.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-router-1', this, false)"><span class="opt-letter">B</span>It caches responses automatically.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-router-1-feedback"></div>
+    <div class="quiz-explain hidden">The router waits for all matched loaders to resolve before rendering. The component reads data with <code>useLoaderData()</code> and there's no "loading" state to manage manually.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · BEHIND THE SCENES ═══ -->
+<section class="section-block" id="internals">
+  <div class="section-header">
+    <div class="section-num-big">13</div>
+    <div>
+      <h2 class="section-title">Behind the scenes</h2>
+      <p class="section-subtitle">reconciliation · Fiber · render vs commit · batching · StrictMode</p>
+    </div>
+  </div>
+
+  <p>Understanding React internals isn't required to build apps, but it makes interview answers sharp and explains otherwise-mysterious bugs.</p>
+
+  <h3>The render → commit cycle</h3>
+  <div class="stepper" data-stepper="phase" data-steps="5">
+    <div class="stepper-head"><span class="stepper-title">What React does when state changes</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">phases</div>
+          <div>
+            <div class="phase" data-cls='{"2":"hl"}'>
+              <span class="phase-name">1 · Schedule</span>
+              <span class="phase-tag">sync</span>
+            </div>
+            <div class="phase" data-cls='{"3":"hl"}'>
+              <span class="phase-name">2 · Render (reconcile)</span>
+              <span class="phase-tag">interruptible</span>
+            </div>
+            <div class="phase" data-cls='{"4":"hl"}'>
+              <span class="phase-name">3 · Commit (mutate DOM)</span>
+              <span class="phase-tag">synchronous</span>
+            </div>
+            <div class="phase" data-cls='{"5":"hl"}'>
+              <span class="phase-name">4 · Effects (run)</span>
+              <span class="phase-tag">after paint</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">what happens</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">state changed</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">setState called from event handler</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">work</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">run components, build Fiber tree</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">diff</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">compare with previous tree</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">DOM</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">apply only the diffs</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">effects</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">run useEffect, cleanup</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>A state setter is called. React schedules a re-render of the component that owns the state. Multiple setState calls in the same event handler are <b>batched</b> into a single re-render.</li>
+      <li><b>Render phase.</b> React calls the component function, then its children's functions, producing new React elements. It builds a "work-in-progress" Fiber tree from those elements. This phase is pure — no DOM changes yet, no side effects. In concurrent mode it can be paused and resumed.</li>
+      <li><b>Reconciliation.</b> React compares the new tree to the previous one: same type + same key → update, different → replace. The diffing algorithm makes this fast — O(n) — because it uses two heuristics: different types mean replace, and keys identify list items.</li>
+      <li><b>Commit phase.</b> React walks the work-in-progress tree and applies only the diffs to the real DOM. This phase is <b>synchronous and uninterruptible</b> — the user sees a consistent update. Then the browser paints.</li>
+      <li><b>Effects.</b> After paint, React runs <code>useEffect</code> callbacks and their cleanups. This is why effects don't block paint. <code>useLayoutEffect</code> runs <em>before</em> paint — use it only for measurements that must happen before the user sees the frame.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 5</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>Virtual DOM &amp; reconciliation</h3>
+  <ul>
+    <li>The <b>virtual DOM</b> is a plain JS object tree that describes what should be on screen. It's cheap to create and compare.</li>
+    <li><b>Reconciliation</b> is the algorithm that diffs the new virtual tree against the old one and produces a minimal set of DOM operations.</li>
+    <li>React's diffing makes two simplifying assumptions: (1) elements of different types produce different subtrees (replace, don't diff), (2) <code>key</code> identifies list items across renders.</li>
+    <li>Result: O(n) diffing instead of the theoretical O(n³) tree diff.</li>
+  </ul>
+
+  <h3>Fiber</h3>
+  <p>Fiber is the data structure that replaced the old stack reconciler. Each component instance is a Fiber node holding its state, hooks, effects, and pointers to <code>child</code>, <code>sibling</code>, and <code>return</code> (parent). This lets React:</p>
+  <ul>
+    <li><b>Pause and resume</b> work (concurrent rendering).</li>
+    <li><b>Prioritise</b> updates — input keystrokes before a heavy list render.</li>
+    <li><b>Discard</b> work in progress if state changes again before commit.</li>
+  </ul>
+
+  <h3>Batching</h3>
+  <p>Multiple <code>setState</code> calls within the same synchronous event handler are batched into one re-render. Since React 18, this also applies to promises, timeouts, and native event handlers — not just React events.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">batching.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">handleClick</span>() {
+  <span class="tok-cmd">setA</span>(<span class="tok-num">1</span>);   <span class="tok-com">// all three batched into ONE re-render</span>
+  <span class="tok-cmd">setB</span>(<span class="tok-num">2</span>);
+  <span class="tok-cmd">setC</span>(<span class="tok-num">3</span>);
+}</code></pre>
+  </div>
+
+  <h3>StrictMode</h3>
+  <p>In development, <code>&lt;StrictMode&gt;</code> intentionally <b>double-invokes</b> some functions — component renders, effects, reducers — to catch impure code. A <code>useEffect</code> that runs twice in dev is <em>supposed</em> to happen. If your effect breaks on double-run, it has a bug: it probably didn't clean up its subscription, or it's mutating external state in a non-idempotent way. Production doesn't double-invoke.</p>
+
+  <div class="quiz-box" id="q-int-1">
+    <div class="quiz-label">Quick check · 12</div>
+    <div class="quiz-question">Which phase is synchronous and cannot be interrupted?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-int-1', this, false)"><span class="opt-letter">A</span>The render phase.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-int-1', this, true)"><span class="opt-letter">B</span>The commit phase — where React mutates the DOM.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-int-1-feedback"></div>
+    <div class="quiz-explain hidden">The render phase can be interrupted and resumed (that's what Fiber enables). The commit phase must be synchronous because the DOM mutations have to happen together — you can't leave the UI half-updated.</div>
+  </div>
+
+  <div class="quiz-box" id="q-int-2">
+    <div class="quiz-label">Quick check · 13</div>
+    <div class="quiz-question">Your <code>useEffect</code> fetches data and it fires twice in development. Is something broken?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-int-2', this, true)"><span class="opt-letter">A</span>No — StrictMode intentionally double-invokes effects in dev to surface missing cleanups. Production runs once.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-int-2', this, false)"><span class="opt-letter">B</span>Yes — there's a bug in React.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-int-2-feedback"></div>
+    <div class="quiz-explain hidden">StrictMode is a dev-only safety check. If the double-fetch bothers you, use an <code>AbortController</code> in the effect — the cleanup cancels the first fetch. That's exactly the bug StrictMode is trying to surface.</div>
+  </div>
+</section>
+
+<!-- ═══ 14 · PERFORMANCE ═══ -->
+<section class="section-block" id="perf">
+  <div class="section-header">
+    <div class="section-num-big">14</div>
+    <div>
+      <h2 class="section-title">Performance — when and how</h2>
+      <p class="section-subtitle">memo · useMemo · useCallback · virtualization · code splitting</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Tool</th><th>What it does</th><th>When to use</th></tr></thead>
+      <tbody>
+        <tr><td><code>React.memo</code></td><td>Skips re-render if props are shallow-equal</td><td>Child re-renders from a parent update with same props</td></tr>
+        <tr><td><code>useMemo</code></td><td>Caches a computed value</td><td>Expensive calculation in render</td></tr>
+        <tr><td><code>useCallback</code></td><td>Caches a function reference</td><td>Passing a handler to a memoized child or to a deps array</td></tr>
+        <tr><td>Code splitting</td><td>Loads JS only when needed</td><td>Route-level or heavy component bundles</td></tr>
+        <tr><td>Virtualization</td><td>Renders only visible items in a long list</td><td>1,000+ rows</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Measure before optimizing.</strong> Use React DevTools Profiler to see which components re-render. Premature <code>memo</code>/<code>useMemo</code>/<code>useCallback</code> adds complexity for no gain. The default Vite + React app is fast; optimizations matter for specific hot spots, not everything.</div>
+  </div>
+</section>
+
+<!-- ═══ 15 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">15</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Mutating state directly</td><td>No re-render; UI drifts from state</td><td>Always use setState with a new object/array</td></tr>
+        <tr><td>Using <code>index</code> as key in a reorderable list</td><td>Input values "shift" when items are deleted/reordered</td><td>Use stable IDs from the data</td></tr>
+        <tr><td>Infinite loop in effect</td><td>App freezes</td><td>Remove state from its own deps; use functional updates</td></tr>
+        <tr><td>Fetching in <code>useEffect</code> without cleanup</td><td>State updates after unmount; stale races</td><td><code>AbortController</code> or an ignore flag</td></tr>
+        <tr><td>Reading <code>state</code> immediately after <code>setState</code></td><td>Gets the old value (snapshot)</td><td>Read inside the next render, or use a functional updater</td></tr>
+        <tr><td>Deep prop drilling</td><td>Unreadable components</td><td>Context, or a state manager (Zustand)</td></tr>
+        <tr><td>Fetching server data into Zustand/Redux</td><td>Two sources of truth drift</td><td>TanStack Query for server data, Zustand for UI</td></tr>
+        <tr><td>Putting computed values in state</td><td>Sync bugs</td><td>Derive them in the render (with <code>useMemo</code> if expensive)</td></tr>
+        <tr><td>Forgetting <code>key</code> in a map</td><td>Warning; bugs on reorder</td><td>Add stable key</td></tr>
+        <tr><td>Assuming StrictMode is a bug</td><td>Chasing ghosts</td><td>Fix the cleanup — it's how React surfaces the bug</td></tr>
+        <tr><td>Storing tokens in localStorage for XSS-sensitive apps</td><td>One XSS steals sessions</td><td>httpOnly cookies + <code>withCredentials</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 16 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">16</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is React, and why is it declarative?</span></summary><div class="qa-body"><p>A JavaScript library for building user interfaces out of components. Declarative means you describe what the UI should look like for a given state, and React reconciles the DOM to match. You don't write DOM update steps yourself — React handles the diff.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>Props vs state?</span></summary><div class="qa-body"><p>Props are inputs passed from parent to child — read-only inside the child. State is data owned by a component that changes over time and triggers re-renders when updated. Props come from outside; state is internal.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>Why do we need keys in lists?</span></summary><div class="qa-body"><p>Keys give each list item a stable identity across renders. Without them React matches items positionally (by index), which breaks when items are inserted, removed, or reordered — especially when those items hold state (input values, focus, scroll). Use a stable unique id.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What's the difference between controlled and uncontrolled components?</span></summary><div class="qa-body"><p>In a controlled component, the input's value comes from React state, and every keystroke goes through <code>onChange</code> to update state. In an uncontrolled component, the DOM owns the value; you read it via a ref on submit. Controlled components are the default choice — they enable validation, transforms, and conditional rendering.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>What does <code>useEffect</code> do, and how does the dependency array work?</span></summary><div class="qa-body"><p>It runs a side effect after render. With no deps, it runs after every render. With <code>[]</code>, once on mount (and cleanup on unmount). With <code>[a, b]</code>, whenever <code>a</code> or <code>b</code> changes. Cleanup runs on unmount and before the next run. Effects are for things outside React: fetching, subscriptions, timers, DOM APIs.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>What's the difference between <code>useMemo</code>, <code>useCallback</code>, and <code>React.memo</code>?</span></summary><div class="qa-body"><p><code>useMemo</code> caches the <em>result</em> of an expensive computation between renders. <code>useCallback</code> caches a <em>function</em> so its reference stays stable. <code>React.memo</code> wraps a component so it skips re-render if its props are shallow-equal to the previous render. They're optimisations — measure before applying.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What's the difference between <code>useEffect</code> and <code>useLayoutEffect</code>?</span></summary><div class="qa-body"><p><code>useEffect</code> runs after the browser paints — non-blocking. <code>useLayoutEffect</code> runs synchronously before paint — blocking. Use <code>useLayoutEffect</code> only when you need to measure DOM and update layout before the user sees the frame (e.g. tooltip positioning). Otherwise, <code>useEffect</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>Explain the virtual DOM and reconciliation.</span></summary><div class="qa-body"><p>The virtual DOM is an in-memory JS tree that describes the UI. On state change, React builds a new virtual tree, diffs it against the previous one (reconciliation), and applies the minimal set of DOM operations. The diffing is O(n) because React uses two heuristics: different types mean replace, and <code>key</code> identifies list items.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>What is React Fiber?</span></summary><div class="qa-body"><p>React's internal data structure and reconciliation engine. Each component is a Fiber node with state, effects, and pointers to child/sibling/parent. It enables concurrent rendering: React can pause, prioritise, resume, and abandon renders — which is what makes features like <code>useTransition</code> possible. The commit phase is still synchronous.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>What are the render and commit phases?</span></summary><div class="qa-body"><p>The render phase runs component functions, computes the new tree, and diffs it — pure, can be interrupted. The commit phase applies the DOM mutations and is synchronous/uninterruptible. <code>useEffect</code> runs after commit (after paint); <code>useLayoutEffect</code> runs after commit but before paint.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>Why does StrictMode double-run effects in development?</span></summary><div class="qa-body"><p>To surface missing cleanups and impure code. If your effect subscribes to something, the second run should be preceded by the cleanup from the first — otherwise you leak subscriptions. In production, effects run once. If double-run breaks your code, the fix is in your cleanup, not in React.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>How would you implement authentication in a React app?</span></summary><div class="qa-body"><p>(1) An <code>AuthContext</code> holding the current user + token, with <code>login</code>/<code>logout</code> functions. (2) A <code>ProtectedRoute</code> wrapper that redirects to <code>/login</code> if the user is null, saving the intended destination in router state. (3) An Axios interceptor that attaches the <code>Authorization</code> header to every request. (4) On mount, restore the session by calling <code>/auth/me</code> with the stored token. For security: prefer <code>httpOnly</code> cookies over <code>localStorage</code> if XSS is a concern.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q13</span><span>How do you do CRUD in React against a REST API?</span></summary><div class="qa-body"><p>Wrap the API in an Axios instance with a base URL and interceptors. Put data-fetching and mutation logic in a custom hook (<code>useTodos</code>) that owns loading/error/data state. The component calls the hook's <code>create</code>/<code>update</code>/<code>remove</code> functions and renders from <code>todos</code>. After mutations, update local state from the server response or refetch. For production-grade caching/invalidation, use TanStack Query.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q14</span><span>What's the difference between BrowserRouter and createBrowserRouter?</span></summary><div class="qa-body"><p><code>BrowserRouter</code> is the classic component-based router with <code>Routes</code>/<code>Route</code> and data fetching inside components. <code>createBrowserRouter</code> (React Router 6.4+) is the data router: routes can declare <code>loader</code> (fetch before render) and <code>action</code> (handle form submissions), plus <code>errorElement</code> for route-level error handling. Use the data router when data loading is central; the classic one for simple apps.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q15</span><span>When does a component re-render?</span></summary><div class="qa-body"><p>On its own state update, on a parent re-render (unless memoized), on a context value change, or on a hook inside it updating (like <code>useReducer</code> dispatch). Setting state to the same value bails out. React batches multiple state updates in the same event into one render.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q16</span><span>Why is <code>setState</code> asynchronous?</span></summary><div class="qa-body"><p>Not truly async — it schedules an update. State in the current render is a snapshot; setting it produces a future render with a new snapshot. This is what makes batching and consistent rendering possible. If you need the latest value immediately, use a functional updater or a ref.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q17</span><span>How do you prevent unnecessary re-renders?</span></summary><div class="qa-body"><p>Measure first with React DevTools Profiler. Then: memoize heavy child components with <code>React.memo</code>; stabilize callback references with <code>useCallback</code>; memoize expensive computed values with <code>useMemo</code>; split state so unrelated updates don't re-render the whole tree; virtualize long lists; split code with <code>React.lazy</code> + Suspense.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q18</span><span>What's a custom hook, and what makes a valid one?</span></summary><div class="qa-body"><p>A function whose name starts with <code>use</code> that calls other hooks inside. It lets you extract stateful logic so multiple components can share it without duplicating the code. Rules: the name must start with <code>use</code>, it can only be called at the top level of a component or another hook, and it can call other hooks — <code>useState</code>, <code>useEffect</code>, <code>useContext</code>, and other custom hooks.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q19</span><span>How would you do optimistic updates in React?</span></summary><div class="qa-body"><p>Before the network call, update local state as if it succeeded. Store a snapshot of the previous state. On success, replace the optimistic item with the server's version. On failure, restore the snapshot and show an error. In TanStack Query, this is <code>onMutate</code> + <code>cancelQueries</code> + <code>setQueryData</code>, with rollback in <code>onError</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q20</span><span>Should state go in React state, Context, Zustand, or TanStack Query?</span></summary><div class="qa-body"><p><b>Local state</b> for anything only one component cares about (form input, modal open). <b>Context</b> for a value that rarely changes and is needed across the tree (theme, auth user). <b>Zustand</b> for client state shared across distant components (cart, UI flows). <b>TanStack Query</b> for server state (fetched data with caching and refetching). Using the right tool per concern keeps each simple.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Frontend · React</span>
+  <span>JSX · hooks · CRUD · auth · router · internals</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>

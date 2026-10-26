@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forms in React — every pattern, ranked · Sheryians</title>
+<meta name="description" content="Multiple useState, single state object, one handleChange, single useRef, multiple refs, and react-hook-form — every way to handle forms in React, with trade-offs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:18ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+
+/* pattern cards */
+.pattern-card{border:1px solid var(--rule);border-radius:12px;overflow:hidden;margin:0 0 24px;background:var(--paper)}
+.pattern-head{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--paper2);border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.pattern-rank{font-family:'Fraunces',Georgia,serif;font-size:22px;font-weight:900;color:var(--accent);line-height:1;min-width:44px}
+.pattern-name{font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:600;flex:1;color:var(--ink)}
+.pattern-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:.06em;text-transform:uppercase}
+.tag-good{background:rgba(26,107,74,.14);color:var(--accent2);border:1px solid var(--accent2)}
+.tag-warn{background:rgba(184,134,11,.14);color:var(--gold);border:1px solid var(--gold)}
+.tag-bad{background:rgba(200,75,31,.12);color:var(--accent);border:1px solid var(--accent)}
+.tag-info{background:rgba(27,69,135,.10);color:var(--accent3);border:1px solid var(--accent3)}
+.pattern-body{padding:20px 22px}
+.pattern-body p{margin:0 0 12px}
+.pattern-body .verdict{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;letter-spacing:.02em;padding:12px 14px;border-radius:6px;background:var(--paper2);border-left:3px solid var(--accent3);margin-top:4px;line-height:1.6}
+.pattern-body .verdict strong{font-family:'DM Sans',sans-serif}
+
+/* stepper */
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+.re-render{border:1px solid var(--rule);border-radius:8px;padding:10px 14px;background:var(--paper);font-family:'IBM Plex Mono',monospace;font-size:12px;margin-bottom:6px;transition:all .3s;display:flex;justify-content:space-between;align-items:center}
+.re-render.flash{background:rgba(200,75,31,.10);border-color:var(--accent)}
+
+/* quiz */
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+  .pattern-head{padding:12px 16px}
+  .pattern-body{padding:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Frontend · React · Forms</div>
+  <h1>Forms in <em>React</em> — every pattern, ranked</h1>
+  <p class="hero-desc">Six ways to handle a form in React, from the naive multi-state approach to <code>react-hook-form</code>. Each gets full code, honest trade-offs, and a verdict on when to use it. Then: validation, file uploads, multi-step forms, and interview questions.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">useState × N</span>
+    <span class="hero-tag">single state object</span>
+    <span class="hero-tag">one handleChange</span>
+    <span class="hero-tag">useRef (single &amp; multiple)</span>
+    <span class="hero-tag">react-hook-form</span>
+    <span class="hero-tag">Yup / Zod</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · THE PROBLEM ═══ -->
+<section class="section-block" id="problem">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">What "handling a form" actually means</h2>
+      <p class="section-subtitle">reading values · tracking changes · validation · submit · reset</p>
+    </div>
+  </div>
+
+  <p class="lead">Every form pattern in React, no matter how it looks, is trying to solve five problems. The differences between patterns are entirely about <em>where the values live</em> (React state or the DOM) and <em>how much boilerplate you're willing to write</em>.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Concern</th><th>What you need to answer</th></tr></thead>
+      <tbody>
+        <tr><td>Reading values</td><td>What has the user typed right now?</td></tr>
+        <tr><td>Tracking changes</td><td>Every keystroke that updates a value (or not — some patterns read on submit)</td></tr>
+        <tr><td>Validation</td><td>Is the current input valid? Should the submit button be enabled?</td></tr>
+        <tr><td>Submit</td><td>When the form is submitted, what payload do I send?</td></tr>
+        <tr><td>Reset</td><td>After submit, how do I clear the form?</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The fundamental choice</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>Controlled (state-driven)</th><th>Uncontrolled (ref-driven)</th></tr></thead>
+      <tbody>
+        <tr><td>Value lives in</td><td>React state</td><td>The DOM node (accessed via ref)</td></tr>
+        <tr><td>React sees every keystroke?</td><td>Yes</td><td>No</td></tr>
+        <tr><td>Re-renders per keystroke?</td><td>Yes (one per input, batched)</td><td>No</td></tr>
+        <tr><td>Easy live validation?</td><td>Yes</td><td>Only if you pull values on submit</td></tr>
+        <tr><td>Simplest code?</td><td>For 1–3 fields</td><td>For many fields or file inputs</td></tr>
+        <tr><td>Used by react-hook-form?</td><td>Optional</td><td><b>By default</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one idea</div>
+    <div class="concept-box-text"><p>A <b>controlled</b> input is one where React owns the value: <code>value={x}</code> + <code>onChange</code>. An <b>uncontrolled</b> input is one where the DOM owns the value: <code>ref={r}</code>, read <code>r.current.value</code> when you need it. Every pattern below is a variation on how many inputs are controlled and how they're batched.</p></div>
+  </div>
+</section>
+
+<!-- ═══ 02 · PATTERN 1 ═══ -->
+<section class="section-block" id="p1">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Pattern 1 — Multiple useState</h2>
+      <p class="section-subtitle">one state per field · the beginner's pattern</p>
+    </div>
+  </div>
+
+  <div class="pattern-card">
+    <div class="pattern-head">
+      <span class="pattern-rank">01</span>
+      <span class="pattern-name">Multiple useState hooks</span>
+      <span class="pattern-tag tag-bad">beginner</span>
+    </div>
+    <div class="pattern-body">
+      <p>Every field gets its own <code>useState</code>. Each input has its own inline <code>onChange</code> that sets that specific state. Submit reads all the variables together.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">RegisterForm.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">import</span> { useState } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">RegisterForm</span>() {
+  <span class="tok-key">const</span> [name, setName]         = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+  <span class="tok-key">const</span> [email, setEmail]       = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+  <span class="tok-key">const</span> [password, setPassword] = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+  <span class="tok-key">const</span> [age, setAge]           = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+  <span class="tok-key">const</span> [city, setCity]         = <span class="tok-cmd">useState</span>(<span class="tok-str">''</span>);
+
+  <span class="tok-key">const</span> submit = e =&gt; {
+    e.<span class="tok-cmd">preventDefault</span>();
+    console.<span class="tok-cmd">log</span>({ name, email, password, age, city });
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={submit}&gt;
+      &lt;input value={name}     onChange={e =&gt; <span class="tok-cmd">setName</span>(e.target.value)} /&gt;
+      &lt;input value={email}    onChange={e =&gt; <span class="tok-cmd">setEmail</span>(e.target.value)} /&gt;
+      &lt;input value={password} onChange={e =&gt; <span class="tok-cmd">setPassword</span>(e.target.value)} type=<span class="tok-str">"password"</span> /&gt;
+      &lt;input value={age}      onChange={e =&gt; <span class="tok-cmd">setAge</span>(e.target.value)} /&gt;
+      &lt;input value={city}     onChange={e =&gt; <span class="tok-cmd">setCity</span>(e.target.value)} /&gt;
+      &lt;button&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+      </div>
+      <p><strong>What it's good at:</strong> being readable. Anyone reading this file can see, at a glance, every field and its value. No abstraction to trace through. That's why every React tutorial starts here.</p>
+      <p><strong>Where it breaks:</strong> the moment the form has 8 fields. You get 8 <code>useState</code> lines, 8 <code>onChange</code> inline functions (each a fresh function every render), and 8 setters to remember. Adding a field means editing the top of the component, the form body, and the submit handler. Resetting means calling 8 setters.</p>
+      <div class="verdict"><strong>Verdict:</strong> use for 1–3 field forms — a login form, a search bar, a single checkbox. Do not use for anything that might grow. The moment you write the fourth <code>useState</code>, switch to Pattern 2 or 3.</div>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="q-p1-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">What re-renders when you type in one of the five inputs in this pattern?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-p1-1', this, false)"><span class="opt-letter">A</span>Only the input you typed in.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-p1-1', this, true)"><span class="opt-letter">B</span>The whole <code>RegisterForm</code> component — all five inputs re-render.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-p1-1-feedback"></div>
+    <div class="quiz-explain hidden">State lives in the parent component. Any state update re-renders the whole component, and React reconciles all five inputs. Usually fine — the component is cheap — but it's the reason <code>react-hook-form</code> exists.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · PATTERN 2 ═══ -->
+<section class="section-block" id="p2">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Pattern 2 — One state object</h2>
+      <p class="section-subtitle">everything in one useState · the mid-tier pattern</p>
+    </div>
+  </div>
+
+  <div class="pattern-card">
+    <div class="pattern-head">
+      <span class="pattern-rank">02</span>
+      <span class="pattern-name">Single state object</span>
+      <span class="pattern-tag tag-warn">intermediate</span>
+    </div>
+    <div class="pattern-body">
+      <p>One <code>useState</code> holds the whole form as an object. Each input updates the object with a spread. Submit reads <code>form</code>.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">RegisterForm.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">RegisterForm</span>() {
+  <span class="tok-key">const</span> [form, setForm] = <span class="tok-cmd">useState</span>({
+    name: <span class="tok-str">''</span>, email: <span class="tok-str">''</span>, password: <span class="tok-str">''</span>, age: <span class="tok-str">''</span>, city: <span class="tok-str">''</span>,
+  });
+
+  <span class="tok-key">const</span> submit = e =&gt; {
+    e.<span class="tok-cmd">preventDefault</span>();
+    console.<span class="tok-cmd">log</span>(form);
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={submit}&gt;
+      &lt;input value={form.name}
+        onChange={e =&gt; <span class="tok-cmd">setForm</span>(f =&gt; ({ ...f, name: e.target.value }))} /&gt;
+      &lt;input value={form.email}
+        onChange={e =&gt; <span class="tok-cmd">setForm</span>(f =&gt; ({ ...f, email: e.target.value }))} /&gt;
+      <span class="tok-com">{/* ...same pattern for every field... */}</span>
+      &lt;button&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+      </div>
+      <p><strong>What it's good at:</strong> submit becomes trivial — <code>onSubmit(form)</code> sends everything at once. Reset is one line: <code>setForm(initialValues)</code>. The state shape mirrors the payload shape, so validation and API calls stay clean.</p>
+      <p><strong>Where it breaks:</strong> the spread in every <code>onChange</code>. Once the object has 10 fields, every keystroke creates a new object with 10 properties. That's the cost of immutability, and it's fine at this scale — but it's also where people start writing a shared <code>handleChange</code> (Pattern 3) or reaching for a library.</p>
+      <div class="verdict"><strong>Verdict:</strong> this is the best "manual" pattern. It scales to 6–10 fields, keeps the state clean, and avoids the eight-setter noise of Pattern 1. Use it whenever you're not ready to introduce react-hook-form.</div>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="q-p2-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">Why must the state update use <code>f =&gt; ({ ...f, name: value })</code> and not <code>form.name = value</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-p2-1', this, true)"><span class="opt-letter">A</span>Mutating the object directly won't trigger a re-render — React compares by reference.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-p2-1', this, false)"><span class="opt-letter">B</span><code>form</code> is a constant and cannot be assigned.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-p2-1-feedback"></div>
+    <div class="quiz-explain hidden">Mutating the existing object doesn't change the reference, so React thinks state hasn't changed and skips re-rendering. Spreading into a new object produces a new reference — which triggers the render.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · PATTERN 3 ═══ -->
+<section class="section-block" id="p3">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Pattern 3 — Single handleChange</h2>
+      <p class="section-subtitle">one state object + one change handler · the "grown-up" manual pattern</p>
+    </div>
+  </div>
+
+  <div class="pattern-card">
+    <div class="pattern-head">
+      <span class="pattern-rank">03</span>
+      <span class="pattern-name">Single handleChange, name-based</span>
+      <span class="pattern-tag tag-good">recommended (manual)</span>
+    </div>
+    <div class="pattern-body">
+      <p>Same single state object, but one <code>handleChange</code> function for all inputs. It reads <code>e.target.name</code> (the input's <code>name</code> attribute) to know which key to update. Adding a field means adding the field to state and to JSX — no new handler, no new setter.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">RegisterForm.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">RegisterForm</span>() {
+  <span class="tok-key">const</span> [form, setForm] = <span class="tok-cmd">useState</span>({
+    name: <span class="tok-str">''</span>, email: <span class="tok-str">''</span>, password: <span class="tok-str">''</span>, age: <span class="tok-str">''</span>, city: <span class="tok-str">''</span>,
+  });
+
+  <span class="tok-key">const</span> handleChange = e =&gt; {
+    <span class="tok-key">const</span> { name, value, type, checked } = e.target;
+    <span class="tok-cmd">setForm</span>(f =&gt; ({
+      ...f,
+      [name]: type === <span class="tok-str">'checkbox'</span> ? checked : value,
+    }));
+  };
+
+  <span class="tok-key">const</span> submit = e =&gt; {
+    e.<span class="tok-cmd">preventDefault</span>();
+    console.<span class="tok-cmd">log</span>(form);
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={submit}&gt;
+      &lt;input name=<span class="tok-str">"name"</span>     value={form.name}     onChange={handleChange} /&gt;
+      &lt;input name=<span class="tok-str">"email"</span>    value={form.email}    onChange={handleChange} /&gt;
+      &lt;input name=<span class="tok-str">"password"</span> value={form.password} onChange={handleChange} type=<span class="tok-str">"password"</span> /&gt;
+      &lt;input name=<span class="tok-str">"age"</span>      value={form.age}      onChange={handleChange} /&gt;
+      &lt;input name=<span class="tok-str">"city"</span>     value={form.city}     onChange={handleChange} /&gt;
+      &lt;button&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+      </div>
+
+      <h4>Why <code>name</code> matters</h4>
+      <p>The computed key <code>[name]</code> is the whole trick. Without a <code>name</code> attribute, <code>e.target.name</code> is <code>""</code>, and <code>setForm</code> sets an empty key — you'll see state like <code>{ name: '', email: 'x', "": 'y' }</code>. Every input <b>must</b> have a <code>name</code> that matches its key in state.</p>
+
+      <h4>Handling checkboxes and selects</h4>
+      <p>Checkboxes use <code>checked</code>, not <code>value</code>. That's why the handler branches on <code>type === 'checkbox'</code>. Selects and textareas use <code>value</code> just like text inputs — no special case needed.</p>
+
+      <div class="verdict"><strong>Verdict:</strong> this is the best pattern you can write by hand. It scales to 15–20 fields, resets in one line, submits as a single object, and centralises change logic in one place. The only reason to reach for Pattern 6 is if you need input-level validation, error display per field, or dirty/touched state tracking — those get painful manually.</div>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="q-p3-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">You added a new input <code>&lt;input value={form.phone} onChange={handleChange} /&gt;</code> but typing in it doesn't update state. Why?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-p3-1', this, false)"><span class="opt-letter">A</span>You need a separate <code>handlePhoneChange</code>.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-p3-1', this, true)"><span class="opt-letter">B</span>You forgot the <code>name="phone"</code> attribute — <code>e.target.name</code> is empty, so the update goes to the wrong key.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-p3-1-feedback"></div>
+    <div class="quiz-explain hidden">The generic <code>handleChange</code> reads the key from <code>e.target.name</code>. Without a <code>name</code> attribute, it has nothing to key on. Add <code>name="phone"</code> and make sure <code>phone: ''</code> is in the initial state object.</div>
+  </div>
+
+  <div class="quiz-box" id="q-p3-2">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">How should this generic handler treat a checkbox? (You want to include a "terms accepted" checkbox.)</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-p3-2', this, true)"><span class="opt-letter">A</span>Use <code>e.target.checked</code> instead of <code>e.target.value</code>, because checkboxes expose their state through <code>checked</code>.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-p3-2', this, false)"><span class="opt-letter">B</span>Use <code>value</code> like any other input.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-p3-2-feedback"></div>
+    <div class="quiz-explain hidden">A checkbox's <code>value</code> is a fixed string (usually <code>"on"</code>); its current state is in <code>checked</code>. Hence the <code>type === 'checkbox' ? checked : value</code> branch in the handler.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · PATTERN 4 ═══ -->
+<section class="section-block" id="p4">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Pattern 4 — Single useRef</h2>
+      <p class="section-subtitle">uncontrolled · the DOM owns the values</p>
+    </div>
+  </div>
+
+  <div class="pattern-card">
+    <div class="pattern-head">
+      <span class="pattern-rank">04</span>
+      <span class="pattern-name">Uncontrolled with one ref</span>
+      <span class="pattern-tag tag-info">niche</span>
+    </div>
+    <div class="pattern-body">
+      <p>An alternative to Pattern 2's state object: store the entire form in a single ref. The DOM holds the values on every keystroke — React only reads them when you actually need them (on submit). No re-renders while typing.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">RegisterForm.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">import</span> { useRef } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">RegisterForm</span>() {
+  <span class="tok-key">const</span> formRef = <span class="tok-cmd">useRef</span>({});
+
+  <span class="tok-key">const</span> submit = e =&gt; {
+    e.<span class="tok-cmd">preventDefault</span>();
+    console.<span class="tok-cmd">log</span>(formRef.current);
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={submit}&gt;
+      &lt;input ref={el =&gt; (formRef.current.name = el)}
+             name=<span class="tok-str">"name"</span>
+             onChange={e =&gt; (formRef.current.name = e.target.value)} /&gt;
+      &lt;input onChange={e =&gt; (formRef.current.email = e.target.value)} /&gt;
+      <span class="tok-com">{/* ...and so on for every field... */}</span>
+      &lt;button&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+      </div>
+
+      <div class="warning-box">
+        <div class="warning-box-icon">⚠️</div>
+        <div class="warning-box-text"><strong>This is worse than it looks.</strong> You still need an <code>onChange</code> per field to capture the value — but now those values are invisible to React. You can't render validation errors, you can't disable the submit button based on current values, and you can't reset the fields without touching the DOM. This pattern is <em>rarely</em> the right choice for a text form.</div>
+      </div>
+
+      <p><strong>Where it actually shines:</strong> file inputs. A file input's value can't be set programmatically (security), so a controlled <code>&lt;input type="file" /&gt;</code> is impossible. The standard approach is a ref:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">file-upload.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">const</span> fileRef = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+&lt;input ref={fileRef} type=<span class="tok-str">"file"</span> /&gt;
+
+<span class="tok-key">const</span> submit = <span class="tok-key">async</span> e =&gt; {
+  e.<span class="tok-cmd">preventDefault</span>();
+  <span class="tok-key">const</span> file = fileRef.current.files[<span class="tok-num">0</span>];
+  <span class="tok-key">if</span> (!file) <span class="tok-key">return</span>;
+  <span class="tok-key">const</span> body = <span class="tok-key">new</span> <span class="tok-cmd">FormData</span>();
+  body.<span class="tok-cmd">append</span>(<span class="tok-str">'avatar'</span>, file);
+  <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/upload'</span>, body);
+};</code></pre>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> use a ref for file inputs and for one-off "grab this value on submit" cases. Don't use refs for text inputs in a form that needs live validation or visual feedback — you'll end up fighting the framework.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 06 · PATTERN 5 ═══ -->
+<section class="section-block" id="p5">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Pattern 5 — Multiple useRef</h2>
+      <p class="section-subtitle">one ref per field · the older uncontrolled pattern</p>
+    </div>
+  </div>
+
+  <div class="pattern-card">
+    <div class="pattern-head">
+      <span class="pattern-rank">05</span>
+      <span class="pattern-name">Multiple refs, one per input</span>
+      <span class="pattern-tag tag-bad">legacy</span>
+    </div>
+    <div class="pattern-body">
+      <p>Every field gets its own ref. On submit, you read <code>nameRef.current.value</code> for each. This is what `<code>useRef</code> for forms looked like before controlled inputs took over, and it's still common in codebases that predate hooks entirely (the class-component version used <code>React.createRef</code>).</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">RegisterForm.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">RegisterForm</span>() {
+  <span class="tok-key">const</span> nameRef     = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">const</span> emailRef    = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">const</span> passwordRef = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-key">const</span> submit = e =&gt; {
+    e.<span class="tok-cmd">preventDefault</span>();
+    console.<span class="tok-cmd">log</span>({
+      name: nameRef.current.value,
+      email: emailRef.current.value,
+      password: passwordRef.current.value,
+    });
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={submit}&gt;
+      &lt;input ref={nameRef} /&gt;
+      &lt;input ref={emailRef} /&gt;
+      &lt;input ref={passwordRef} type=<span class="tok-str">"password"</span> /&gt;
+      &lt;button&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+      </div>
+
+      <h4>What it's good at</h4>
+      <ul>
+        <li><strong>Zero re-renders while typing</strong> — nothing updates until submit. Fast for very large forms.</li>
+        <li><strong>No controlled-input boilerplate</strong> — no <code>value</code> + <code>onChange</code> on every input.</li>
+        <li><strong>Works for uncontrolled-friendly inputs</strong> — files, dates, third-party widgets.</li>
+      </ul>
+
+      <h4>Where it breaks</h4>
+      <ul>
+        <li><strong>No live validation.</strong> You can't show "email is invalid" while typing — React doesn't know the email.</li>
+        <li><strong>No conditional UI.</strong> Can't disable submit when empty, can't show "password is too short" in real time.</li>
+        <li><strong>Resetting means touching the DOM.</strong> <code>nameRef.current.value = ''</code>, one per field.</li>
+        <li><strong>Ref null-checking.</strong> Before the DOM mounts, <code>ref.current</code> is <code>null</code>. Any code that reads it (e.g. auto-focus on mount) must handle that.</li>
+      </ul>
+
+      <div class="verdict"><strong>Verdict:</strong> use for a form with 15+ fields where you only care about the payload at submit time (a settings page with 30 toggles, a form inside a wizard). For anything that needs inline feedback, use Pattern 3 or Pattern 6.</div>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="q-p5-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">Why can't you show real-time validation errors with Pattern 5?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-p5-1', this, false)"><span class="opt-letter">A</span>Because <code>useRef</code> doesn't allow you to read values.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-p5-1', this, true)"><span class="opt-letter">B</span>Because React doesn't re-render on ref changes — you only see the value when you explicitly read <code>ref.current.value</code> (e.g. on submit).</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-p5-1-feedback"></div>
+    <div class="quiz-explain hidden">Reading a ref doesn't trigger re-renders. Validation logic needs to run against the current value — which requires React to know the value — which is the whole point of controlled inputs.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · PATTERN 6 ═══ -->
+<section class="section-block" id="p6">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Pattern 6 — react-hook-form</h2>
+      <p class="section-subtitle">the modern default · uncontrolled inputs + controlled API · built-in validation</p>
+    </div>
+  </div>
+
+  <div class="pattern-card">
+    <div class="pattern-head">
+      <span class="pattern-rank">06</span>
+      <span class="pattern-name">react-hook-form</span>
+      <span class="pattern-tag tag-good">production default</span>
+    </div>
+    <div class="pattern-body">
+      <p><code>react-hook-form</code> solves the tension between Pattern 3 (easy validation, but re-renders on every keystroke) and Pattern 5 (fast, but no live feedback). Internally it uses <code>ref</code>s to register inputs, so typing doesn't re-render — but it exposes a controlled API so you can still read values, validate, and show errors <em>on change of specific fields</em>.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code>npm install react-hook-form</code></pre>
+      </div>
+
+      <h3>The basics</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">RegisterForm.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">import</span> { useForm } <span class="tok-key">from</span> <span class="tok-str">'react-hook-form'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">RegisterForm</span>() {
+  <span class="tok-key">const</span> {
+    register, handleSubmit, reset, formState: { errors, isSubmitting },
+  } = <span class="tok-cmd">useForm</span>();
+
+  <span class="tok-key">const</span> onSubmit = <span class="tok-key">async</span> data =&gt; {
+    <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/auth/register'</span>, data);
+    <span class="tok-cmd">reset</span>();
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input {...register(<span class="tok-str">'name'</span>, { required: <span class="tok-str">'Name is required'</span> })} /&gt;
+      {errors.name &amp;&amp; &lt;p&gt;{errors.name.message}&lt;/p&gt;}
+
+      &lt;input
+        type=<span class="tok-str">"email"</span>
+        {...register(<span class="tok-str">'email'</span>, {
+          required: <span class="tok-str">'Email is required'</span>,
+          pattern: { value: /\S+@\S+\.\S+/, message: <span class="tok-str">'Invalid email'</span> },
+        })}
+      /&gt;
+      {errors.email &amp;&amp; &lt;p&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;input
+        type=<span class="tok-str">"password"</span>
+        {...register(<span class="tok-str">'password'</span>, {
+          required: <span class="tok-str">'Password is required'</span>,
+          minLength: { value: <span class="tok-num">8</span>, message: <span class="tok-str">'At least 8 characters'</span> },
+        })}
+      /&gt;
+      {errors.password &amp;&amp; &lt;p&gt;{errors.password.message}&lt;/p&gt;}
+
+      &lt;button disabled={isSubmitting}&gt;
+        {isSubmitting ? <span class="tok-str">'Registering…'</span> : <span class="tok-str">'Register'</span>}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+      </div>
+
+      <h3>How it works — the mental model</h3>
+      <ol>
+        <li><b><code>register('fieldName')</code></b> returns props (<code>name</code>, <code>onChange</code>, <code>onBlur</code>, <code>ref</code>). When spread onto an input, it registers the input with the form. No <code>value</code> prop — the input stays uncontrolled.</li>
+        <li><b><code>handleSubmit(onSubmit)</code></b> wraps your submit handler. It runs validation first; if validation fails, <code>onSubmit</code> isn't called and <code>errors</code> fills in. If it passes, <code>onSubmit(data)</code> receives the whole form as an object.</li>
+        <li><b><code>formState.errors</code></b> holds one entry per failed field. It only updates when needed, not on every keystroke.</li>
+        <li><b><code>reset()</code></b> clears all fields and errors — no per-field reset calls.</li>
+        <li><b><code>isSubmitting</code></b> is true between <code>handleSubmit</code> starting and the returned promise resolving. Ideal for disabling buttons.</li>
+      </ol>
+
+      <h3>Validation modes</h3>
+      <p>By default, errors appear on submit. Change the timing with the <code>mode</code> option:</p>
+      <div class="table-wrap">
+        <table class="flag-table">
+          <thead><tr><th>mode</th><th>When errors show</th></tr></thead>
+          <tbody>
+            <tr><td><code>onSubmit</code> (default)</td><td>After the user submits</td></tr>
+            <tr><td><code>onBlur</code></td><td>When the user leaves a field</td></tr>
+            <tr><td><code>onChange</code></td><td>After every keystroke — great for search inputs, aggressive for password fields</td></tr>
+            <tr><td><code>onTouched</code></td><td>On blur first, then on change after the field has been touched — the best UX in most cases</td></tr>
+            <tr><td><code>all</code></td><td>On blur AND on change</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">mode + default values</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">const</span> { register, handleSubmit, formState: { errors, isValid } } = <span class="tok-cmd">useForm</span>({
+  mode: <span class="tok-str">'onTouched'</span>,
+  defaultValues: { name: <span class="tok-str">''</span>, email: <span class="tok-str">''</span>, password: <span class="tok-str">''</span> },
+});</code></pre>
+      </div>
+
+      <h3>Watching a value in real time</h3>
+      <p>By default <code>react-hook-form</code> doesn't re-render on keystrokes. When you <em>want</em> to react to a specific field (e.g. show a live password strength meter), use <code>watch</code>:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">watch</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">const</span> password = <span class="tok-cmd">watch</span>(<span class="tok-str">'password'</span>, <span class="tok-str">''</span>);
+
+&lt;input type=<span class="tok-str">"password"</span> {...register(<span class="tok-str">'password'</span>)} /&gt;
+&lt;div className={password.length &gt;= <span class="tok-num">8</span> ? <span class="tok-str">'good'</span> : <span class="tok-str">'weak'</span>}&gt;
+  {password.length} characters
+&lt;/div&gt;</code></pre>
+      </div>
+      <p>Only that field re-renders when <code>password</code> changes — the rest of the form stays quiet. That's the biggest behavioural win over Pattern 3.</p>
+
+      <h3>Cross-field validation</h3>
+      <p>"Confirm password must match password" needs two fields. Use <code>validate</code> with the values argument, or <code>getValues</code>:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-label">validate</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre class="code-pre"><code><span class="tok-key">const</span> { register, handleSubmit, getValues, formState: { errors } } = <span class="tok-cmd">useForm</span>();
+
+&lt;input type=<span class="tok-str">"password"</span> {...register(<span class="tok-str">'password'</span>, { required: <span class="tok-key">true</span> })} /&gt;
+&lt;input
+  type=<span class="tok-str">"password"</span>
+  {...register(<span class="tok-str">'confirm'</span>, {
+    validate: v =&gt; v === <span class="tok-cmd">getValues</span>(<span class="tok-str">'password'</span>) || <span class="tok-str">'Passwords do not match'</span>,
+  })}
+/&gt;
+{errors.confirm &amp;&amp; &lt;p&gt;{errors.confirm.message}&lt;/p&gt;}</code></pre>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> the default for anything beyond a login form. You get validation, error tracking, submit lifecycle, reset, watch, and field arrays — all with less code than Pattern 3. The mental model is one extra concept ("register returns props"); everything else follows.</div>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="q-p6-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">Why does <code>react-hook-form</code> avoid re-rendering the whole form on every keystroke?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-p6-1', this, true)"><span class="opt-letter">A</span>It registers inputs via refs, so the DOM holds the value and React doesn't need to re-render just because a field changed.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-p6-1', this, false)"><span class="opt-letter">B</span>It memoizes the inputs with <code>React.memo</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-p6-1-feedback"></div>
+    <div class="quiz-explain hidden">The `ref` from <code>register()</code> gives RHF a handle to the DOM node. It reads <code>.value</code> when it needs it (validation, submit) without a re-render — same trick as Pattern 5, wrapped in a clean API with errors and submit lifecycle.</div>
+  </div>
+
+  <div class="quiz-box" id="q-p6-2">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">What does <code>handleSubmit(onSubmit)</code> do that <code>onSubmit</code> alone doesn't?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-p6-2', this, false)"><span class="opt-letter">A</span>It calls <code>preventDefault</code> — nothing else.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-p6-2', this, true)"><span class="opt-letter">B</span>It runs all validators first, populates <code>errors</code> if any fail, and only calls <code>onSubmit</code> when the form is valid.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-p6-2-feedback"></div>
+    <div class="quiz-explain hidden">It's the gate: validation → errors or onSubmit. If validation fails, your handler is never called — you don't need to write "if (errors) return".</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · COMPARE ═══ -->
+<section class="section-block" id="compare">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Head to head</h2>
+      <p class="section-subtitle">when to pick which</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pattern</th><th>Re-renders / keystroke</th><th>Live validation</th><th>Scalability</th><th>Best for</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>1 · Many useState</b></td>
+          <td>Whole component</td>
+          <td>Easy (each state)</td>
+          <td>1–3 fields</td>
+          <td>Tiny forms, tutorial code</td>
+        </tr>
+        <tr>
+          <td><b>2 · Single state object</b></td>
+          <td>Whole component</td>
+          <td>Easy</td>
+          <td>Up to ~8 fields</td>
+          <td>Small/medium forms</td>
+        </tr>
+        <tr>
+          <td><b>3 · Single handleChange</b></td>
+          <td>Whole component</td>
+          <td>Easy</td>
+          <td>Up to ~20 fields</td>
+          <td>The best manual pattern</td>
+        </tr>
+        <tr>
+          <td><b>4 · Single useRef</b></td>
+          <td>None while typing</td>
+          <td>Hard — values invisible</td>
+          <td>Medium (if submit-only)</td>
+          <td>File inputs, submit-only forms</td>
+        </tr>
+        <tr>
+          <td><b>5 · Multiple useRefs</b></td>
+          <td>None while typing</td>
+          <td>Hard</td>
+          <td>Large (submit-only)</td>
+          <td>Settings pages, wizard steps</td>
+        </tr>
+        <tr>
+          <td><b>6 · react-hook-form</b></td>
+          <td>None by default; only watched fields</td>
+          <td>Best (built-in)</td>
+          <td>Unlimited</td>
+          <td>Everything beyond a login</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Rule of thumb</div>
+    <div class="concept-box-text"><p><b>1–3 fields, no validation:</b> Pattern 1. <b>4–10 fields, needs validation:</b> Pattern 3. <b>Beyond that, or any kind of arrays / dynamic fields / multi-step:</b> Pattern 6 (react-hook-form). Patterns 4 and 5 are tools for specific inputs (files, third-party widgets), not general form strategies.</p></div>
+  </div>
+</section>
+
+<!-- ═══ 09 · VALIDATION ═══ -->
+<section class="section-block" id="validation">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Validation — Yup &amp; Zod</h2>
+      <p class="section-subtitle">schema validation · resolvers · typed errors</p>
+    </div>
+  </div>
+
+  <p>For anything beyond basic required/pattern checks, define your validation as a schema. Two ecosystems dominate:</p>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>Yup</th><th>Zod</th></tr></thead>
+      <tbody>
+        <tr><td>Style</td><td>Chainable API</td><td>Composable, method chain</td></tr>
+        <tr><td>TypeScript inference</td><td>Good</td><td>Excellent — the schema is the type</td></tr>
+        <tr><td>Default in RHF examples</td><td>Long-time default</td><td>Increasingly the new default</td></tr>
+        <tr><td>Bundle size</td><td>Larger</td><td>Smaller</td></tr>
+        <tr><td>Works for API validation too</td><td>Yes</td><td>Yes — very common for Express/Fastify request bodies</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>With Yup</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">yup.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useForm } <span class="tok-key">from</span> <span class="tok-str">'react-hook-form'</span>;
+<span class="tok-key">import</span> { yupResolver } <span class="tok-key">from</span> <span class="tok-str">'@hookform/resolvers/yup'</span>;
+<span class="tok-key">import</span> * <span class="tok-key">as</span> yup <span class="tok-key">from</span> <span class="tok-str">'yup'</span>;
+
+<span class="tok-key">const</span> schema = yup.<span class="tok-cmd">object</span>({
+  name:     yup.<span class="tok-cmd">string</span>().<span class="tok-cmd">required</span>(<span class="tok-str">'Name is required'</span>),
+  email:    yup.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(<span class="tok-str">'Invalid email'</span>).<span class="tok-cmd">required</span>(),
+  password: yup.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">8</span>, <span class="tok-str">'At least 8 characters'</span>).<span class="tok-cmd">required</span>(),
+  age:      yup.<span class="tok-cmd">number</span>().<span class="tok-cmd">min</span>(<span class="tok-num">18</span>, <span class="tok-str">'Must be 18+'</span>),
+});
+
+<span class="tok-key">const</span> { register, handleSubmit, formState: { errors } } = <span class="tok-cmd">useForm</span>({
+  resolver: <span class="tok-cmd">yupResolver</span>(schema),
+});</code></pre>
+  </div>
+
+  <h3>With Zod</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">zod.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { zodResolver } <span class="tok-key">from</span> <span class="tok-str">'@hookform/resolvers/zod'</span>;
+<span class="tok-key">import</span> { z } <span class="tok-key">from</span> <span class="tok-str">'zod'</span>;
+
+<span class="tok-key">const</span> schema = z.<span class="tok-cmd">object</span>({
+  name:     z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">1</span>, <span class="tok-str">'Name is required'</span>),
+  email:    z.<span class="tok-cmd">string</span>().<span class="tok-cmd">email</span>(<span class="tok-str">'Invalid email'</span>),
+  password: z.<span class="tok-cmd">string</span>().<span class="tok-cmd">min</span>(<span class="tok-num">8</span>, <span class="tok-str">'At least 8 characters'</span>),
+  age:      z.<span class="tok-cmd">number</span>().<span class="tok-cmd">min</span>(<span class="tok-num">18</span>, <span class="tok-str">'Must be 18+'</span>),
+});
+
+<span class="tok-key">type</span> FormData = z.<span class="tok-cmd">infer</span>&lt;<span class="tok-key">typeof</span> schema&gt;;
+
+<span class="tok-key">const</span> { register, handleSubmit, formState: { errors } } = <span class="tok-cmd">useForm</span>&lt;FormData&gt;({
+  resolver: <span class="tok-cmd">zodResolver</span>(schema),
+});</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Same schema, both sides.</strong> Zod schemas work as API request validation on Express and as form validation in React. Define it once, import it on both sides — no drift between "what the form allows" and "what the server accepts". This is one of the strongest reasons to prefer Zod over Yup in modern MERN stacks.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · FIELD ARRAYS ═══ -->
+<section class="section-block" id="arrays">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Dynamic fields — useFieldArray</h2>
+      <p class="section-subtitle">add/remove rows · the pattern react-hook-form makes trivial</p>
+    </div>
+  </div>
+
+  <p>Any "add another phone number" / "add line item" UI. Pattern 3 handles this badly (you'd manage an array in state, then map it, then give each row its own handler). <code>useFieldArray</code> turns it into three calls.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">addresses.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useForm, useFieldArray } <span class="tok-key">from</span> <span class="tok-str">'react-hook-form'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">Addresses</span>() {
+  <span class="tok-key">const</span> { register, control, handleSubmit } = <span class="tok-cmd">useForm</span>({
+    defaultValues: { addresses: [{ line1: <span class="tok-str">''</span> }] },
+  });
+  <span class="tok-key">const</span> { fields, append, remove } = <span class="tok-cmd">useFieldArray</span>({ control, name: <span class="tok-str">'addresses'</span> });
+
+  <span class="tok-key">return</span> (
+    &lt;form onSubmit={handleSubmit(d =&gt; console.<span class="tok-cmd">log</span>(d))}&gt;
+      {fields.<span class="tok-cmd">map</span>((field, i) =&gt; (
+        &lt;div key={field.id}&gt;
+          &lt;input {...register(<span class="tok-str">`addresses.${i}.line1`</span>)} /&gt;
+          &lt;button type=<span class="tok-str">"button"</span> onClick={() =&gt; <span class="tok-cmd">remove</span>(i)}&gt;Remove&lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+      &lt;button type=<span class="tok-str">"button"</span> onClick={() =&gt; <span class="tok-cmd">append</span>({ line1: <span class="tok-str">''</span> })}&gt;
+        Add address
+      &lt;/button&gt;
+      &lt;button&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Use <code>field.id</code> as the React key, not the index.</strong> <code>useFieldArray</code> generates a stable id per row. Index keys break the same way they always do — remove row 1 and inputs shift values up.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · SUBMIT LIFECYCLE ═══ -->
+<section class="section-block" id="submit">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">The submit lifecycle, everywhere</h2>
+      <p class="section-subtitle">double submit · network errors · reset on success</p>
+    </div>
+  </div>
+
+  <p>Whichever pattern you use, the submit handler needs to handle the same things: prevent double-submit, show loading, catch errors, reset or redirect on success. Here's the shape, using Pattern 3 (adapt to any other pattern):</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">submit.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> [form, setForm] = <span class="tok-cmd">useState</span>({ email: <span class="tok-str">''</span>, password: <span class="tok-str">''</span> });
+<span class="tok-key">const</span> [submitting, setSubmitting] = <span class="tok-cmd">useState</span>(<span class="tok-key">false</span>);
+<span class="tok-key">const</span> [serverError, setServerError] = <span class="tok-cmd">useState</span>(<span class="tok-key">null</span>);
+
+<span class="tok-key">const</span> submit = <span class="tok-key">async</span> e =&gt; {
+  e.<span class="tok-cmd">preventDefault</span>();
+  <span class="tok-key">if</span> (submitting) <span class="tok-key">return</span>;                     <span class="tok-com">// guard double submit</span>
+
+  <span class="tok-cmd">setSubmitting</span>(<span class="tok-key">true</span>);
+  <span class="tok-cmd">setServerError</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">try</span> {
+    <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/auth/login'</span>, form);
+    <span class="tok-cmd">setForm</span>({ email: <span class="tok-str">''</span>, password: <span class="tok-str">''</span> });     <span class="tok-com">// reset on success</span>
+    <span class="tok-cmd">navigate</span>(<span class="tok-str">'/dashboard'</span>);
+  } <span class="tok-key">catch</span> (err) {
+    <span class="tok-cmd">setServerError</span>(err.response?.data?.message || <span class="tok-str">'Something went wrong'</span>);
+  } <span class="tok-key">finally</span> {
+    <span class="tok-cmd">setSubmitting</span>(<span class="tok-key">false</span>);
+  }
+};
+
+&lt;button type=<span class="tok-str">"submit"</span> disabled={submitting}&gt;
+  {submitting ? <span class="tok-str">'Submitting…'</span> : <span class="tok-str">'Submit'</span>}
+&lt;/button&gt;</code></pre>
+  </div>
+
+  <h3>In react-hook-form</h3>
+  <p>The same lifecycle is built in: <code>isSubmitting</code> for the loading state, <code>handleSubmit</code> for the guard, and if <code>onSubmit</code> throws, RHF keeps <code>isSubmitting</code> true until the promise settles — no need to write your own flag.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">rhf-submit.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> onSubmit = <span class="tok-key">async</span> data =&gt; {
+  <span class="tok-key">try</span> {
+    <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/auth/login'</span>, data);
+    <span class="tok-cmd">reset</span>();
+    <span class="tok-cmd">navigate</span>(<span class="tok-str">'/dashboard'</span>);
+  } <span class="tok-key">catch</span> (err) {
+    <span class="tok-cmd">setError</span>(<span class="tok-str">'root.server'</span>, { message: err.response?.data?.message });
+  }
+};</code></pre>
+  </div>
+</section>
+
+<!-- ═══ 12 · FILE UPLOADS ═══ -->
+<section class="section-block" id="files">
+  <div class="section-header">
+    <div class="section-num-big">12</div>
+    <div>
+      <h2 class="section-title">File uploads</h2>
+      <p class="section-subtitle">file input is uncontrolled by nature · FormData · progress</p>
+    </div>
+  </div>
+
+  <p>File inputs <b>cannot</b> be controlled — the browser forbids setting <code>input.value</code> from JavaScript for security reasons. So the pattern is always "uncontrolled with a ref, plus state if you want to preview or validate".</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">AvatarUpload.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useRef, useState } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-cmd">AvatarUpload</span>() {
+  <span class="tok-key">const</span> fileRef = <span class="tok-cmd">useRef</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">const</span> [preview, setPreview] = <span class="tok-cmd">useState</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">const</span> [progress, setProgress] = <span class="tok-cmd">useState</span>(<span class="tok-num">0</span>);
+
+  <span class="tok-key">const</span> onChange = e =&gt; {
+    <span class="tok-key">const</span> file = e.target.files[<span class="tok-num">0</span>];
+    <span class="tok-key">if</span> (file) <span class="tok-cmd">setPreview</span>(URL.<span class="tok-cmd">createObjectURL</span>(file));
+  };
+
+  <span class="tok-key">const</span> submit = <span class="tok-key">async</span> () =&gt; {
+    <span class="tok-key">const</span> file = fileRef.current.files[<span class="tok-num">0</span>];
+    <span class="tok-key">if</span> (!file) <span class="tok-key">return</span>;
+
+    <span class="tok-key">const</span> body = <span class="tok-key">new</span> <span class="tok-cmd">FormData</span>();
+    body.<span class="tok-cmd">append</span>(<span class="tok-str">'avatar'</span>, file);
+
+    <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/upload'</span>, body, {
+      headers: { <span class="tok-str">'Content-Type'</span>: <span class="tok-str">'multipart/form-data'</span> },
+      onUploadProgress: e =&gt;
+        <span class="tok-cmd">setProgress</span>(Math.<span class="tok-cmd">round</span>((e.loaded * <span class="tok-num">100</span>) / e.total)),
+    });
+  };
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;input ref={fileRef} type=<span class="tok-str">"file"</span> onChange={onChange} /&gt;
+      {preview &amp;&amp; &lt;img src={preview} alt=<span class="tok-str">""</span> width=<span class="tok-str">"80"</span> /&gt;}
+      {progress &gt; <span class="tok-num">0</span> &amp;&amp; &lt;progress value={progress} max=<span class="tok-str">"100"</span> /&gt;}
+      &lt;button onClick={submit}&gt;Upload&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Never set <code>Content-Type</code> manually on <code>FormData</code> requests.</strong> Your browser must include the multipart boundary in the header. If you hard-code <code>'multipart/form-data'</code>, the boundary is missing and the server can't parse the body. Axios sets it correctly if you leave it alone — remove that header from the code above and it still works. Same story for <code>fetch</code>.</div>
+  </div>
+
+  <h3>In react-hook-form</h3>
+  <p>RHF supports files via <code>register</code> too — the browser gives you a <code>FileList</code>. You then wrap it in <code>FormData</code> before sending:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">rhf-file.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> { register, handleSubmit } = <span class="tok-cmd">useForm</span>();
+
+<span class="tok-key">const</span> onSubmit = <span class="tok-key">async</span> ({ avatar }) =&gt; {
+  <span class="tok-key">const</span> body = <span class="tok-key">new</span> <span class="tok-cmd">FormData</span>();
+  body.<span class="tok-cmd">append</span>(<span class="tok-str">'avatar'</span>, avatar[<span class="tok-num">0</span>]);
+  <span class="tok-key">await</span> api.<span class="tok-cmd">post</span>(<span class="tok-str">'/upload'</span>, body);
+};
+
+&lt;input type=<span class="tok-str">"file"</span> {...register(<span class="tok-str">'avatar'</span>)} /&gt;</code></pre>
+  </div>
+</section>
+
+<!-- ═══ 13 · MULTI-STEP ═══ -->
+<section class="section-block" id="wizard">
+  <div class="section-header">
+    <div class="section-num-big">13</div>
+    <div>
+      <h2 class="section-title">Multi-step forms</h2>
+      <p class="section-subtitle">shared state across steps · validation per step · back navigation</p>
+    </div>
+  </div>
+
+  <p>The classic onboarding wizard: step 1 collects the profile, step 2 the address, step 3 confirms. Two ways to structure it, and both are valid.</p>
+
+  <h3>Option A — one form, one state, conditional UI</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Wizard.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">Wizard</span>() {
+  <span class="tok-key">const</span> [step, setStep] = <span class="tok-cmd">useState</span>(<span class="tok-num">1</span>);
+  <span class="tok-key">const</span> [data, setData] = <span class="tok-cmd">useState</span>({ name: <span class="tok-str">''</span>, city: <span class="tok-str">''</span>, pin: <span class="tok-str">''</span> });
+
+  <span class="tok-key">const</span> next = () =&gt; <span class="tok-cmd">setStep</span>(s =&gt; s + <span class="tok-num">1</span>);
+  <span class="tok-key">const</span> back = () =&gt; <span class="tok-cmd">setStep</span>(s =&gt; s - <span class="tok-num">1</span>);
+
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      {step === <span class="tok-num">1</span> &amp;&amp; &lt;Step1 data={data} onChange={setData} onNext={next} /&gt;}
+      {step === <span class="tok-num">2</span> &amp;&amp; &lt;Step2 data={data} onChange={setData} onNext={next} onBack={back} /&gt;}
+      {step === <span class="tok-num">3</span> &amp;&amp; &lt;Confirm data={data} onBack={back} /&gt;}
+    &lt;/&gt;
+  );
+}</code></pre>
+  </div>
+  <p>Each step receives the same state object and calls <code>onChange</code>. Going back loses nothing because the parent owns the data. <b>Simple, no library needed.</b></p>
+
+  <h3>Option B — RHF + one form instance across steps</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">rhf-wizard.jsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> methods = <span class="tok-cmd">useForm</span>({ mode: <span class="tok-str">'onTouched'</span> });
+<span class="tok-key">const</span> [step, setStep] = <span class="tok-cmd">useState</span>(<span class="tok-num">1</span>);
+
+<span class="tok-key">const</span> next = <span class="tok-key">async</span> () =&gt; {
+  <span class="tok-com">// validate only the fields on this step</span>
+  <span class="tok-key">const</span> ok = <span class="tok-key">await</span> methods.<span class="tok-cmd">trigger</span>(
+    step === <span class="tok-num">1</span> ? [<span class="tok-str">'name'</span>, <span class="tok-str">'email'</span>] : [<span class="tok-str">'city'</span>, <span class="tok-str">'pin'</span>]
+  );
+  <span class="tok-key">if</span> (ok) <span class="tok-cmd">setStep</span>(s =&gt; s + <span class="tok-num">1</span>);
+};</code></pre>
+  </div>
+  <p><code>trigger(names)</code> validates only the named fields — perfect for "validate this step, then advance". All fields stay in one form instance, so the final submit has the full payload.</p>
+</section>
+
+<!-- ═══ 14 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">14</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>value={x}</code> without <code>onChange</code></td><td>Input is read-only; React warns</td><td>Add <code>onChange</code>, or use <code>defaultValue</code> + ref for uncontrolled</td></tr>
+        <tr><td><code>name</code> attribute missing on Pattern 3 inputs</td><td>Value written to empty key; state has <code>{ "": "x" }</code></td><td>Every input needs <code>name</code> matching its state key</td></tr>
+        <tr><td>Checkbox uses <code>value</code> not <code>checked</code></td><td>Keeps the same fixed string regardless of user action</td><td>Branch on <code>type === 'checkbox'</code> and read <code>e.target.checked</code></td></tr>
+        <tr><td>Controlling a file input</td><td>Browser throws — file values are not settable</td><td>Use a ref + <code>FormData</code></td></tr>
+        <tr><td>Manually setting <code>Content-Type: multipart/form-data</code></td><td>Server can't parse the body — missing boundary</td><td>Let the browser / Axios set it</td></tr>
+        <tr><td>Not calling <code>preventDefault()</code></td><td>Page reloads, losing state and showing a GET submission</td><td><code>e.preventDefault()</code> at the top of submit</td></tr>
+        <tr><td>No double-submit guard</td><td>Two orders created, two emails sent</td><td>Disable the button while <code>submitting</code>, or return early if already submitting</td></tr>
+        <tr><td>Index keys in dynamic field arrays</td><td>Removing row 1 shifts input values up</td><td>Use <code>field.id</code> from <code>useFieldArray</code></td></tr>
+        <tr><td>Deeply nested field names break <code>handleChange</code></td><td><code>[name]: value</code> sets one flat key, not a nested object</td><td>Use dot notation in RHF (<code>user.address.city</code>) or write a nested-safe updater</td></tr>
+        <tr><td>Storing derived state (<code>fullName = first + ' ' + last</code>)</td><td>Sync bugs</td><td>Compute in render; only store what the user types</td></tr>
+        <tr><td>Showing every error on mount</td><td>The form screams at the user before they've typed anything</td><td><code>mode: 'onTouched'</code> (RHF) or gate errors on a "has been touched" flag</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 15 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">15</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">forms specifically</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is a controlled vs uncontrolled component?</span></summary><div class="qa-body"><p>Controlled: React state drives the input via <code>value</code> + <code>onChange</code> — the source of truth is React. Uncontrolled: the DOM holds the value; you read it via a ref when needed (typically on submit). Controlled is better for validation and conditional UI; uncontrolled is faster for large forms and required for file inputs.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>Why does typing in a controlled form cause the whole component to re-render?</span></summary><div class="qa-body"><p>Because state lives in the component. Every keystroke calls <code>setState</code> → the component re-renders → all its JSX (including every input) is reconciled. For a 3-input form this is negligible. For a 30-input form it starts to matter — that's the motivation for <code>react-hook-form</code>, which stores values in refs.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>How does the single <code>handleChange</code> pattern work?</span></summary><div class="qa-body"><p>All inputs share one <code>handleChange</code>. Each input has a <code>name</code> attribute that matches a key in the state object. The handler reads <code>e.target.name</code> and writes <code>setForm(f =&gt; ({ ...f, [name]: value }))</code>. The computed key picks the right property. Adding a field is: add the key to initial state, add the input with the matching <code>name</code>. No new handler, no new setter.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>Why is a file input always uncontrolled?</span></summary><div class="qa-body"><p>Browsers forbid setting <code>input.value</code> for file inputs from JavaScript — for security, a script can't fabricate a file that the user didn't choose. So you use a <code>ref</code> and read <code>ref.current.files</code>, then package the file in a <code>FormData</code> object before sending.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>How does react-hook-form avoid re-renders on every keystroke?</span></summary><div class="qa-body"><p><code>register(name)</code> returns a <code>ref</code> that RHF attaches to the DOM input. RHF reads the value from the DOM node when it needs it — on blur, on change of a field that has validation, on submit — instead of storing it in React state. So typing updates the DOM directly and RHF doesn't trigger a render. It re-renders only when you watch a field, or when an error appears.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>What does <code>handleSubmit</code> from react-hook-form do?</span></summary><div class="qa-body"><p>It returns an onSubmit handler for the form. When the user submits, it runs every registered field's validators. If any fail, it populates <code>formState.errors</code> and does NOT call your handler. If all pass, it calls your handler with the whole form data as an object. It also manages <code>isSubmitting</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>How would you reset a form after submit?</span></summary><div class="qa-body"><p>Pattern 1: call each setter with its initial value. Pattern 2/3: <code>setForm(initialValues)</code>. Pattern 5: assign <code>ref.current.value = ''</code> per field (painful). RHF: <code>reset()</code>. The shared idea: a single source of truth for "initial state", so reset is one operation.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>How do you handle validation in a large form?</span></summary><div class="qa-body"><p>Define the rules as a schema (Yup or Zod) and pass it to <code>useForm({ resolver })</code>. All validation logic lives in the schema, errors come out in <code>formState.errors</code>, and the same schema can be reused on the server for request validation. For one-off rules (like "confirm password must match"), use the <code>validate</code> option on that field with access to the rest of the form.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>How do you do cross-field validation?</span></summary><div class="qa-body"><p>In react-hook-form: use the <code>validate</code> option on a field, and inside it call <code>getValues()</code> to check against other fields. Or use <code>.refine()</code> / <code>.superRefine()</code> on the schema to express the rule at the schema level. Manually: run the check in the submit handler after reading all fields.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>How do you prevent double submits?</span></summary><div class="qa-body"><p>Track a <code>submitting</code> boolean in state, set it true at the start of submit, and disable the submit button while it's true. Guard the handler with <code>if (submitting) return;</code> for keyboard-triggered submits. RHF exposes <code>isSubmitting</code> for the same purpose.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>How do you display server-side validation errors (e.g. "email already in use")?</span></summary><div class="qa-body"><p>In RHF, use <code>setError('email', { message: err.response.data.message })</code> — that error goes into <code>formState.errors</code> exactly like a client-side one. In manual patterns, keep a separate <code>serverError</code> state and render it above or below the form; you can also merge it into the field-level errors object if you want a unified display.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>How do you handle dynamic fields (add/remove rows)?</span></summary><div class="qa-body"><p>In RHF, use <code>useFieldArray</code> — <code>append</code>, <code>remove</code>, <code>insert</code>, <code>move</code>, <code>prepend</code> are provided. Field names use array index in dot notation: <code>addresses.0.line1</code>, <code>addresses.1.line1</code>. Use <code>field.id</code> as the React key. Manually: keep an array in state, map it, give each row a stable id, and pass the id to a per-row handler.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q13</span><span>How would you build a multi-step form?</span></summary><div class="qa-body"><p>Keep the data in one place (parent state or one RHF instance) and use a <code>step</code> counter to decide which step to render. Advancing validates only the current step's fields — RHF's <code>trigger(fieldNames)</code> is built for this. Going back is safe because the data hasn't been unmounted, just visually hidden (or the state was lifted).</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q14</span><span>When would you choose react-hook-form over manual patterns?</span></summary><div class="qa-body"><p>As soon as you need any of: per-field errors, submit lifecycle (<code>isSubmitting</code>, <code>isValid</code>, <code>isDirty</code>), array fields, schema validation, or form sizes above ~10 fields. For a 2-field login form, manual state is simpler. For a signup / checkout / profile-edit form, RHF saves hundreds of lines and gives a better UX.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q15</span><span>Why is <code>{...register('email')}</code> a spread and not <code>value={email}</code>?</span></summary><div class="qa-body"><p><code>register('email')</code> returns <code>{ name, onChange, onBlur, ref }</code> — not a value. The input stays uncontrolled. Spreading gives the input everything RHF needs to track it. If you want a controlled field (e.g. to mask input as they type), use <code>Controller</code> or <code>useController</code> to wrap a controlled component.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Frontend · Forms</span>
+  <span>useState · refs · react-hook-form · Yup · Zod</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+})();
+</script>
+</body>
+</html>

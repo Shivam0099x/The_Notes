@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docker — the complete course · Sheryians</title>
+<meta name="description" content="Everything about Docker — images, containers, volumes, networks, Dockerfiles, multi-stage builds, Compose, security, and production patterns.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:17ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.layer{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);margin-bottom:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;transition:all .3s}
+.layer.hl{background:rgba(200,75,31,.08);border-color:var(--accent)}
+.layer-name{flex:1;color:var(--ink);font-weight:600}
+.layer-size{font-size:10px;color:var(--muted)}
+.layer-tag{font-size:9px;padding:1px 6px;border-radius:3px;background:var(--paper3);color:var(--muted)}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">DevOps · Containers · MERN</div>
+  <h1><em>Docker</em> — from your laptop to production</h1>
+  <p class="hero-desc">Images, containers, volumes, networks, Dockerfiles, Compose, multi-stage builds, security, and the patterns you need to containerise any Node/Postgres/Redis stack and keep it running.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Images &amp; containers</span>
+    <span class="hero-tag">Dockerfile in depth</span>
+    <span class="hero-tag">Volumes</span>
+    <span class="hero-tag">Networks</span>
+    <span class="hero-tag">Compose</span>
+    <span class="hero-tag">Multi-stage</span>
+    <span class="hero-tag">Security</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<!-- ═══ 01 · WHY ═══ -->
+<section class="section-block" id="why">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">Why Docker exists</h2>
+      <p class="section-subtitle">"works on my machine" · VMs vs containers · what problem it actually solves</p>
+    </div>
+  </div>
+
+  <p class="lead">Before Docker, moving an app from a laptop to a server meant installing the right Node version, the right Postgres, the right system libs, the right environment variables — and hoping it all matched. "Works on my machine" was the standard failure mode. Docker fixes that by shipping the app <b>with its whole environment</b>, as a single portable image.</p>
+
+  <h3>What a container actually is</h3>
+  <p>A <b>container</b> is a process running on the host, isolated by Linux features:</p>
+  <ul>
+    <li><b>Namespaces</b> — give the process its own view of the filesystem, network, process tree, hostname, etc. It can't see other containers' processes.</li>
+    <li><b>Cgroups</b> — limit how much CPU, memory, and I/O it can consume.</li>
+    <li><b>Union filesystem</b> — layered read-only image + a writable layer on top. This is why containers start fast and share disk space.</li>
+  </ul>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>Virtual Machine</th><th>Container</th></tr></thead>
+      <tbody>
+        <tr><td>What's inside</td><td>A whole OS (kernel + userland)</td><td>Your app + its dependencies</td></tr>
+        <tr><td>Boot time</td><td>30s – minutes</td><td>milliseconds</td></tr>
+        <tr><td>Size</td><td>GBs</td><td>MBs to hundreds of MBs</td></tr>
+        <tr><td>Isolation</td><td>Hardware-level</td><td>Process-level (namespaces)</td></tr>
+        <tr><td>Sharing</td><td>Can't easily share OS resources</td><td>Share the host kernel</td></tr>
+        <tr><td>Use for</td><td>Full OS environments, untrusted workloads</td><td>Apps, services, dev environments</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one sentence</div>
+    <div class="concept-box-text"><p>Docker packages your application <b>and everything it needs to run</b> into an image; that image runs as one or more identical containers on any machine with Docker, regardless of what the host has installed. Same image → same behaviour.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-why-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">Why do containers boot in milliseconds, while VMs take seconds to minutes?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-why-1', this, false)"><span class="opt-letter">A</span>Containers don't have an OS at all.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-why-1', this, true)"><span class="opt-letter">B</span>Containers share the host kernel — they don't boot an OS, they just start a process.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-why-1-feedback"></div>
+    <div class="quiz-explain hidden">A VM runs a full OS with its own kernel. A container is a process on the host kernel, isolated with namespaces and cgroups. Starting a process is fast; booting an OS is not.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · INSTALL ═══ -->
+<section class="section-block" id="install">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Install &amp; verify</h2>
+      <p class="section-subtitle">Docker Desktop vs Engine · hello-world</p>
+    </div>
+  </div>
+
+  <p>Two ways to run Docker:</p>
+  <ul>
+    <li><b>Docker Desktop</b> — one-click install for macOS/Windows/Linux; includes the daemon, CLI, Compose, and a GUI. Fine for local dev, licensing restriction for big companies.</li>
+    <li><b>Docker Engine</b> — the daemon and CLI, no GUI. Install via your package manager on Linux; on mac/Windows you'll use Desktop.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">verify install</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>docker --version
+docker <span class="tok-cmd">run</span> hello-world
+docker info</code></pre>
+  </div>
+
+  <p>If <code>hello-world</code> runs, you're set. If it fails with "Cannot connect to the Docker daemon", the daemon isn't running — start Docker Desktop, or <code>sudo systemctl start docker</code> on Linux.</p>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Docker needs Linux.</strong> On macOS and Windows it runs a tiny Linux VM underneath (Desktop does this for you). That's why <code>docker run ubuntu</code> works on your Mac — you're running a Linux process inside a Linux VM the GUI manages for you.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · IMAGES vs CONTAINERS ═══ -->
+<section class="section-block" id="images">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Images &amp; containers</h2>
+      <p class="section-subtitle">layers · the class/instance distinction · pulling · running</p>
+    </div>
+  </div>
+
+  <p>The core mental model: <b>an image is a class, a container is an instance.</b> You build an image once, then run as many containers from it as you like. Each container has its own writable layer; the image stays read-only and shared.</p>
+
+  <h3>Images are layered</h3>
+  <p>Every instruction in a Dockerfile adds a layer. Layers are cached, reused, and shared between images. Two images based on <code>node:20-alpine</code> share the Alpine base layer on disk.</p>
+
+  <div class="stepper" data-stepper="layers" data-steps="6">
+    <div class="stepper-head"><span class="stepper-title">Image layers, from base to app</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">layers in the final image</div>
+          <div id="layer-stack">
+            <div class="layer" data-cls='{"2":"is-off","3":"is-off","4":"is-off","5":"is-off","6":"is-off"}'>
+              <span class="layer-name">FROM node:20-alpine</span><span class="layer-size">~140 MB</span><span class="layer-tag">base</span>
+            </div>
+            <div class="layer" data-cls='{"1":"is-off","3":"is-off","4":"is-off","5":"is-off","6":"is-off"}'>
+              <span class="layer-name">WORKDIR /app</span><span class="layer-size">0 B</span><span class="layer-tag">metadata</span>
+            </div>
+            <div class="layer" data-cls='{"1":"is-off","2":"is-off","4":"is-off","5":"is-off","6":"is-off"}'>
+              <span class="layer-name">COPY package*.json ./</span><span class="layer-size">~2 KB</span><span class="layer-tag">changes rarely</span>
+            </div>
+            <div class="layer" data-cls='{"1":"is-off","2":"is-off","3":"is-off","5":"is-off","6":"is-off"}'>
+              <span class="layer-name">RUN npm ci --omit=dev</span><span class="layer-size">~40 MB</span><span class="layer-tag">cached</span>
+            </div>
+            <div class="layer" data-cls='{"1":"is-off","2":"is-off","3":"is-off","4":"is-off","6":"is-off"}'>
+              <span class="layer-name">COPY . .</span><span class="layer-size">~1 MB</span><span class="layer-tag">changes often</span>
+            </div>
+            <div class="layer" data-cls='{"1":"is-off","2":"is-off","3":"is-off","4":"is-off","5":"is-off"}'>
+              <span class="layer-name">CMD [ "node", "server.js" ]</span><span class="layer-size">0 B</span><span class="layer-tag">runtime</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">what changes when…</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="3-6"><div class="stat-label">edit package.json</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">rebuilds from layer 3</div></div>
+            <div class="stat" data-show="5-6"><div class="stat-label">edit source code</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">rebuilds from layer 5</div></div>
+            <div class="stat" data-show="1-2"><div class="stat-label">build status</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">no cache yet</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li><b>FROM node:20-alpine</b> — the base image. Alpine is a tiny Linux distro (5 MB) with Node installed; the whole layer is ~140 MB. Everything else builds on top of this.</li>
+      <li><b>WORKDIR /app</b> — a metadata-only layer. Nearly free, but every subsequent command runs from <code>/app</code>.</li>
+      <li><b>COPY package*.json ./</b> — copies just the manifest files first. This layer is cached until <code>package.json</code> changes — which is rare.</li>
+      <li><b>RUN npm ci --omit=dev</b> — installs production dependencies. Because layer 3 rarely changes, this expensive step is almost always cached. Change one source file and you don't re-run <code>npm ci</code>.</li>
+      <li><b>COPY . .</b> — copies the app source. This layer changes on every code edit — which is exactly why it comes <em>after</em> the npm install. Ordering by "changes least often first" is the single biggest lever on build speed.</li>
+      <li><b>CMD [ "node", "server.js" ]</b> — the default command when the container starts. A container is just this process — when it exits, the container stops.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 6</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>Pulling &amp; running</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com"># pull an image from Docker Hub</span>
+docker <span class="tok-cmd">pull</span> node:20-alpine
+
+<span class="tok-com"># list local images</span>
+docker <span class="tok-cmd">images</span>
+
+<span class="tok-com"># run a container — Docker pulls it if you don't have it</span>
+docker <span class="tok-cmd">run</span> node:20-alpine node -e <span class="tok-str">"console.log('hi')"</span>
+
+<span class="tok-com"># list running containers</span>
+docker <span class="tok-cmd">ps</span>
+<span class="tok-com"># list ALL containers, running or stopped</span>
+docker <span class="tok-cmd">ps</span> -a
+
+<span class="tok-com"># stop and remove</span>
+docker <span class="tok-cmd">stop</span> container_id
+docker <span class="tok-cmd">rm</span> container_id
+
+<span class="tok-com"># remove an image</span>
+docker <span class="tok-cmd">rmi</span> node:20-alpine</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong><code>docker run</code> does three things:</b> pulls the image if missing, creates a container from it, and starts it. If the process inside exits (like <code>node -e "..."</code> which prints and ends), the container stops — you won't see it in <code>docker ps</code>, but it's still there in <code>docker ps -a</code> until you <code>docker rm</code> it.</div>
+  </div>
+
+  <div class="quiz-box" id="q-images-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">You run <code>docker run node:20-alpine node -e "console.log('hi')"</code>. Then <code>docker ps</code> shows nothing. Why?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-images-1', this, true)"><span class="opt-letter">A</span>The container exited after printing — <code>docker ps</code> only shows running containers.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-images-1', this, false)"><span class="opt-letter">B</span>The command failed silently.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-images-1-feedback"></div>
+    <div class="quiz-explain hidden">A container lives exactly as long as its main process. Printing then exiting stops the container. It's still visible with <code>docker ps -a</code> until you <code>docker rm</code> it.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · DOCKERFILE ═══ -->
+<section class="section-block" id="dockerfile">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">The Dockerfile</h2>
+      <p class="section-subtitle">every instruction · CMD vs ENTRYPOINT · ARG vs ENV · .dockerignore</p>
+    </div>
+  </div>
+
+  <p>A Dockerfile is a plain text file with instructions, one per line. Every line adds a layer to the image. Learn the instructions once and you can read any Dockerfile.</p>
+
+  <h3>The reference</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Instruction</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>FROM image:tag</code></td><td>Sets the base image. <b>Always pin the tag</b> (<code>node:20-alpine</code>, not <code>node:latest</code>) — <code>latest</code> moves under you.</td></tr>
+        <tr><td><code>WORKDIR /path</code></td><td>Sets the working directory for later commands and the container's default cwd.</td></tr>
+        <tr><td><code>COPY src dest</code></td><td>Copies files from the build context into the image. <code>COPY . .</code> copies everything except what's in <code>.dockerignore</code>.</td></tr>
+        <tr><td><code>ADD src dest</code></td><td>Like <code>COPY</code> but also unpacks tarballs and fetches URLs. <b>Prefer COPY</b> — ADD is surprising.</td></tr>
+        <tr><td><code>RUN cmd</code></td><td>Runs a shell command <b>at build time</b> (installs packages, builds assets). Creates a layer.</td></tr>
+        <tr><td><code>ENV KEY=value</code></td><td>Sets an environment variable <b>at build time and runtime</b>. Visible to any process in the container.</td></tr>
+        <tr><td><code>ARG NAME=default</code></td><td>Build-time variable, not available at runtime. Passed with <code>--build-arg</code>.</td></tr>
+        <tr><td><code>EXPOSE 3000</code></td><td>Documents that the image listens on a port. Doesn't actually publish it — use <code>docker run -p</code> for that.</td></tr>
+        <tr><td><code>USER name</code></td><td>Switches to a non-root user for later instructions and the container's runtime.</td></tr>
+        <tr><td><code>VOLUME /data</code></td><td>Declares a mount point. Usually you set volumes at run time with <code>-v</code> instead.</td></tr>
+        <tr><td><code>HEALTHCHECK</code></td><td>Periodically runs a command to check if the container is healthy.</td></tr>
+        <tr><td><code>CMD [...]</code></td><td>Default command — can be overridden at <code>docker run</code>.</td></tr>
+        <tr><td><code>ENTRYPOINT [...]</code></td><td>The fixed command — arguments from <code>docker run</code> are appended to it.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>A production-grade Node Dockerfile</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Dockerfile</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">FROM</span> node:<span class="tok-num">20</span>-alpine
+
+<span class="tok-com"># pin to a non-root user that already exists in the alpine image</span>
+<span class="tok-key">USER</span> node
+
+<span class="tok-key">WORKDIR</span> /app
+
+<span class="tok-com"># copy only manifests first — lets npm ci stay cached when source changes</span>
+<span class="tok-key">COPY</span> --chown=node:node package*.json ./
+
+<span class="tok-key">RUN</span> npm ci --omit=dev
+
+<span class="tok-com"># copy the rest</span>
+<span class="tok-key">COPY</span> --chown=node:node . .
+
+<span class="tok-key">ENV</span> NODE_ENV=production
+<span class="tok-key">ENV</span> PORT=<span class="tok-num">3000</span>
+
+<span class="tok-key">EXPOSE</span> <span class="tok-num">3000</span>
+
+<span class="tok-key">CMD</span> [<span class="tok-str">"node"</span>, <span class="tok-str">"server.js"</span>]</code></pre>
+  </div>
+
+  <h3>CMD vs ENTRYPOINT</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>CMD</th><th>ENTRYPOINT</th></tr></thead>
+      <tbody>
+        <tr><td>Purpose</td><td>Default command</td><td>Fixed command — always runs</td></tr>
+        <tr><td>Overridden by</td><td><code>docker run image other-cmd</code></td><td>Only with <code>--entrypoint</code></td></tr>
+        <tr><td>Args appended?</td><td>No — fully replaced</td><td>Yes — args go after the entrypoint</td></tr>
+        <tr><td>Use for</td><td>Most apps: the primary process</td><td>Wrappers, CLIs where you always want the entrypoint to run</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">CMD + ENTRYPOINT together</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com"># ENTRYPOINT is fixed; CMD is the default args</span>
+<span class="tok-key">ENTRYPOINT</span> [<span class="tok-str">"node"</span>, <span class="tok-str">"server.js"</span>]
+<span class="tok-key">CMD</span> [<span class="tok-str">"--port"</span>, <span class="tok-str">"3000"</span>]
+
+<span class="tok-com"># docker run img                        → runs: node server.js --port 3000</span>
+<span class="tok-com"># docker run img --port 4000            → runs: node server.js --port 4000</span></code></pre>
+  </div>
+
+  <h3>ARG vs ENV</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>ARG</th><th>ENV</th></tr></thead>
+      <tbody>
+        <tr><td>Available at build time</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Available at runtime</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Set with</td><td><code>docker build --build-arg K=V</code></td><td><code>docker run -e K=V</code></td></tr>
+        <tr><td>Use for</td><td>Build configuration (base image version, build flags)</td><td>Runtime config (database URL, feature flags)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Never bake secrets into an image.</strong> Anything passed via <code>ARG</code>, <code>ENV</code>, or <code>COPY</code> at build time ends up in image layers, and layers are readable by anyone with the image. Pass secrets at runtime with <code>-e</code>, <code>--env-file</code>, or a secret manager. For builds that need secrets (private npm, private git), use BuildKit's <code>--secret</code> mount — it doesn't persist in layers.</div>
+  </div>
+
+  <h3>.dockerignore — smaller builds, faster uploads</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">.dockerignore</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>node_modules
+.git
+.env
+.env.*
+npm-debug.log
+Dockerfile
+.dockerignore
+coverage
+dist
+*.md</code></pre>
+  </div>
+
+  <p>Without <code>.dockerignore</code>, <code>COPY . .</code> copies your local <code>node_modules</code> (which might be built for macOS, and won't work in a Linux container) and your <code>.env</code> (a secret leak). Always include one.</p>
+
+  <div class="quiz-box" id="q-df-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">You want to change <code>node:20-alpine</code> to <code>node:22-alpine</code> without editing the Dockerfile. What do you do?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-df-1', this, false)"><span class="opt-letter">A</span>Set an <code>ENV NODE_VERSION=22</code> at runtime.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-df-1', this, true)"><span class="opt-letter">B</span>Make the base image an <code>ARG</code> — <code>ARG NODE_VERSION=20</code>, <code>FROM node:${NODE_VERSION}-alpine</code> — then <code>docker build --build-arg NODE_VERSION=22</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-df-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>ARG</code> before <code>FROM</code> is the standard way to parameterise the base image. <code>ENV</code> only affects the runtime environment, not the base image the Dockerfile picks.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · PORTS ═══ -->
+<section class="section-block" id="ports">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Ports &amp; the run command</h2>
+      <p class="section-subtitle">-p · EXPOSE vs publish · -d · -it · --name · --rm</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">docker run — the flags you'll use</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>docker <span class="tok-cmd">run</span> \
+  -d \                                    <span class="tok-com"># detach — run in background</span>
+  -p <span class="tok-num">8080</span>:<span class="tok-num">3000</span> \                          <span class="tok-com"># publish host:container port</span>
+  --name myapp \                          <span class="tok-com"># give it a readable name</span>
+  --rm \                                  <span class="tok-com"># auto-remove when it exits</span>
+  -e NODE_ENV=production \                <span class="tok-com"># set an env var</span>
+  --env-file .env \                       <span class="tok-com"># load env vars from a file</span>
+  -v /host/path:/container/path \         <span class="tok-com"># bind mount</span>
+  --network mynet \                       <span class="tok-com"># join a user-defined network</span>
+  myapp:<span class="tok-num">1.0</span>                             <span class="tok-com"># image:tag</span>
+
+<span class="tok-com"># interactive container — useful for debugging</span>
+docker <span class="tok-cmd">run</span> -it node:20-alpine sh</code></pre>
+  </div>
+
+  <h3>-p host:container</h3>
+  <p><code>EXPOSE</code> in the Dockerfile documents the port but doesn't publish it. To reach the container from your machine, use <code>-p hostport:containerport</code>:</p>
+  <ul>
+    <li><code>-p 8080:3000</code> — your laptop's port 8080 forwards to the container's 3000</li>
+    <li><code>-p 3000</code> — picks a random host port for container port 3000 (view with <code>docker port</code>)</li>
+    <li>No <code>-p</code> — the container is only reachable from other containers on the same network</li>
+  </ul>
+
+  <div class="quiz-box" id="q-ports-1">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">Your Node app listens on 3000 inside the container. You run <code>docker run -p 8080:3000 myapp</code>. Where do you open a browser?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-ports-1', this, true)"><span class="opt-letter">A</span><code>http://localhost:8080</code> — the host port you published.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-ports-1', this, false)"><span class="opt-letter">B</span><code>http://localhost:3000</code> — the container's internal port.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-ports-1-feedback"></div>
+    <div class="quiz-explain hidden">The host port (8080) is what your browser sees. Docker forwards it to the container's port 3000. Nothing inside the container is reachable directly from the host — only through the published mapping.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · VOLUMES ═══ -->
+<section class="section-block" id="volumes">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Volumes — persisting data</h2>
+      <p class="section-subtitle">container filesystem is ephemeral · named volumes · bind mounts · tmpfs</p>
+    </div>
+  </div>
+
+  <p>A container's filesystem is <b>ephemeral</b>. Delete the container, and everything the process wrote is gone. That's fine for a stateless web server, but data (Postgres, uploads, cache) needs to survive. Docker gives you three ways:</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Type</th><th>Managed by</th><th>Stored on host</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr><td><b>Named volume</b></td><td>Docker</td><td><code>/var/lib/docker/volumes/</code></td><td>Persistent app data (DB files, uploads)</td></tr>
+        <tr><td><b>Bind mount</b></td><td>You</td><td>Any host path you specify</td><td>Dev: mount source code so live edits work</td></tr>
+        <tr><td><b>tmpfs</b></td><td>Kernel</td><td>RAM (never disk)</td><td>Secrets, temp files, never-persist data</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">volumes</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com"># named volume — created if it doesn't exist</span>
+docker <span class="tok-cmd">volume</span> create pgdata
+docker <span class="tok-cmd">run</span> -d --name pg -v pgdata:/var/lib/postgresql/data postgres:<span class="tok-num">16</span>
+
+<span class="tok-com"># list volumes</span>
+docker <span class="tok-cmd">volume</span> ls
+
+<span class="tok-com"># bind mount — mount a host directory</span>
+docker <span class="tok-cmd">run</span> -d -p <span class="tok-num">3000</span>:<span class="tok-num">3000</span> \
+  -v $(pwd):/app \
+  -v /app/node_modules \      <span class="tok-com"># keep container's node_modules, don't overwrite with host's</span>
+  node:<span class="tok-num">20</span>-alpine npm run dev
+
+<span class="tok-com"># inspect a volume (path on host)</span>
+docker <span class="tok-cmd">volume</span> inspect pgdata</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The dev workflow trick</div>
+    <div class="concept-box-text"><p>For development, bind-mount your source code so edits on your laptop appear instantly inside the container:</p><p><code>-v $(pwd):/app</code></p><p>But that overwrites the container's <code>/app/node_modules</code> (installed during build) with your host's. So add an anonymous volume on top:</p><p><code>-v /app/node_modules</code></p><p>Docker mounts that path from a fresh volume, keeping the container's dependencies intact. Two <code>-v</code> flags, one line, and your dev loop works.</p></div>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>docker rm</code> deletes the container's writable layer, not its volumes.</strong> If you run <code>docker rm -v container</code> you explicitly delete anonymous volumes too. Named volumes (<code>pgdata</code>, <code>redis-data</code>) are only deleted with <code>docker volume rm</code> or <code>docker volume prune</code>. This is why Postgres data survives even if you rebuild the container.</div>
+  </div>
+
+  <div class="quiz-box" id="q-vol-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">You run Postgres in a container and rebuild it. Data is gone. What did you forget?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-vol-1', this, false)"><span class="opt-letter">A</span>Nothing — Postgres can't persist data in Docker.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-vol-1', this, true)"><span class="opt-letter">B</span>A volume mounted at <code>/var/lib/postgresql/data</code> — without one, the DB files live in the container's throwaway layer.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-vol-1-feedback"></div>
+    <div class="quiz-explain hidden">Every write inside a container lands in the writable layer, which is discarded on <code>docker rm</code>. Mount a named volume at the DB's data directory and the files survive container rebuilds.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · NETWORKS ═══ -->
+<section class="section-block" id="networks">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Networks</h2>
+      <p class="section-subtitle">bridge · host · none · DNS by container name · user-defined networks</p>
+    </div>
+  </div>
+
+  <p>Containers on the same network can reach each other <b>by name</b>. This is how <code>app</code> talks to <code>db</code> without you hard-coding IPs.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">network basics</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com"># create a user-defined network</span>
+docker <span class="tok-cmd">network</span> create mynet
+
+<span class="tok-com"># run two containers on it</span>
+docker <span class="tok-cmd">run</span> -d --name db --network mynet postgres:<span class="tok-num">16</span>
+docker <span class="tok-cmd">run</span> -d --name app --network mynet myapp
+
+<span class="tok-com"># from 'app', the DB is reachable as 'db:5432'</span>
+<span class="tok-com"># DATABASE_URL=postgres://user:pass@db:5432/mydb</span>
+
+<span class="tok-com"># list networks</span>
+docker <span class="tok-cmd">network</span> ls</code></pre>
+  </div>
+
+  <h3>Network types</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Driver</th><th>Behaviour</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr><td><code>bridge</code></td><td>Private subnet per network, NAT to the host. Default for <code>docker run</code>.</td><td>Most apps and services</td></tr>
+        <tr><td><code>host</code></td><td>Container shares the host's network stack. No port mapping needed, but no isolation.</td><td>High-perf single-purpose containers; rare</td></tr>
+        <tr><td><code>none</code></td><td>No network at all.</td><td>Batch jobs, security-sensitive tasks</td></tr>
+        <tr><td><code>overlay</code></td><td>Multi-host networking (Swarm or Kubernetes).</td><td>Clusters</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Why user-defined networks beat the default bridge</div>
+    <div class="concept-box-text"><p>On the default <code>bridge</code> network, containers can only reach each other by IP — <code>localhost</code> and names don't work. On a <b>user-defined bridge</b>, Docker runs an embedded DNS server, so <code>db</code>, <code>redis</code>, <code>app</code> are reachable by name. Always create a network; it's one command and it eliminates most "why can't I connect" problems.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-net-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">Your app container needs to connect to Postgres at <code>db:5432</code>. What must be true?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-net-1', this, true)"><span class="opt-letter">A</span>Both containers are on the same user-defined Docker network, and the Postgres container is named <code>db</code>.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-net-1', this, false)"><span class="opt-letter">B</span>The Postgres container has <code>-p 5432:5432</code> published to the host.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-net-1-feedback"></div>
+    <div class="quiz-explain hidden">Port publishing (<code>-p</code>) is only needed to reach the container from outside Docker. Container-to-container traffic uses the Docker network, with DNS resolution by container name.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · COMPOSE ═══ -->
+<section class="section-block" id="compose">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Docker Compose</h2>
+      <p class="section-subtitle">one YAML for the whole stack · depends_on · dev vs prod · profiles</p>
+    </div>
+  </div>
+
+  <p>Running <code>docker run</code> five times with the right flags is a nightmare. Compose lets you define the whole stack — app, Postgres, Redis, Nginx — in one <code>compose.yaml</code> and start it with one command. Compose creates a network automatically and names services so they resolve each other by their service name.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">compose.yaml</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">services</span>:
+  <span class="tok-cmd">app</span>:
+    <span class="tok-cmd">build</span>: .
+    <span class="tok-cmd">ports</span>:
+      - <span class="tok-str">"3000:3000"</span>
+    <span class="tok-cmd">environment</span>:
+      DATABASE_URL: postgres://user:pass@db:<span class="tok-num">5432</span>/mydb
+      REDIS_URL: redis://cache:<span class="tok-num">6379</span>
+    <span class="tok-cmd">depends_on</span>:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    <span class="tok-cmd">volumes</span>:
+      - .:/app
+      - /app/node_modules
+    <span class="tok-cmd">command</span>: npm run dev
+
+  <span class="tok-cmd">db</span>:
+    <span class="tok-cmd">image</span>: postgres:<span class="tok-num">16</span>
+    <span class="tok-cmd">environment</span>:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mydb
+    <span class="tok-cmd">volumes</span>:
+      - pgdata:/var/lib/postgresql/data
+    <span class="tok-cmd">healthcheck</span>:
+      test: [<span class="tok-str">"CMD-SHELL"</span>, <span class="tok-str">"pg_isready -U user -d mydb"</span>]
+      interval: 5s
+      timeout: 3s
+      retries: <span class="tok-num">5</span>
+
+  <span class="tok-cmd">cache</span>:
+    <span class="tok-cmd">image</span>: redis:<span class="tok-num">7</span>-alpine
+
+<span class="tok-key">volumes</span>:
+  pgdata:</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">compose commands</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>docker <span class="tok-cmd">compose</span> up -d              <span class="tok-com"># start everything in background</span>
+docker <span class="tok-cmd">compose</span> logs -f app         <span class="tok-com"># tail logs of one service</span>
+docker <span class="tok-cmd">compose</span> exec app sh         <span class="tok-com"># shell into a running container</span>
+docker <span class="tok-cmd">compose</span> ps                 <span class="tok-com"># list running services</span>
+docker <span class="tok-cmd">compose</span> down               <span class="tok-com"># stop and remove everything</span>
+docker <span class="tok-cmd">compose</span> down -v            <span class="tok-com"># ... including volumes (fresh DB)</span>
+docker <span class="tok-cmd">compose</span> build --no-cache    <span class="tok-com"># rebuild images from scratch</span>
+docker <span class="tok-cmd">compose</span> up --build          <span class="tok-com"># rebuild then start</span></code></pre>
+  </div>
+
+  <h3>The gotchas</h3>
+  <ul>
+    <li><b><code>depends_on</code> does not wait for a service to be ready — only started.</b> Postgres can take 5 seconds to accept connections. Use <code>healthcheck</code> + <code>condition: service_healthy</code> (as above).</li>
+    <li><b>Compose service names are DNS names.</b> <code>db</code> and <code>cache</code> in the YAML resolve to their containers' IPs from inside <code>app</code>. Your code uses <code>db:5432</code>, not <code>localhost:5432</code>.</li>
+    <li><b><code>localhost</code> inside a container means the container itself.</b> This confuses everyone at least once. Use the service name, not <code>localhost</code>, when connecting between services.</li>
+    <li><b><code>compose down -v</code> deletes named volumes.</b> Useful for a fresh DB; dangerous in production.</li>
+  </ul>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Use <code>compose.override.yaml</code> for dev-specific config.</strong> Compose automatically merges it over <code>compose.yaml</code>. Put dev-only volumes (<code>.:/app</code>) and commands (<code>npm run dev</code>) in the override; leave the base file clean for production.</div>
+  </div>
+
+  <div class="quiz-box" id="q-comp-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">Your app container tries to connect to <code>localhost:5432</code> for Postgres and fails. Why?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-comp-1', this, false)"><span class="opt-letter">A</span>Postgres is on 5433, not 5432.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-comp-1', this, true)"><span class="opt-letter">B</span><code>localhost</code> inside the app container is the app container itself — not the host, not the DB. Use <code>db:5432</code> (the service name).</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-comp-1-feedback"></div>
+    <div class="quiz-explain hidden">Every container has its own loopback interface. <code>localhost</code> inside <code>app</code> only refers to <code>app</code>. Compose gives each service a DNS name equal to its key in the YAML — use that.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · MULTI-STAGE ═══ -->
+<section class="section-block" id="multistage">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Multi-stage builds</h2>
+      <p class="section-subtitle">build stage ≠ runtime stage · smaller, safer images</p>
+    </div>
+  </div>
+
+  <p>A single-stage Dockerfile keeps compilers, test runners, and dev dependencies in your final image. That's <b>hundreds of MB of attack surface</b> you don't need in production. Multi-stage builds solve this: you build the app in one stage, copy only the artefacts into a fresh, minimal final stage.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Dockerfile — multi-stage for a React + Express app</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com"># ---- stage 1: build the frontend + install ALL deps</span>
+<span class="tok-key">FROM</span> node:<span class="tok-num">20</span>-alpine <span class="tok-key">AS</span> build
+<span class="tok-key">WORKDIR</span> /app
+<span class="tok-key">COPY</span> package*.json ./
+<span class="tok-key">RUN</span> npm ci
+<span class="tok-key">COPY</span> . .
+<span class="tok-key">RUN</span> npm run build   <span class="tok-com"># produces /app/dist</span>
+
+<span class="tok-com"># ---- stage 2: minimal runtime</span>
+<span class="tok-key">FROM</span> node:<span class="tok-num">20</span>-alpine <span class="tok-key">AS</span> runtime
+<span class="tok-key">WORKDIR</span> /app
+<span class="tok-key">USER</span> node
+
+<span class="tok-com"># install only production deps</span>
+<span class="tok-key">COPY</span> package*.json ./
+<span class="tok-key">RUN</span> npm ci --omit=dev
+
+<span class="tok-com"># copy built assets and server code from the build stage</span>
+<span class="tok-key">COPY</span> --from=build /app/dist ./dist
+<span class="tok-key">COPY</span> --from=build /app/server ./server
+
+<span class="tok-key">ENV</span> NODE_ENV=production
+<span class="tok-key">EXPOSE</span> <span class="tok-num">3000</span>
+<span class="tok-key">CMD</span> [<span class="tok-str">"node"</span>, <span class="tok-str">"server/index.js"</span>]</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">What gets dropped</div>
+    <div class="concept-box-text"><p>The final image doesn't include dev dependencies, source files that aren't needed at runtime, the build cache, or any layer from the build stage you didn't explicitly <code>COPY --from</code>. A typical Node app shrinks from 900 MB (single-stage with devDeps) to 150–180 MB (multi-stage with only prod deps). A Go app can go from 900 MB (with compiler) to 10 MB (static binary on <code>scratch</code>).</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-multi-1">
+    <div class="quiz-label">Quick check · 08</div>
+    <div class="quiz-question">In a multi-stage Dockerfile, what ends up in the final image?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-multi-1', this, true)"><span class="opt-letter">A</span>Only what's in the last <code>FROM</code> stage, plus files copied in via <code>COPY --from=...</code>.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-multi-1', this, false)"><span class="opt-letter">B</span>All stages, merged.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-multi-1-feedback"></div>
+    <div class="quiz-explain hidden">Only the last stage is the final image. Earlier stages exist purely for building; whatever you want from them must be explicitly <code>COPY --from=stage path</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · REGISTRY ═══ -->
+<section class="section-block" id="registry">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Registries &amp; pushing images</h2>
+      <p class="section-subtitle">Docker Hub · GHCR · tagging strategy · pulling on a server</p>
+    </div>
+  </div>
+
+  <p>An image you build locally lives on your laptop. To deploy it, you push it to a <b>registry</b> — a server that stores images by name and tag.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">push to Docker Hub</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>docker <span class="tok-cmd">login</span>                          <span class="tok-com"># authenticate</span>
+
+<span class="tok-com"># tag with the registry prefix + username + repo</span>
+docker <span class="tok-cmd">tag</span> myapp:<span class="tok-num">1.0</span> myusername/myapp:<span class="tok-num">1.0</span>
+docker <span class="tok-cmd">tag</span> myapp:<span class="tok-num">1.0</span> myusername/myapp:latest
+
+docker <span class="tok-cmd">push</span> myusername/myapp:<span class="tok-num">1.0</span>
+docker <span class="tok-cmd">push</span> myusername/myapp:latest
+
+<span class="tok-com"># on a server:</span>
+docker <span class="tok-cmd">pull</span> myusername/myapp:<span class="tok-num">1.0</span>
+docker <span class="tok-cmd">run</span> -d -p <span class="tok-num">80</span>:<span class="tok-num">3000</span> myusername/myapp:<span class="tok-num">1.0</span></code></pre>
+  </div>
+
+  <h3>Tagging strategy</h3>
+  <ul>
+    <li><b>Never rely on <code>latest</code> in production.</b> It moves. Pin to a version or a git SHA.</li>
+    <li>Tag with the <b>git commit SHA</b> in CI: <code>myapp:sha-abc1234</code> — you can trace an image back to the exact commit.</li>
+    <li>Also tag a stable alias: <code>myapp:1.4.2</code> or <code>myapp:production</code>. When you deploy, use the version tag.</li>
+  </ul>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Registry</th><th>Free for</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Docker Hub</td><td>Public repos unlimited; 1 private</td><td>Default; rate-limited pulls for anonymous users</td></tr>
+        <tr><td>GitHub Container Registry (GHCR)</td><td>Public + private within GitHub org</td><td>Tight CI integration; easiest if you're on GitHub</td></tr>
+        <tr><td>AWS ECR / GCP Artifact Registry / Azure ACR</td><td>Pay per GB</td><td>Native to their clouds, with IAM integration</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-reg-1">
+    <div class="quiz-label">Quick check · 09</div>
+    <div class="quiz-question">Why should production not rely on the <code>latest</code> tag?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-reg-1', this, false)"><span class="opt-letter">A</span>Docker refuses to pull <code>latest</code> in production.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-reg-1', this, true)"><span class="opt-letter">B</span><code>latest</code> can point to a different image every push, so deploys aren't reproducible.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-reg-1-feedback"></div>
+    <div class="quiz-explain hidden">Version-pinned tags guarantee you deploy exactly what you tested. <code>latest</code> is a moving pointer — a rollback could pull a different image than the one that was running.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · SECURITY ═══ -->
+<section class="section-block" id="security">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Security</h2>
+      <p class="section-subtitle">non-root · pinned base · scanning · secrets · no docker socket</p>
+    </div>
+  </div>
+
+  <p>The defaults aren't all terrible, but several practices take minutes and prevent real incidents:</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Rule</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><b>Run as non-root</b> (<code>USER node</code>)</td><td>A compromised process can't touch system files or escalate easily</td></tr>
+        <tr><td><b>Pin base image tags</b> (<code>node:20.11-alpine</code>, not <code>node:20</code>, not <code>latest</code>)</td><td>Reproducible builds; avoid surprise breakage when the tag mutates</td></tr>
+        <tr><td><b>Use minimal base images</b> (alpine, distroless, slim)</td><td>Fewer packages, fewer CVEs</td></tr>
+        <tr><td><b>Scan images</b> (<code>docker scout</code>, Trivy, Snyk)</td><td>Catches known-vulnerable dependencies in the base image and your packages</td></tr>
+        <tr><td><b>Don't bake secrets into images</b></td><td>Layers are readable by anyone who can <code>docker pull</code>. Use runtime <code>-e</code>, secret managers, or BuildKit <code>--secret</code></td></tr>
+        <tr><td><b>Don't mount the Docker socket</b> (<code>/var/run/docker.sock</code>)</td><td>That gives the container root on the host — you're effectively disabling isolation</td></tr>
+        <tr><td><b>Read-only filesystem</b> (<code>--read-only</code>) where possible</td><td>Blocks many attack patterns; combine with explicit tmpfs/volume mounts</td></tr>
+        <tr><td><b>Resource limits</b> (<code>--memory</code>, <code>--cpus</code>)</td><td>A runaway container can't take down the host</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">hardened run</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>docker <span class="tok-cmd">run</span> -d \
+  --user <span class="tok-num">1000</span>:<span class="tok-num">1000</span> \
+  --read-only \
+  --tmpfs /tmp \
+  --memory <span class="tok-str">"256m"</span> \
+  --cpus <span class="tok-str">"0.5"</span> \
+  --cap-drop ALL \
+  --security-opt no-new-privileges \
+  -e NODE_ENV=production \
+  --env-file /etc/myapp.env \
+  myapp:<span class="tok-num">1.0</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>/var/run/docker.sock</code> is root.</strong> Containers that mount the socket (common in CI tools, "Docker-in-Docker" workarounds) can spawn privileged containers, read host files, and effectively own the host. If you need to build images inside a container, use rootless Docker, Kaniko, or BuildKit — never share the socket with a container running untrusted code.</div>
+  </div>
+
+  <div class="quiz-box" id="q-sec-1">
+    <div class="quiz-label">Quick check · 10</div>
+    <div class="quiz-question">What's the security problem with <code>COPY .env .env</code> in a Dockerfile?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-sec-1', this, true)"><span class="opt-letter">A</span>The secrets are baked into an image layer; anyone with the image can extract them.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-sec-1', this, false)"><span class="opt-letter">B</span>Nothing — <code>.env</code> is a config file, not a secret.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-sec-1-feedback"></div>
+    <div class="quiz-explain hidden">Docker layer history is preserved even if a later instruction deletes the file — every <code>RUN</code>, <code>COPY</code>, or <code>ADD</code> is a permanent layer. Once secrets are in the image, they're in the registry forever. Use runtime env vars or BuildKit secret mounts.</div>
+  </div>
+</section>
+
+<!-- ═══ 12 · PRODUCTION ═══ -->
+<section class="section-block" id="production">
+  <div class="section-header">
+    <div class="section-num-big">12</div>
+    <div>
+      <h2 class="section-title">Docker in production</h2>
+      <p class="section-subtitle">logging · health checks · restart policies · zero-downtime · orchestration</p>
+    </div>
+  </div>
+
+  <h3>Logging</h3>
+  <p>Write logs to <code>stdout</code>/<code>stderr</code>. Docker captures them, and every log aggregator (Loki, Datadog, CloudWatch) reads from there. Don't write to files inside the container — those files disappear with the container.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">logging</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com"># in your app: use stdout, not a file</span>
+console.<span class="tok-cmd">log</span>(<span class="tok-str">'User created'</span>, { id });      <span class="tok-com">// goes to docker logs</span>
+
+<span class="tok-com"># view logs</span>
+docker <span class="tok-cmd">logs</span> -f container_name
+
+<span class="tok-com"># limit log size per container</span>
+docker <span class="tok-cmd">run</span> --log-driver json-file --log-opt max-size=10m --log-opt max-file=3 myapp</code></pre>
+  </div>
+
+  <h3>Health checks &amp; restart policies</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">run with restart policy</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>docker <span class="tok-cmd">run</span> -d --restart=unless-stopped myapp:<span class="tok-num">1.0</span></code></pre>
+  </div>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Restart policy</th><th>When it restarts</th></tr></thead>
+      <tbody>
+        <tr><td><code>no</code> (default)</td><td>Never</td></tr>
+        <tr><td><code>on-failure</code></td><td>Only if it exits with a non-zero code</td></tr>
+        <tr><td><code>always</code></td><td>Always, even on clean exit</td></tr>
+        <tr><td><code>unless-stopped</code></td><td>Always, unless you explicitly stopped it</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Health check vs restart</div>
+    <div class="concept-box-text"><p>A <b>healthcheck</b> tells Docker (and orchestrators) whether the container is actually <em>serving</em> — the process may be alive but the DB connection is dead. A <b>restart policy</b> reacts to the process exiting. A container can be running (process up) but unhealthy (endpoint failing) for hours without a restart policy doing anything. Use both in production.</p></div>
+  </div>
+
+  <h3>Zero-downtime deploys — briefly</h3>
+  <p>Docker by itself doesn't do rolling updates. In production, you usually run containers on an <b>orchestrator</b> — Kubernetes, ECS, Nomad, Docker Swarm — which handles rolling update strategies, health checks, and load-balancing across multiple replicas. For a single-server small app, a plain <code>docker compose up -d</code> with a reverse proxy (Nginx, Caddy) and two replicas + restart policy covers most of the same ground manually.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Orchestrator</th><th>When to use</th></tr></thead>
+      <tbody>
+        <tr><td>Docker Compose</td><td>Single host, dev or small prod, no rolling deploys</td></tr>
+        <tr><td>Docker Swarm</td><td>Multi-host, simple, but increasingly niche</td></tr>
+        <tr><td>Kubernetes</td><td>Real production, multi-service, auto-scaling, rolling deploys</td></tr>
+        <tr><td>AWS ECS / GCP Cloud Run / Fly.io</td><td>Managed alternatives — you push images, they orchestrate</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-prod-1">
+    <div class="quiz-label">Quick check · 11</div>
+    <div class="quiz-question">Your container's main process crashes at 3 AM. What restart policy should you set so the container comes back automatically?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-prod-1', this, true)"><span class="opt-letter">A</span><code>--restart=unless-stopped</code> — it restarts after any non-manual stop.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-prod-1', this, false)"><span class="opt-letter">B</span><code>--restart=on-failure</code> is not enough — the process dies and comes back, but the host still shows the old image.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-prod-1-feedback"></div>
+    <div class="quiz-explain hidden">Both <code>on-failure</code> and <code>unless-stopped</code> cover crashes. <code>unless-stopped</code> is the standard production choice — it restarts even on clean exit, but respects a manual <code>docker stop</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · PITFALLS ═══ -->
+<section class="section-block" id="pitfalls">
+  <div class="section-header">
+    <div class="section-num-big">13</div>
+    <div>
+      <h2 class="section-title">Pitfalls that bite in real projects</h2>
+      <p class="section-subtitle">common mistakes · what to do instead</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pitfall</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Copying host <code>node_modules</code> into image</td><td>Native binaries built on macOS crash in the Linux container</td><td><code>.dockerignore</code> with <code>node_modules</code>, plus <code>RUN npm ci</code> inside</td></tr>
+        <tr><td>Using <code>node:latest</code> or <code>FROM ubuntu</code></td><td>Image mutates under you; rebuilds differ day to day</td><td>Pin to <code>node:20.11-alpine</code>, <code>ubuntu:22.04</code></td></tr>
+        <tr><td>Running as root</td><td>Any exploit gains root inside the container</td><td><code>USER node</code> (or a non-root UID)</td></tr>
+        <tr><td>Secrets in Dockerfile</td><td>Leaked into every layer forever</td><td>Runtime env / secret manager / BuildKit <code>--secret</code></td></tr>
+        <tr><td>No <code>.dockerignore</code></td><td>Huge uploads, secret leaks, mystery bugs</td><td>Ignore <code>node_modules</code>, <code>.git</code>, <code>.env*</code>, <code>dist</code></td></tr>
+        <tr><td>Blind <code>COPY . .</code> before <code>npm ci</code></td><td>Every build reinstalls dependencies — slow</td><td>Copy manifests → install → copy source</td></tr>
+        <tr><td>No volume on DB</td><td>Data lost on container rebuild</td><td>Named volume at the data directory</td></tr>
+        <tr><td><code>localhost</code> between containers</td><td>"Connection refused" — <code>localhost</code> is the container itself</td><td>Use the service name (<code>db:5432</code>) on the same network</td></tr>
+        <tr><td><code>depends_on</code> without healthcheck</td><td>App starts before DB is ready; crashes on first query</td><td><code>healthcheck</code> + <code>condition: service_healthy</code></td></tr>
+        <tr><td>Logging to a file</td><td>Logs vanish with the container; no aggregation</td><td>Log to stdout/stderr</td></tr>
+        <tr><td>Giving containers the docker socket</td><td>Container gets host root</td><td>Rootless Docker, Kaniko, BuildKit, or managed builders</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>The <code>localhost</code> trap, one more time.</strong> Inside a container, <code>localhost</code> is the container. It cannot reach the host, other containers, or the internet through <code>localhost</code>. To reach the host from a container (rare), use <code>host.docker.internal</code> on Docker Desktop. To reach another container, use its service/container name on the same network.</div>
+  </div>
+</section>
+
+<!-- ═══ 14 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">14</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">the ones you'll actually be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is Docker, and what problem does it solve?</span></summary><div class="qa-body"><p>Docker packages an application and its dependencies into a portable image that runs identically on any machine with Docker. It solves the "works on my machine" problem by removing the dependency on what the host OS has installed — the container carries its own environment.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>What's the difference between an image and a container?</span></summary><div class="qa-body"><p>An <b>image</b> is a read-only, layered filesystem plus metadata — a template. A <b>container</b> is a running instance of an image, with its own writable layer on top and its own isolated process, network, and filesystem view. One image, many containers.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>What's the difference between a VM and a container?</span></summary><div class="qa-body"><p>A VM includes a full OS and its own kernel, running on virtualised hardware. A container shares the host kernel and is isolated via Linux namespaces and cgroups. Containers are lighter (MBs vs GBs), start faster (ms vs seconds), and are easier to run many of — but they offer weaker isolation than VMs.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>Explain the Dockerfile instructions you use most.</span></summary><div class="qa-body"><p><code>FROM</code> sets the base image. <code>WORKDIR</code> sets the working directory. <code>COPY</code> copies files in from the build context. <code>RUN</code> executes commands at build time (each creates a layer). <code>ENV</code> sets a runtime env var; <code>ARG</code> sets a build-time-only var. <code>CMD</code> is the default command; <code>ENTRYPOINT</code> is the fixed command. <code>EXPOSE</code> documents a port. <code>USER</code> switches to a non-root user. <code>HEALTHCHECK</code> defines a readiness probe.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>CMD vs ENTRYPOINT — when do you use which?</span></summary><div class="qa-body"><p><code>CMD</code> is the default command and can be overridden by <code>docker run image other-cmd</code>. <code>ENTRYPOINT</code> is the fixed command; args from <code>docker run</code> are appended to it. Use <code>CMD</code> for most apps (the primary process), and <code>ENTRYPOINT</code> when you're building a wrapper/CLI where a specific binary must always run. Combined, <code>ENTRYPOINT</code> sets the binary and <code>CMD</code> sets default args.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>What are Docker volumes, and why do you need them?</span></summary><div class="qa-body"><p>A container's writable layer is ephemeral — deleting the container deletes it. Volumes let data persist outside that layer. Named volumes (managed by Docker, stored under <code>/var/lib/docker/volumes</code>) are the correct choice for DBs and uploads. Bind mounts (a host directory mounted into the container) are correct for dev — source code edits reflect instantly. <code>tmpfs</code> mounts exist only in RAM and are used for secrets and temp files.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>How does container networking work?</span></summary><div class="qa-body"><p>Each container gets its own network namespace. Docker attaches it to a network (a bridge by default, or a user-defined bridge). On a user-defined bridge, containers are reachable by container/service name because Docker runs an embedded DNS. Only containers whose ports are published with <code>-p</code> are reachable from the host. Container-to-container traffic never goes through the host port — it uses the internal network directly.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>Why would a container reach the DB by name (<code>db:5432</code>) rather than <code>localhost</code>?</span></summary><div class="qa-body"><p><code>localhost</code> inside a container is the container itself. The DB is in a different container, with its own loopback. On the same Docker network, Docker's embedded DNS resolves the service/container name to its container IP. So <code>db:5432</code> reaches the Postgres container; <code>localhost:5432</code> reaches only the app's own (empty) port 5432.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>What does <code>docker compose</code> do that <code>docker run</code> doesn't?</span></summary><div class="qa-body"><p>Compose defines multi-container stacks declaratively in one YAML: services, networks, volumes, env files, healthchecks, dependencies. One command (<code>docker compose up</code>) starts everything, creates the network, and wires up DNS names. It handles rebuilds, logs, exec, and teardown per service. <code>docker run</code> is one container at a time with flags repeated by hand.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>What is a multi-stage build, and why use one?</span></summary><div class="qa-body"><p>A Dockerfile with multiple <code>FROM</code> stages. The first stage builds (compiles TypeScript, builds the frontend, installs devDeps). The final stage copies only the artefacts it needs, using <code>COPY --from=build</code>. This drops dev dependencies, build tools, and source from the final image — smaller, faster to deploy, smaller attack surface, fewer CVEs.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>Why should a container run as non-root?</span></summary><div class="qa-body"><p>If the process is compromised, root inside the container can (a) modify the container's filesystem freely, (b) potentially escalate to the host if any kernel or configuration weaknesses exist, and (c) trigger container-escape vulnerabilities. Running as a non-root user (via <code>USER</code>) limits damage. Combine with <code>--cap-drop ALL</code>, <code>--read-only</code>, and <code>--security-opt no-new-privileges</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>How would you reduce Docker image size?</span></summary><div class="qa-body"><p>1) Use a small base (<code>alpine</code>, <code>slim</code>, <code>distroless</code>). 2) Multi-stage builds so build tools and dev dependencies don't ship. 3) <code>.dockerignore</code> to keep node_modules, .git, and tests out of the build context. 4) Combine related <code>RUN</code> instructions into one layer (or use <code>RUN --mount=type=cache</code>) so intermediate files don't accumulate. 5) Remove package manager caches (<code>rm -rf /var/cache/apk/*</code>) after installing. 6) Use <code>npm ci --omit=dev</code> or a <code>.npmrc</code> that excludes devDependencies in the runtime stage.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q13</span><span>What is a healthcheck, and how is it different from a restart policy?</span></summary><div class="qa-body"><p>A healthcheck periodically runs a command inside the container to check if it's actually serving (e.g. an HTTP endpoint returns 200, or <code>pg_isready</code> passes). It reports a status (<code>healthy</code>, <code>unhealthy</code>) and, in orchestrators, triggers restart or removal. A restart policy is about the process exiting — it restarts the container when it dies. Both are needed: a container can be running but unhealthy.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q14</span><span>How do you handle secrets in Docker?</span></summary><div class="qa-body"><p>Never bake them into the image (<code>ENV</code>, <code>ARG</code>, <code>COPY</code> all create permanent layers). At runtime, pass them as env vars with <code>-e</code> or <code>--env-file</code>, or inject from a secrets manager (AWS Secrets Manager, Vault, Doppler) as env vars when the container starts. For build-time secrets (private npm, private git), use BuildKit's <code>RUN --mount=type=secret</code> — the secret is mounted only during that build step and never persisted.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q15</span><span>How do you do zero-downtime deploys with Docker?</span></summary><div class="qa-body"><p>Docker by itself doesn't — you need an orchestrator or a manual pattern. The standard approach with Kubernetes/ECS: run N replicas of the service behind a load balancer, deploy a new version, wait for the new pods/containers to pass health checks, then drain and terminate the old ones. With Compose on a single host: run two replicas behind Nginx, update one at a time, and use <code>docker compose up -d --no-deps --scale app=2 --no-recreate app</code> plus a proxy that routes to healthy instances.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q16</span><span>What is <code>.dockerignore</code>, and why does it matter?</span></summary><div class="qa-body"><p>It excludes files from the build context — the directory Docker sends to the daemon. Without it, you upload <code>node_modules</code> (which can contain binaries built for the wrong OS) and <code>.env</code> (which can leak secrets). It also makes builds faster by shrinking the context. Standard contents: <code>node_modules</code>, <code>.git</code>, <code>.env*</code>, <code>Dockerfile</code>, <code>.dockerignore</code>, <code>dist</code>, <code>coverage</code>, <code>*.md</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q17</span><span>Why is copying host <code>node_modules</code> into a container a bug?</span></summary><div class="qa-body"><p>Native dependencies (like <code>bcrypt</code>, <code>sharp</code>, <code>node-sass</code>) are compiled for a specific OS and CPU architecture. If you <code>npm install</code> on macOS and then <code>COPY . .</code>, the image contains macOS-built binaries that fail to load in a Linux container with <code>Error: invalid ELF header</code>. Always install dependencies inside the image (<code>RUN npm ci</code>) and always add <code>node_modules</code> to <code>.dockerignore</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q18</span><span>Difference between <code>docker stop</code> and <code>docker kill</code>?</span></summary><div class="qa-body"><p><code>docker stop</code> sends <code>SIGTERM</code> to the container's main process, waits up to a grace period (default 10s) for it to exit cleanly, then <code>SIGKILL</code>s it. Use it — apps can flush logs, close DB connections, finish requests. <code>docker kill</code> sends <code>SIGKILL</code> immediately — the process dies without cleanup. Reserve <code>kill</code> for genuinely stuck containers.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q19</span><span>What happens to data written inside a container when it exits?</span></summary><div class="qa-body"><p>It stays in the container's writable layer as long as the container exists. If you <code>docker rm</code> the container, that layer is deleted and the data is gone. Only data on a <b>volume</b> (named or bind mount) survives container removal. So containers should be treated as stateless; anything persistent belongs on a volume.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q20</span><span>How would you containerise a Node + Postgres + Redis stack?</span></summary><div class="qa-body"><p>Write a <code>Dockerfile</code> for the Node app (multi-stage: build stage installs all deps and compiles TypeScript/React, runtime stage installs only prod deps). Write a <code>compose.yaml</code> with three services: <code>app</code> (build from the Dockerfile, publishes 3000, env vars for <code>DATABASE_URL</code> and <code>REDIS_URL</code> pointing at <code>db</code> and <code>cache</code>, <code>depends_on</code> with healthchecks), <code>db</code> (image <code>postgres:16</code>, named volume at <code>/var/lib/postgresql/data</code>, healthcheck <code>pg_isready</code>), and <code>cache</code> (image <code>redis:7-alpine</code>). <code>docker compose up -d</code> starts the whole stack, wired on one network, with DNS names <code>db</code> and <code>cache</code>.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · DevOps · Docker</span>
+  <span>Images · containers · volumes · Compose · multi-stage · security</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>
