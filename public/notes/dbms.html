@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DBMS — the complete conceptual guide · Sheryians</title>
+<meta name="description" content="DBMS from first principles — architecture, data models, ER, normalization, transactions, ACID, concurrency, indexing, storage, recovery, distributed DBs, and NoSQL — concepts only, no SQL syntax.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:18ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+/* stepper */
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+/* generic demo */
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.tbl-demo{width:100%;border-collapse:collapse;font-size:12.5px;font-family:'IBM Plex Mono',monospace}
+.tbl-demo th,.tbl-demo td{border:1px solid var(--rule);padding:6px 10px;text-align:left}
+.tbl-demo th{background:var(--paper3);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tbl-demo tr.hl td{background:rgba(200,75,31,.08)}
+.tbl-demo tr.hl2 td{background:rgba(26,107,74,.08)}
+.tbl-demo tr.skip td{opacity:.35}
+
+.er-box{border:1px solid var(--rule);border-radius:10px;padding:16px;background:var(--paper);margin:16px 0}
+.er-svg{width:100%;height:auto;display:block;overflow:visible}
+.er-svg text{font-family:'IBM Plex Mono',monospace;fill:var(--ink);font-size:11px}
+.er-svg .entity{fill:var(--paper2);stroke:var(--accent);stroke-width:1.5}
+.er-svg .attribute{fill:var(--paper);stroke:var(--rule);stroke-width:1}
+.er-svg .relation{fill:var(--paper);stroke:var(--accent3);stroke-width:1.5;transform:rotate(45deg);transform-origin:center}
+.er-svg .line{stroke:var(--muted);stroke-width:1.2;fill:none}
+.er-svg .label{font-size:10px;fill:var(--muted)}
+.er-svg .key-attr{stroke:var(--accent2);stroke-width:1.6}
+
+/* quiz */
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.toc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:24px 0 40px}
+.toc a{display:block;padding:10px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--paper2);text-decoration:none;color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;transition:border-color .2s,color .2s}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+.toc a .n{color:var(--accent);font-weight:600;margin-right:6px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols,.toc{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Backend · Database · Theory</div>
+  <h1><em>DBMS</em> — how a database actually works</h1>
+  <p class="hero-desc">Every DBMS concept, explained from first principles: what a database is, how data models work, what transactions and isolation really mean, how indexes find data, what a WAL is, and why distributed databases are hard. Concepts and theory only — no SQL syntax.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Architecture</span>
+    <span class="hero-tag">Data models</span>
+    <span class="hero-tag">ER &amp; normalization</span>
+    <span class="hero-tag">Transactions &amp; ACID</span>
+    <span class="hero-tag">Concurrency</span>
+    <span class="hero-tag">Indexing</span>
+    <span class="hero-tag">Storage &amp; recovery</span>
+    <span class="hero-tag">Distributed DBs</span>
+    <span class="hero-tag">NoSQL</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#what"><span class="n">01</span>What a DBMS is</a>
+  <a href="#arch"><span class="n">02</span>Architecture</a>
+  <a href="#models"><span class="n">03</span>Data models</a>
+  <a href="#er"><span class="n">04</span>ER model</a>
+  <a href="#keys"><span class="n">05</span>Keys &amp; constraints</a>
+  <a href="#normal"><span class="n">06</span>Normalization</a>
+  <a href="#tx"><span class="n">07</span>Transactions</a>
+  <a href="#acid"><span class="n">08</span>ACID</a>
+  <a href="#conc"><span class="n">09</span>Concurrency control</a>
+  <a href="#iso"><span class="n">10</span>Isolation levels</a>
+  <a href="#idx"><span class="n">11</span>Indexing</a>
+  <a href="#storage"><span class="n">12</span>Storage engines</a>
+  <a href="#recovery"><span class="n">13</span>Recovery &amp; WAL</a>
+  <a href="#dist"><span class="n">14</span>Distributed databases</a>
+  <a href="#cap"><span class="n">15</span>CAP &amp; consistency</a>
+  <a href="#sql-nosql"><span class="n">16</span>SQL vs NoSQL</a>
+  <a href="#interview"><span class="n">17</span>Interview questions</a>
+</nav>
+
+<!-- ═══ 01 · WHAT ═══ -->
+<section class="section-block" id="what">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">What a DBMS is</h2>
+      <p class="section-subtitle">data vs information vs database · why not files · what the DBMS guarantees</p>
+    </div>
+  </div>
+
+  <p class="lead">A <b>database</b> is an organised collection of data. A <b>DBMS</b> (Database Management System) is the software that stores, retrieves, and protects that data. You don't talk to the files directly — you talk to the DBMS, and it decides how to store, index, and retrieve them.</p>
+
+  <h3>Why not just use files?</h3>
+  <p>Every application could write to a JSON file or a CSV. For small, single-user, simple data, it works. It collapses the moment you have <b>multiple users</b>, <b>concurrent writes</b>, or <b>relationships between entities</b>.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Problem with files</th><th>What the DBMS solves</th></tr></thead>
+      <tbody>
+        <tr><td>Two processes write to the same file → corrupted data</td><td><b>Concurrency control</b> — locks, MVCC, transaction isolation</td></tr>
+        <tr><td>App crashes mid-write → half-written file</td><td><b>Atomicity + recovery</b> via write-ahead logging</td></tr>
+        <tr><td>Finding "all users over 25 in Pune" means scanning the file</td><td><b>Indexes</b> — data structures that find rows without scanning</td></tr>
+        <tr><td>Nothing stops a field from being a number in one row and a string in another</td><td><b>Schema + constraints</b> — types, NOT NULL, foreign keys</td></tr>
+        <tr><td>No access control — anyone with file access can read anything</td><td><b>Authentication + authorization</b> — users, roles, grants</td></tr>
+        <tr><td>Backups and restores are manual, error-prone</td><td><b>Backup + point-in-time recovery</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one sentence</div>
+    <div class="concept-box-text"><p>A DBMS is the layer between your application and the storage. It guarantees <b>atomicity</b> (writes succeed or don't happen), <b>consistency</b> (constraints hold), <b>isolation</b> (concurrent operations don't corrupt each other), and <b>durability</b> (committed data survives a crash), while providing the query and index machinery to make data findable.</p></div>
+  </div>
+
+  <h3>What the DBMS layer does</h3>
+  <ul>
+    <li><b>Storage management</b> — how bytes go on disk, how pages are laid out, how memory is cached.</li>
+    <li><b>Query processing</b> — parse the request, plan the fastest execution path, execute it.</li>
+    <li><b>Transaction management</b> — group operations into atomic units, coordinate concurrent access.</li>
+    <li><b>Recovery</b> — after a crash, bring the database back to a consistent state.</li>
+    <li><b>Access control</b> — who can read, write, alter what.</li>
+  </ul>
+
+  <div class="quiz-box" id="q-what-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">Why is a JSON file NOT a substitute for a database in a multi-user app?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-what-1', this, false)"><span class="opt-letter">A</span>JSON files can't store nested data.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-what-1', this, true)"><span class="opt-letter">B</span>Two concurrent writers can corrupt the file, and there's no built-in transaction, isolation, or recovery.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-what-1-feedback"></div>
+    <div class="quiz-explain hidden">A file gives you no way to coordinate two writers, no way to undo a half-finished write, and no guarantee the file is consistent when your app reads it. Those guarantees are exactly what a DBMS provides.</div>
+  </div>
+</section>
+
+<!-- ═══ 02 · ARCHITECTURE ═══ -->
+<section class="section-block" id="arch">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Architecture of a DBMS</h2>
+      <p class="section-subtitle">the layered stack · query pipeline · buffer manager · file manager</p>
+    </div>
+  </div>
+
+  <p>Every relational DBMS has the same high-level layers, even if the implementations differ. Data flows top to bottom on writes and bottom to top on reads.</p>
+
+  <div class="stepper" data-stepper="arch" data-steps="6">
+    <div class="stepper-head"><span class="stepper-title">The DBMS layers, top to bottom</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">layers</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">1</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">Client / application</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">2</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">Query parser &amp; rewriter</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">3</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">Query optimizer (planner)</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">4</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">Execution engine</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">5</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">Buffer manager (in-memory cache)</div></div>
+            <div class="stat" data-show="6"><div class="stat-label">6</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">Storage manager (disk, pages, B+ trees)</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">responsibility</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">task</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">sends a query, waits for results</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">task</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">validates syntax, resolves tables, checks permissions</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">task</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">picks the fastest plan (index vs scan, join order)</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">task</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">runs the plan, calls the buffer manager for pages</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">task</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">keeps hot pages in RAM, evicts cold ones</div></div>
+            <div class="stat" data-show="6"><div class="stat-label">task</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">reads/writes pages, maintains indexes and logs</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>The application sends a query. From here on, the DBMS is in charge — the app doesn't touch files directly.</li>
+      <li>The <b>parser</b> checks syntax, the <b>rewriter</b> normalises it (expands views, flattens subqueries), and the <b>catalog</b> validates that the tables and columns exist and the user has permission.</li>
+      <li>The <b>optimizer</b> generates multiple possible execution plans and estimates the cost of each — how many pages to read, how many rows to touch, whether to use an index. It picks the cheapest. This is why two queries that "mean the same thing" can run at wildly different speeds.</li>
+      <li>The <b>execution engine</b> runs the chosen plan: it requests rows from the storage manager, applies filters, joins, aggregates, and returns results.</li>
+      <li>The <b>buffer manager</b> is the RAM cache. It holds recently used pages in memory, tracks which pages are dirty (modified but not yet written), and decides when to evict a page. All this matters because disk is thousands of times slower than memory.</li>
+      <li>The <b>storage manager</b> reads and writes <b>pages</b> (4–16 KB blocks) from disk. It maintains <b>B+ tree indexes</b>, writes the <b>write-ahead log</b>, and handles recovery after a crash.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 6</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>The optimizer is the reason query rewriting matters.</strong> Two queries that are logically equivalent — <code>SELECT * FROM a, b WHERE a.id = b.a_id</code> and <code>SELECT * FROM a JOIN b ON a.id = b.a_id</code> — can produce very different plans. The optimizer is smart, but not omniscient; understanding what plan it picks is how you make queries fast. (The SQL specifics of that are in the SQL note; here we only care that the layer exists.)</div>
+  </div>
+
+  <div class="quiz-box" id="q-arch-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">Which layer decides whether a query uses an index or a full scan?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-arch-1', this, true)"><span class="opt-letter">A</span>The query optimizer — it estimates the cost of each plan and picks the cheapest.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-arch-1', this, false)"><span class="opt-letter">B</span>The buffer manager.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-arch-1-feedback"></div>
+    <div class="quiz-explain hidden">The optimizer uses statistics (table size, index selectivity, page counts) to choose between plans. The buffer manager only caches pages — it doesn't decide which pages to request.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · DATA MODELS ═══ -->
+<section class="section-block" id="models">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">Data models</h2>
+      <p class="section-subtitle">relational · document · key-value · graph · columnar · choosing a model</p>
+    </div>
+  </div>
+
+  <p>A data model is the way a database conceptually organises data. Each model optimises for a different shape of data and access pattern. Understanding them makes you choose the right tool instead of fitting the wrong one.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Model</th><th>Data shape</th><th>Strengths</th><th>Weaknesses</th></tr></thead>
+      <tbody>
+        <tr><td><b>Relational</b></td><td>Tables of rows, related by keys</td><td>Joins, ACID, mature tooling, strong consistency</td><td>Schema migrations, less flexible shape</td></tr>
+        <tr><td><b>Document</b></td><td>Hierarchical JSON-like documents</td><td>Flexible shape, one read returns a connected structure</td><td>Weak joins, schema drift, hard to enforce constraints</td></tr>
+        <tr><td><b>Key-value</b></td><td>Simple <code>key → value</code> map</td><td>Extreme speed, trivially scalable</td><td>No querying by value, no structure</td></tr>
+        <tr><td><b>Graph</b></td><td>Nodes and edges with properties</td><td>Traversal, relationships are first-class</td><td>Niche tooling, complex to scale writes</td></tr>
+        <tr><td><b>Columnar</b></td><td>Column-oriented storage</td><td>Analytical queries, compression</td><td>Not good for row-level reads/writes</td></tr>
+        <tr><td><b>Time-series</b></td><td>Timestamped samples</td><td>Efficient range queries by time, built-in aggregation</td><td>Overkill for non-temporal data</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The model follows the access pattern</div>
+    <div class="concept-box-text"><p><b>Relational</b> when data is highly connected and queries join across entities. <b>Document</b> when one entity is a self-contained object (a product with variants, a user with preferences). <b>Key-value</b> when the access pattern is literally "get by key" (sessions, caches, feature flags). <b>Graph</b> when the question is "who is connected to whom" (social, fraud detection, recommendations). <b>Columnar</b> when you scan millions of rows to aggregate a few columns (analytics).</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-models-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">An analytics dashboard scans 500 million rows to compute averages per region. Which model fits best?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-models-1', this, true)"><span class="opt-letter">A</span>Columnar — reading only the two columns needed (region, value) is dramatically cheaper than reading full rows.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-models-1', this, false)"><span class="opt-letter">B</span>Key-value — it's the fastest model.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-models-1-feedback"></div>
+    <div class="quiz-explain hidden">Analytical queries scan few columns across many rows. A row-store reads entire rows even when you only need two columns. Columnar storage reads only the columns requested, and compresses them better.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · ER MODEL ═══ -->
+<section class="section-block" id="er">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">The ER model</h2>
+      <p class="section-subtitle">entities · attributes · relationships · cardinality · weak entities</p>
+    </div>
+  </div>
+
+  <p>The Entity-Relationship model is the design language for relational databases. You describe the world as <b>entities</b> (things), <b>attributes</b> (properties of things), and <b>relationships</b> (how things connect). Then you translate the model into tables.</p>
+
+  <div class="er-box">
+    <svg class="er-svg" viewBox="0 0 640 280" role="img" aria-label="ER diagram example">
+      <!-- User entity -->
+      <ellipse class="entity" cx="120" cy="80" rx="60" ry="28"/>
+      <text x="120" y="85" text-anchor="middle" font-weight="600">User</text>
+      <!-- User attributes -->
+      <ellipse class="attribute key-attr" cx="40" cy="30" rx="34" ry="16"/>
+      <text x="40" y="35" text-anchor="middle">user_id</text>
+      <ellipse class="attribute" cx="120" cy="30" rx="34" ry="16"/>
+      <text x="120" y="35" text-anchor="middle">email</text>
+      <ellipse class="attribute" cx="200" cy="30" rx="34" ry="16"/>
+      <text x="200" y="35" text-anchor="middle">name</text>
+      <path class="line" d="M120,52 L40,40"/>
+      <path class="line" d="M120,52 L120,44"/>
+      <path class="line" d="M120,52 L200,40"/>
+
+      <!-- Order entity -->
+      <ellipse class="entity" cx="520" cy="80" rx="60" ry="28"/>
+      <text x="520" y="85" text-anchor="middle" font-weight="600">Order</text>
+      <ellipse class="attribute key-attr" cx="440" cy="30" rx="34" ry="16"/>
+      <text x="440" y="35" text-anchor="middle">order_id</text>
+      <ellipse class="attribute" cx="520" cy="30" rx="38" ry="16"/>
+      <text x="520" y="35" text-anchor="middle">total</text>
+      <ellipse class="attribute" cx="600" cy="30" rx="38" ry="16"/>
+      <text x="600" y="35" text-anchor="middle">created_at</text>
+      <path class="line" d="M520,52 L440,40"/>
+      <path class="line" d="M520,52 L520,44"/>
+      <path class="line" d="M520,52 L600,40"/>
+
+      <!-- Relationship diamond -->
+      <polygon class="relation" points="320,80 360,110 320,140 280,110"/>
+      <text x="320" y="115" text-anchor="middle" font-size="11">places</text>
+
+      <!-- Connect User → places → Order -->
+      <path class="line" d="M180,80 L280,110"/>
+      <path class="line" d="M360,110 L460,80"/>
+      <text x="215" y="90" class="label">1</text>
+      <text x="430" y="90" class="label">N</text>
+
+      <!-- Line item weak entity (double-border approximation) -->
+      <rect class="entity" x="270" y="210" width="100" height="34" rx="8" fill="none"/>
+      <rect x="275" y="215" width="90" height="24" rx="6" fill="none" stroke="#C84B1F" stroke-width="1"/>
+      <text x="320" y="232" text-anchor="middle" font-weight="600">LineItem</text>
+      <path class="line" d="M320,140 L320,210" stroke-dasharray="4 3"/>
+      <text x="328" y="175" class="label">contains</text>
+    </svg>
+    <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0;font-family:'IBM Plex Mono',monospace">Rectangles/ellipses = entities · ovals = attributes (underlined key) · diamond = relationship · dashed = identifying relationship for a weak entity</p>
+  </div>
+
+  <h3>Entities and attributes</h3>
+  <ul>
+    <li><b>Entity</b> — a real-world thing with independent existence. A User, an Order, a Product.</li>
+    <li><b>Strong entity</b> — has its own identity. It doesn't depend on another entity to exist.</li>
+    <li><b>Weak entity</b> — cannot exist without its parent. A LineItem only makes sense as part of an Order. Its identity depends on the parent.</li>
+    <li><b>Attributes</b> — properties. A User has <code>email</code>, <code>name</code>, <code>age</code>. A LineItem has <code>quantity</code>, <code>unit_price</code>.</li>
+    <li><b>Key attribute</b> — a property whose value uniquely identifies the entity. <code>user_id</code> for User.</li>
+    <li><b>Composite attribute</b> — an attribute composed of sub-attributes (address = street + city + pin).</li>
+    <li><b>Multivalued attribute</b> — an attribute that can hold multiple values (a user can have multiple phone numbers).</li>
+  </ul>
+
+  <h3>Relationships and cardinality</h3>
+  <p>Cardinality describes how many entities on one side can be associated with entities on the other. It drives the table structure.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Cardinality</th><th>Meaning</th><th>How to model it</th></tr></thead>
+      <tbody>
+        <tr><td><b>1:1</b></td><td>One user has one profile</td><td>Foreign key on either side, or merge the tables</td></tr>
+        <tr><td><b>1:N</b></td><td>One user has many orders</td><td>Foreign key on the "many" side (<code>orders.user_id</code>)</td></tr>
+        <tr><td><b>N:M</b></td><td>Many students take many courses</td><td>Join table with foreign keys to both sides</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Participation constraints</h3>
+  <ul>
+    <li><b>Total participation</b> — every entity must participate. Every Order must have a User. Enforced with a <code>NOT NULL</code> foreign key.</li>
+    <li><b>Partial participation</b> — participation is optional. A User may have zero orders.</li>
+    <li><b>Weak entity</b> — always total participation on the identifying relationship (a LineItem always belongs to an Order).</li>
+  </ul>
+
+  <div class="concept-box">
+    <div class="concept-box-label">From ER to tables — the translation</div>
+    <div class="concept-box-text"><p>Each strong entity becomes a table. Its key becomes the primary key. A 1:N relationship becomes a foreign key on the "many" side. An N:M relationship becomes a join table. A weak entity becomes a table with a composite primary key: parent key + partial key of the weak entity. This translation is mechanical, but every step matters — get the cardinality wrong and your schema will have anomalies downstream.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-er-1">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">An Order has many LineItems, but a LineItem cannot exist without its Order. What kind of entity is LineItem?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-er-1', this, true)"><span class="opt-letter">A</span>A weak entity — its identity depends on the parent Order, and it participates totally in the relationship.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-er-1', this, false)"><span class="opt-letter">B</span>A strong entity — it has its own attributes.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-er-1-feedback"></div>
+    <div class="quiz-explain hidden">Having its own attributes doesn't make it strong. A weak entity cannot exist without its identifying parent. LineItem's identity is (order_id, line_number) — without the order, the item has no identity.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · KEYS ═══ -->
+<section class="section-block" id="keys">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Keys &amp; constraints</h2>
+      <p class="section-subtitle">superkey · candidate · primary · foreign · unique · the hierarchy</p>
+    </div>
+  </div>
+
+  <p>Keys are the mechanism that connects tables and enforces identity. The names are hierarchical and often confused.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Key</th><th>Definition</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><b>Superkey</b></td><td>Any set of columns that uniquely identifies a row</td><td>(<code>email</code>), (<code>email, name</code>), (<code>aadhaar</code>)</td></tr>
+        <tr><td><b>Candidate key</b></td><td>A <em>minimal</em> superkey — no extra columns</td><td>(<code>email</code>), (<code>aadhaar</code>) — both uniquely identify but neither needs the other</td></tr>
+        <tr><td><b>Primary key</b></td><td>The chosen candidate key — the official identifier</td><td>We pick <code>id</code> as the primary key</td></tr>
+        <tr><td><b>Alternate key</b></td><td>A candidate key that wasn't chosen as primary</td><td><code>email</code> is alternate if <code>id</code> is primary</td></tr>
+        <tr><td><b>Composite key</b></td><td>A candidate key made of multiple columns</td><td>(<code>order_id, line_number</code>) for a LineItem</td></tr>
+        <tr><td><b>Foreign key</b></td><td>A column that references the primary key of another table</td><td><code>orders.user_id → users.id</code></td></tr>
+        <tr><td><b>Unique key</b></td><td>A constraint that no two rows share this value — but nulls are usually allowed</td><td><code>users.email</code> is often unique</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Superkey ⊇ Candidate key ⊇ Primary key</div>
+    <div class="concept-box-text"><p>Every candidate key is a superkey, but not every superkey is a candidate key. Every primary key is a candidate key, but not every candidate key is chosen as primary. If a set of columns doesn't uniquely identify a row, it isn't a superkey at all.</p></div>
+  </div>
+
+  <h3>Constraint types</h3>
+  <ul>
+    <li><b>Primary key</b> — unique + not null. One per table.</li>
+    <li><b>Foreign key</b> — value must exist in the referenced primary key (or be null if allowed). Enforces referential integrity.</li>
+    <li><b>Unique</b> — no duplicates, but (usually) allows nulls.</li>
+    <li><b>Not null</b> — the column must have a value.</li>
+    <li><b>Check</b> — arbitrary condition (<code>age &gt;= 0</code>).</li>
+    <li><b>Default</b> — value used when none is provided.</li>
+  </ul>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Foreign keys are the DBMS's integrity guarantee.</strong> Without one, you can reference a user that doesn't exist and the DBMS won't stop you. With one, insert fails if the reference is broken, and <code>ON DELETE CASCADE</code> defines what happens when the parent is deleted. Applications enforcing this "by convention" get it wrong eventually.</div>
+  </div>
+
+  <div class="quiz-box" id="q-keys-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">A table has columns <code>(id, email, name)</code>. Both <code>id</code> and <code>email</code> uniquely identify a row. Which of these is <em>not</em> a candidate key?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-keys-1', this, false)"><span class="opt-letter">A</span><code>id</code></button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-keys-1', this, true)"><span class="opt-letter">B</span><code>(id, email)</code> — it's a superkey, but not minimal, so it's not a candidate key.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-keys-1-feedback"></div>
+    <div class="quiz-explain hidden">A candidate key must be minimal — you can't remove any column and still uniquely identify a row. <code>id</code> alone does the job, so <code>(id, email)</code> has a redundant column. It's a superkey, but not a candidate key.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · NORMALIZATION ═══ -->
+<section class="section-block" id="normal">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Normalization</h2>
+      <p class="section-subtitle">anomalies · 1NF · 2NF · 3NF · BCNF · when to denormalize</p>
+    </div>
+  </div>
+
+  <p>Normalization is the process of restructuring a schema so that every fact is stored in exactly one place. It's not about "making tables smaller" — it's about eliminating <b>update anomalies</b> that arise when data is duplicated.</p>
+
+  <h3>The three anomalies, with an example</h3>
+  <p>Suppose one table stores both students and their courses: <code>(student_id, student_name, student_email, course_id, course_name, instructor)</code>.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Anomaly</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td><b>Insert</b></td><td>You can't add a new course without also having a student enrolled in it — every course row needs a student.</td></tr>
+        <tr><td><b>Update</b></td><td>If a course's instructor changes, you have to update every row where that course appears. Miss one → inconsistent data.</td></tr>
+        <tr><td><b>Delete</b></td><td>If the last enrolled student is removed, the course information disappears too — you lost the course.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The normal forms</h3>
+  <div class="stepper" data-stepper="nf" data-steps="5">
+    <div class="stepper-head"><span class="stepper-title">Normalization — one rule at a time</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">normal form</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">1NF</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">atomic values only</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">2NF</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">no partial dependency</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">3NF</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">no transitive dependency</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">BCNF</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">every determinant is a candidate key</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">note</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">denormalization is a choice</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">rule</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">1NF</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">no column holds a list or repeated group</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">2NF</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">non-key columns depend on the whole key, not part of it</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">3NF</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">non-key columns don't depend on other non-key columns</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">BCNF</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">stricter than 3NF — no exceptions for multi-attribute keys</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">denormalization</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">deliberately re-introducing redundancy for read speed</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li><b>1NF — atomic values only.</b> No column may hold a comma-separated list, no repeating groups. A <code>phones</code> column holding <code>"123, 456"</code> violates 1NF. Move the phones into their own table with a foreign key back to the user.</li>
+      <li><b>2NF — no partial dependency.</b> Every non-key column must depend on the <em>whole</em> primary key, not just part of it. If <code>student_name</code> depends only on <code>student_id</code> (not on <code>course_id</code>), and your key is <code>(student_id, course_id)</code>, that's a 2NF violation. Split it out.</li>
+      <li><b>3NF — no transitive dependency.</b> A non-key column must not depend on another non-key column. If <code>instructor</code> depends on <code>course_id</code> and <code>course_id</code> is a non-key column, then <code>instructor</code> is transitively dependent — split it out.</li>
+      <li><b>BCNF — every determinant is a candidate key.</b> This catches edge cases that 3NF misses, especially with composite keys where two different candidate keys overlap. In practice most well-designed schemas hit BCNF without extra work.</li>
+      <li><b>Denormalization is a valid choice.</b> Every join costs a page read. Warehouses, dashboards, and read-heavy systems often intentionally store duplicate data to avoid joins. The rule is: <b>normalize until it hurts, denormalize until it works</b> — and know exactly which anomalies you're trading away.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 5</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Normalization is about correctness, not performance.</strong> A normalized schema is usually <em>slower</em> to read (because joins) but <em>safer</em> to write (no duplication, no drift). Denormalize on purpose, for a measured performance reason — never as a first step.</div>
+  </div>
+
+  <div class="quiz-box" id="q-norm-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">A table has columns <code>(student_id, course_id, student_name)</code> with primary key <code>(student_id, course_id)</code>. <code>student_name</code> depends only on <code>student_id</code>. Which normal form does this violate?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-norm-1', this, true)"><span class="opt-letter">A</span>2NF — a non-key column depends on only part of the composite key.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-norm-1', this, false)"><span class="opt-letter">B</span>3NF — a non-key column depends on another non-key column.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-norm-1-feedback"></div>
+    <div class="quiz-explain hidden">This is the classic partial-dependency violation. <code>student_name</code> only needs <code>student_id</code>, so it belongs in a separate <code>students</code> table, not in the junction table.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · TRANSACTIONS ═══ -->
+<section class="section-block" id="tx">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Transactions</h2>
+      <p class="section-subtitle">the unit of work · begin/commit/rollback · what a transaction protects</p>
+    </div>
+  </div>
+
+  <p>A <b>transaction</b> is a sequence of operations that the DBMS treats as one indivisible unit. Either all operations succeed and become visible, or none of them do. There's no middle state.</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The classic example</div>
+    <div class="concept-box-text"><p>Transfer ₹100 from account A to account B:</p><p>1. Debit A by ₹100.<br>2. Credit B by ₹100.</p><p>If the process crashes between 1 and 2, without a transaction you've destroyed ₹100. With a transaction, the DBMS rolls back the debit and A is untouched. The transaction guarantees the pair is atomic.</p></div>
+  </div>
+
+  <h3>The transaction lifecycle</h3>
+  <ol>
+    <li><b>Begin</b> — the transaction starts, and the DBMS records the state it needs to roll back to.</li>
+    <li><b>Operations</b> — reads and writes happen. Writes may not be flushed to disk yet (they're in the buffer).</li>
+    <li><b>Commit</b> — the DBMS flushes the write-ahead log so the changes survive a crash. Data becomes visible to other transactions.</li>
+    <li><b>Rollback</b> — the DBMS undoes the changes using the log or undo records. The database returns to its state before the transaction began.</li>
+  </ol>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Commit ≠ flushed to the actual data file.</strong> A committed transaction is flushed to the <b>write-ahead log</b>, which is enough for durability — after a crash, the log is replayed. The data pages are written lazily. This is a critical design: the log is written sequentially (fast); data files are updated in the background (slow, random access).</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · ACID ═══ -->
+<section class="section-block" id="acid">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">ACID</h2>
+      <p class="section-subtitle">atomicity · consistency · isolation · durability · how each is enforced</p>
+    </div>
+  </div>
+
+  <p>ACID is the set of guarantees a transactional database makes. Each letter names a property, and each property has a mechanism inside the DBMS that provides it.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Property</th><th>Meaning</th><th>How the DBMS enforces it</th></tr></thead>
+      <tbody>
+        <tr><td><b>Atomicity</b></td><td>All or nothing</td><td>Write-ahead log + undo log. On rollback, undo the operations</td></tr>
+        <tr><td><b>Consistency</b></td><td>Constraints hold before and after</td><td>Constraints (PK, FK, CHECK), triggers, application logic</td></tr>
+        <tr><td><b>Isolation</b></td><td>Concurrent transactions don't interfere</td><td>Locks, MVCC, isolation levels</td></tr>
+        <tr><td><b>Durability</b></td><td>Committed = permanent</td><td>Flush the WAL to disk before acknowledging commit</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Consistency is the odd one out</div>
+    <div class="concept-box-text"><p>Atomicity, isolation, and durability are provided entirely by the DBMS. Consistency is partly your responsibility — the DBMS enforces the <em>declared</em> constraints (NOT NULL, foreign keys, unique), but it can't know that "order total must equal sum of line items" unless you tell it. That rule has to be enforced by the application, a trigger, or a check constraint. When people say "ACID ensures consistency," they mean consistency within the rules you declared.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-acid-1">
+    <div class="quiz-label">Quick check · 07</div>
+    <div class="quiz-question">A transaction commits. The server crashes five seconds later before the data pages are written to disk. What happens after restart?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-acid-1', this, true)"><span class="opt-letter">A</span>The WAL is replayed during recovery, bringing the data pages up to date. The transaction is not lost.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-acid-1', this, false)"><span class="opt-letter">B</span>The transaction is lost — the data pages weren't written.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-acid-1-feedback"></div>
+    <div class="quiz-explain hidden">This is exactly what durability means. Commit flushes the log, not the pages. On restart, the DBMS replays the WAL to reconstruct committed changes. The pages can lag behind; the log cannot.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · CONCURRENCY ═══ -->
+<section class="section-block" id="conc">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Concurrency control</h2>
+      <p class="section-subtitle">schedules · anomalies · locking · 2PL · MVCC</p>
+    </div>
+  </div>
+
+  <p>Multiple transactions run at once. Without controls, their interleavings produce results no single transaction would produce alone. Concurrency control restricts interleavings so that only "safe" ones are allowed.</p>
+
+  <h3>The three read anomalies</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Anomaly</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td><b>Dirty read</b></td><td>T1 writes a value, T2 reads it, T1 rolls back. T2 has now used data that never existed.</td></tr>
+        <tr><td><b>Non-repeatable read</b></td><td>T1 reads a row, T2 updates the same row and commits, T1 reads it again and gets a different value. Same row, different answer within one transaction.</td></tr>
+        <tr><td><b>Phantom read</b></td><td>T1 runs a query returning 5 rows. T2 inserts a new matching row and commits. T1 runs the same query and gets 6 rows. The "phantom" row appeared.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Locking — the two-phase approach</h3>
+  <p>The classic solution is <b>Two-Phase Locking (2PL)</b>: a transaction acquires locks as it reads and writes, and cannot release any lock until all locks it will ever acquire have been acquired. This guarantees <b>serializability</b> — the result is equivalent to running the transactions one after another.</p>
+
+  <div class="stepper" data-stepper="2pl" data-steps="6">
+    <div class="stepper-head"><span class="stepper-title">Two-Phase Locking — growing and shrinking</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">T1's lock state</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">acquire lock on row A</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">phase</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">growing (only acquiring)</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">acquire lock on row B</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">phase</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">now shrinking — release B</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">phase</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">release A</div></div>
+            <div class="stat" data-show="6"><div class="stat-label">result</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">T1 done, locks cleared</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">rule</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1-3"><div class="stat-label">growing phase</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">can only acquire locks, never release</div></div>
+            <div class="stat" data-show="4-5"><div class="stat-label">shrinking phase</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">can only release locks, never acquire</div></div>
+            <div class="stat" data-show="1"><div class="stat-label">blocked?</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">A was free — acquires immediately</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">blocked?</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">B was locked by T2 — T1 waits</div></div>
+            <div class="stat" data-show="6"><div class="stat-label">guarantee</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">no dirty reads, no non-repeatable reads, serializable</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>T1 wants to update row A. It acquires an exclusive lock on A. Nothing else can read or write A while T1 holds it.</li>
+      <li>This is the <b>growing phase</b>. T1 is accumulating locks. It cannot release A yet — releasing would let another transaction see its in-progress work.</li>
+      <li>T1 also wants to update row B. It tries to acquire a lock on B, but T2 already holds one. T1 <b>waits</b>. It does not release A while waiting — that would violate the growing phase.</li>
+      <li>Eventually T2 releases B. T1 acquires B. Now T1 has all the locks it needs. It begins its <b>shrinking phase</b> — releasing locks in the order it finished with them.</li>
+      <li>T1 releases A. Now T1's work is fully done and other transactions can see it. Releasing A before B would be fine too — the point is that no new lock is acquired after the first release.</li>
+      <li>T1 commits and releases all locks. Because no transaction could acquire a lock that another held, and the growing phase prevented "I released A and now I want to acquire B", every transaction that committed did so in a state equivalent to a serial order. This is <b>serializability</b>.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 6</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>Deadlocks</h3>
+  <p>Two-phase locking has a classic problem: <b>deadlock</b>. T1 holds A and waits for B; T2 holds B and waits for A. Neither can proceed. The DBMS detects this (usually with a wait-for graph) and picks one transaction to <b>abort</b>.</p>
+
+  <h3>MVCC — the modern alternative</h3>
+  <p>Locks block readers and writers against each other. Modern databases (Postgres, MySQL with InnoDB, Oracle) use <b>MVCC — Multi-Version Concurrency Control</b>. Instead of locking, they keep multiple versions of a row. Each transaction sees the version that was current when it started its snapshot. Readers never block writers, writers never block readers.</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">What MVCC trades</div>
+    <div class="concept-box-text"><p>MVCC gives you non-blocking reads, which is a huge win for read-heavy workloads. The cost is storage: old versions accumulate until <code>VACUUM</code> (Postgres) or a similar mechanism reclaims them. Under heavy write load with long-running transactions, the version count can grow large. MVCC also doesn't prevent every anomaly — serializable behaviour still needs additional checks.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-conc-1">
+    <div class="quiz-label">Quick check · 08</div>
+    <div class="quiz-question">Two-phase locking (2PL) has a fundamental drawback. What is it?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-conc-1', this, false)"><span class="opt-letter">A</span>It allows dirty reads.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-conc-1', this, true)"><span class="opt-letter">B</span>It can deadlock — two transactions each hold a lock the other needs.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-conc-1-feedback"></div>
+    <div class="quiz-explain hidden">2PL guarantees serializability but creates deadlocks. The DBMS detects and aborts one transaction. Modern databases use MVCC to avoid blocking entirely, which reduces (but doesn't eliminate) deadlock scenarios.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · ISOLATION ═══ -->
+<section class="section-block" id="iso">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Isolation levels</h2>
+      <p class="section-subtitle">the four levels · what each prevents · the cost of each</p>
+    </div>
+  </div>
+
+  <p>Isolation levels let you trade consistency for performance. A higher level prevents more anomalies but allows less concurrency (or requires more versioning).</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Level</th><th>Dirty read</th><th>Non-repeatable read</th><th>Phantom read</th><th>Concurrency</th></tr></thead>
+      <tbody>
+        <tr><td><b>READ UNCOMMITTED</b></td><td>Allowed</td><td>Allowed</td><td>Allowed</td><td>Highest</td></tr>
+        <tr><td><b>READ COMMITTED</b> (default)</td><td>Prevented</td><td>Allowed</td><td>Allowed</td><td>High</td></tr>
+        <tr><td><b>REPEATABLE READ</b></td><td>Prevented</td><td>Prevented</td><td>Allowed*</td><td>Medium</td></tr>
+        <tr><td><b>SERIALIZABLE</b></td><td>Prevented</td><td>Prevented</td><td>Prevented</td><td>Low</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>*Postgres footnote.</strong> The SQL standard says REPEATABLE READ permits phantom reads. Postgres implements REPEATABLE READ as a true snapshot, so it also prevents phantoms — behaving like the standard's SERIALIZABLE in that respect. This is a real interview gotcha: know the standard table AND know that Postgres's REPEATABLE READ is stronger.</div>
+  </div>
+
+  <div class="quiz-box" id="q-iso-1">
+    <div class="quiz-label">Quick check · 09</div>
+    <div class="quiz-question">You read a row, another transaction commits an update, and you read the same row again and get a different value. Which anomaly is this, and what isolation level prevents it?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-iso-1', this, true)"><span class="opt-letter">A</span>A non-repeatable read — REPEATABLE READ (or higher) prevents it.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-iso-1', this, false)"><span class="opt-letter">B</span>A dirty read — READ COMMITTED prevents it.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-iso-1-feedback"></div>
+    <div class="quiz-explain hidden">A dirty read is reading an <em>uncommitted</em> change. Here the change is committed — the issue is that the value changed between two reads in the same transaction. That's a non-repeatable read.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · INDEXING ═══ -->
+<section class="section-block" id="idx">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Indexing — the concept</h2>
+      <p class="section-subtitle">why indexes exist · B+ trees · hash indexes · when they hurt</p>
+    </div>
+  </div>
+
+  <p>An index is a <b>sorted data structure</b> that lets the DBMS find rows without scanning the whole table. Without an index, finding one row in a million means reading a million pages. With one, it means reading a handful.</p>
+
+  <h3>The B+ tree — why databases choose it</h3>
+  <p>The B+ tree is the default index in almost every relational database. It's a balanced tree where each node is a disk page and holds hundreds of keys. The tree stays 3–4 levels deep even for billions of rows.</p>
+
+  <div class="stepper" data-stepper="bptree" data-steps="5">
+    <div class="stepper-head"><span class="stepper-title">B+ tree lookup — 4 levels, one page read each</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">tree structure</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">root</div><div class="stat-value" style="font-size:14px">[ 50 | 100 ]</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">level 2</div><div class="stat-value" style="font-size:14px">[ 20 | 40 ]</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">level 3</div><div class="stat-value" style="font-size:14px">[ 60 | 70 | 80 ]</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">level 4</div><div class="stat-value" style="font-size:14px">[ ..., 65, 68, 72, ... ]</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">found</div><div class="stat-value" style="font-size:14px">value 68 → row pointer</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">what's happening</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">read page</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">1 page read (usually cached)</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">compare</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">68 &gt; 40 → go right</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">compare</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">60 ≤ 68 &lt; 70 → go middle</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">read leaf</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">leaf page with the actual rows</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">total</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">3–4 disk pages for billions of rows</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>The <b>root page</b> holds a small number of separator keys. A lookup starts here. Because every query starts at the root, this page is virtually always in the buffer pool — effectively free.</li>
+      <li>Looking for 68. The root says <code>[50 | 100]</code>. 68 &gt; 50 and 68 &lt; 100, so it descends to the middle child. Each comparison eliminates an entire subtree.</li>
+      <li>The next-level node <code>[20 | 40]</code> says 68 &gt; 40 → go right. Follow that child pointer.</li>
+      <li>The third-level node <code>[60 | 70 | 80]</code> says 60 ≤ 68 &lt; 70 → go to its leaf. This is the last internal node the lookup needs.</li>
+      <li>The <b>leaf page</b> holds the actual key-value pairs (the indexed value and a pointer to the row). The lookup finds 68 and returns the row pointer. Total page reads: 3–4. For a table of billions of rows. This is the power of a B+ tree.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 5</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>Why not a hash table for every index?</h3>
+  <p>Hash tables are O(1) for equality but useless for ranges. "Find all users aged 18–30" on a hash index means hashing every possible age and unioning — practically a full scan. B+ trees support ranges, sorts, and prefix lookups because their keys are ordered.</p>
+
+  <h3>The cost of indexes</h3>
+  <ul>
+    <li><b>Writes.</b> Every insert, update, or delete must update every index on the table. Six indexes = six extra B+ tree writes per row insert.</li>
+    <li><b>Storage.</b> An index can be 20–40% of the data size. A text or array index can be larger than the collection.</li>
+    <li><b>Maintenance.</b> Long-running writes may page-split or fragment the index, degrading lookup performance over time.</li>
+  </ul>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>More indexes is not better.</strong> An index nobody queries is pure cost — write amplification and disk. A collection with 15 indexes on 3 columns is a maintenance nightmare. Add indexes based on the queries that actually run, remove indexes that don't show up in query statistics.</div>
+  </div>
+
+  <div class="quiz-box" id="q-idx-1">
+    <div class="quiz-label">Quick check · 10</div>
+    <div class="quiz-question">Why does a hash index not help a range query <code>WHERE age BETWEEN 18 AND 30</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-idx-1', this, false)"><span class="opt-letter">A</span>Because hash functions can't process numbers.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-idx-1', this, true)"><span class="opt-letter">B</span>Because hashes scatter nearby keys — "18" and "19" may land in completely different buckets. You'd need to hash every value in the range.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-idx-1-feedback"></div>
+    <div class="quiz-explain hidden">A hash index is great for <code>WHERE age = 22</code>. For a range, the values are scattered across the hash space. A B+ tree keeps them sorted and adjacent, so a range is one leaf-chain walk.</div>
+  </div>
+</section>
+
+<!-- ═══ 12 · STORAGE ═══ -->
+<section class="section-block" id="storage">
+  <div class="section-header">
+    <div class="section-num-big">12</div>
+    <div>
+      <h2 class="section-title">Storage engines</h2>
+      <p class="section-subtitle">pages · heap vs clustered · row vs column · B-tree vs LSM</p>
+    </div>
+  </div>
+
+  <h3>Pages — the unit of disk I/O</h3>
+  <p>Disks don't give you "one byte" at a time; they give you a <b>page</b> — typically 4 KB, 8 KB, or 16 KB. Every DBMS read or write touches a full page, whether you need one byte from it or all of it. This is why data layout matters: if related rows are on the same page, one read returns them all.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Storage layout</th><th>How it stores</th><th>Best for</th></tr></thead>
+      <tbody>
+        <tr><td><b>Heap (row-store)</b></td><td>Rows written in insertion order, with an index pointing to their location</td><td>OLTP: point reads, single-row inserts/updates</td></tr>
+        <tr><td><b>Clustered (index-organized)</b></td><td>Rows stored in primary-key order in the table itself</td><td>Range scans by primary key, cover the whole row from one B+ tree</td></tr>
+        <tr><td><b>Columnar</b></td><td>Values of one column stored together</td><td>OLAP: aggregate over few columns, huge scans</td></tr>
+        <tr><td><b>LSM tree</b></td><td>Writes go to memory first, flushed as sorted files, periodically merged</td><td>Write-heavy workloads (Cassandra, RocksDB, LevelDB)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>B-tree vs LSM tree</h3>
+  <p>The B-tree is the workhorse of OLTP databases because it gives consistent read latency — one lookup is always O(log n) page reads. LSM trees flip the trade-off: they make writes extremely fast by appending to memory and merging files later, at the cost of slower reads (multiple files may need to be searched) and periodic compaction pauses.</p>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The read vs write trade-off</div>
+    <div class="concept-box-text"><p><b>B-tree:</b> reads are consistently fast, writes are slower (in-place page modification). <b>LSM tree:</b> writes are very fast (append-only), reads are slower (multiple files, bloom filters help). Row-store: entire row per disk read, good for OLTP. Column-store: only the queried columns, good for analytics. Every storage engine is a trade-off.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-stor-1">
+    <div class="quiz-label">Quick check · 11</div>
+    <div class="quiz-question">A system ingests 100,000 events per second but rarely reads them individually. Which storage engine pattern fits best?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-stor-1', this, true)"><span class="opt-letter">A</span>LSM tree — append-only writes are extremely fast, and batched reads/compactions happen offline.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-stor-1', this, false)"><span class="opt-letter">B</span>Heap B-tree — it's the default.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-stor-1-feedback"></div>
+    <div class="quiz-explain hidden">The workload is write-dominated. B-tree indexes get hot on every insert and page-split constantly. LSM trees absorb this write rate by writing to memory and flushing sorted files, which is why time-series and event-log systems use them.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · RECOVERY ═══ -->
+<section class="section-block" id="recovery">
+  <div class="section-header">
+    <div class="section-num-big">13</div>
+    <div>
+      <h2 class="section-title">Crash recovery &amp; WAL</h2>
+      <p class="section-subtitle">the write-ahead log · redo vs undo · checkpoints</p>
+    </div>
+  </div>
+
+  <p>Databases crash. Power fails, processes are killed, disks fail. The DBMS must recover to a consistent state where every committed transaction is present and every uncommitted transaction is absent.</p>
+
+  <h3>The write-ahead log (WAL)</h3>
+  <p>The core rule: <b>before</b> a data page is modified on disk, an entry describing the change must be written to the log and flushed. The log is append-only (sequential writes, fast); data pages are random writes (slow). This ordering is what makes recovery possible.</p>
+
+  <div class="stepper" data-stepper="wal" data-steps="6">
+    <div class="stepper-head"><span class="stepper-title">WAL — crash and recover</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">actions</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">T1 updates row → log write</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">log flushed to disk</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">T1 commits → commit record in log</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">data page not yet written</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">crash</div></div>
+            <div class="stat" data-show="6"><div class="stat-label">step</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">recovery: replay log</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">what the log has</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">log entry</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">update row 42, old → new</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">disk state</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">log has it, data page doesn't</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">log entry</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">T1 commit — durable</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">data page</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">still old value (in buffer pool)</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">state</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">memory lost, log survives</div></div>
+            <div class="stat" data-show="6"><div class="stat-label">final state</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">replay re-applies the change → row 42 has new value</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>A transaction updates a row in memory. Before the row is touched on disk, the DBMS writes a log record: "row 42, old value X, new value Y".</li>
+      <li>The log record is flushed to disk. From this moment on, the change can survive a crash — because the log has it, even if the data page doesn't. This is the <b>write-ahead</b> part: log first, page second.</li>
+      <li>When the transaction commits, a commit record is appended to the log. The commit is durable the moment the commit record hits disk. The data page can lag behind — that's fine.</li>
+      <li>The data page is still in the buffer pool, unmodified on disk. Under normal operation, it will be written lazily by the buffer manager — often much later.</li>
+      <li>The server crashes. Memory is lost. The buffer pool is gone. The data page never reached disk.</li>
+      <li>On restart, the DBMS replays the log. Every committed transaction is redone (<b>redo</b>). Every transaction without a commit record is undone (<b>undo</b>) using the "old value" stored in its log records. The database ends up consistent, with exactly the committed transactions applied.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 6</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <h3>Checkpoints</h3>
+  <p>Replaying the whole log on every restart would be slow. A <b>checkpoint</b> periodically flushes all dirty pages to disk and records in the log "everything up to this point is safely on disk." Recovery can then skip everything before the last checkpoint.</p>
+
+  <div class="quiz-box" id="q-wal-1">
+    <div class="quiz-label">Quick check · 12</div>
+    <div class="quiz-question">Why must the log record be flushed <em>before</em> the data page is modified on disk?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-wal-1', this, true)"><span class="opt-letter">A</span>Because if the crash happens after the page write but before the log write, there's no record to undo the change — the database would be corrupted.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-wal-1', this, false)"><span class="opt-letter">B</span>Because log writes are slower.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-wal-1-feedback"></div>
+    <div class="quiz-explain hidden">That's the whole point of "write-ahead". If the page is written and the log isn't, and then a crash happens, the disk contains a change no one knows about and no rollback can undo it. Log first, always.</div>
+  </div>
+</section>
+
+<!-- ═══ 14 · DISTRIBUTED ═══ -->
+<section class="section-block" id="dist">
+  <div class="section-header">
+    <div class="section-num-big">14</div>
+    <div>
+      <h2 class="section-title">Distributed databases</h2>
+      <p class="section-subtitle">replication · sharding · two-phase commit · eventual vs strong consistency</p>
+    </div>
+  </div>
+
+  <p>When one machine can't hold the data or handle the load, you distribute it. Two fundamental strategies — and they can be combined.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Strategy</th><th>What it does</th><th>Why use it</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td><b>Replication</b></td><td>Same data on multiple nodes</td><td>Availability (failover), read scaling</td><td>Writes must be propagated; replicas may lag</td></tr>
+        <tr><td><b>Sharding (partitioning)</b></td><td>Different data on different nodes, split by a shard key</td><td>Write scaling, storage scaling</td><td>Cross-shard queries are slow/expensive; resharding is hard</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Two-phase commit (2PC)</h3>
+  <p>When a transaction must modify data on multiple nodes, 2PC coordinates them. The coordinator asks every participant to <b>prepare</b> (prepare to commit, but don't yet). If any participant can't, everyone is told to roll back. If all say yes, the coordinator asks everyone to <b>commit</b>. This guarantees all-or-nothing across nodes, but adds two round trips of latency and creates a blocking risk if the coordinator dies mid-transaction.</p>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Distributed transactions are slow.</strong> This is why many modern systems prefer <b>eventual consistency</b> and <b>sagas</b> — a sequence of local transactions with compensating actions — over 2PC. It's a trade: you accept brief inconsistency in exchange for throughput and availability.</div>
+  </div>
+</section>
+
+<!-- ═══ 15 · CAP ═══ -->
+<section class="section-block" id="cap">
+  <div class="section-header">
+    <div class="section-num-big">15</div>
+    <div>
+      <h2 class="section-title">CAP &amp; consistency models</h2>
+      <p class="section-subtitle">the theorem · what "choose 2" actually means · PACELC</p>
+    </div>
+  </div>
+
+  <p>The CAP theorem says a distributed database can guarantee at most <b>two</b> of three properties when a network partition occurs:</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Property</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><b>Consistency</b> (C)</td><td>Every read sees the most recent write — a linearisable single view</td></tr>
+        <tr><td><b>Availability</b> (A)</td><td>Every request gets a response (not an error)</td></tr>
+        <tr><td><b>Partition tolerance</b> (P)</td><td>The system keeps working despite messages being dropped between nodes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">What "choose 2" actually means</div>
+    <div class="concept-box-text"><p>Partitions happen — networks fail. So P isn't really optional. The real choice is what to do <em>when</em> a partition occurs: refuse writes to preserve consistency (CP), or accept writes and risk divergence to preserve availability (AP). No system is "CA" — that's only possible if there is no network partition, which a distributed system cannot guarantee. So in practice, distributed databases are CP or AP.</p></div>
+  </div>
+
+  <h3>PACELC — the more useful extension</h3>
+  <p>CAP only describes behaviour during a partition. What about the 99% of the time when the network is fine? PACELC answers: during a <b>P</b>artition, choose <b>A</b> or <b>C</b>; <b>E</b>lse (no partition), choose <b>L</b>atency or <b>C</b>onsistency. Even with a healthy network, strong consistency requires coordinating across nodes, which adds latency.</p>
+
+  <h3>Consistency models</h3>
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Model</th><th>Guarantee</th></tr></thead>
+      <tbody>
+        <tr><td><b>Strong (linearizable)</b></td><td>Every read returns the most recent committed write</td></tr>
+        <tr><td><b>Sequential</b></td><td>All nodes see writes in the same order</td></tr>
+        <tr><td><b>Causal</b></td><td>Writes that depend on each other are seen in order; unrelated writes may be reordered</td></tr>
+        <tr><td><b>Eventual</b></td><td>If writes stop, all replicas will eventually converge</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-cap-1">
+    <div class="quiz-label">Quick check · 13</div>
+    <div class="quiz-question">Why is "CA" not a realistic option for a distributed database?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-cap-1', this, false)"><span class="opt-letter">A</span>Because consistency and availability can't coexist.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-cap-1', this, true)"><span class="opt-letter">B</span>Because network partitions happen — so partition tolerance isn't a choice, and you're really choosing C or A during a partition.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-cap-1-feedback"></div>
+    <div class="quiz-explain hidden">CA would only be possible if the system never has a network partition. Distributed systems always do. So the real choice is: when a partition happens, are you CP or AP?</div>
+  </div>
+</section>
+
+<!-- ═══ 16 · SQL vs NOSQL ═══ -->
+<section class="section-block" id="sql-nosql">
+  <div class="section-header">
+    <div class="section-num-big">16</div>
+    <div>
+      <h2 class="section-title">SQL vs NoSQL — the honest comparison</h2>
+      <p class="section-subtitle">what each does well · when to pick which · the false binary</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>SQL (relational)</th><th>NoSQL</th></tr></thead>
+      <tbody>
+        <tr><td><b>Schema</b></td><td>Fixed, enforced by the DBMS</td><td>Flexible, enforced (if at all) by the application</td></tr>
+        <tr><td><b>ACID</b></td><td>Full ACID by default</td><td>Varies — many NoSQL databases are "BASE" (eventually consistent)</td></tr>
+        <tr><td><b>Joins</b></td><td>First-class, optimised</td><td>Weak or absent — data modelling requires embedding or denormalization</td></tr>
+        <tr><td><b>Scaling</b></td><td>Vertical (bigger machine) for writes; horizontal with sharding add-ons</td><td>Horizontal from the start (designed to distribute)</td></tr>
+        <tr><td><b>Query language</b></td><td>SQL — standardised, expressive</td><td>Custom per database (MongoDB, Cassandra, Redis all differ)</td></tr>
+        <tr><td><b>When it's the right choice</b></td><td>Data is relational, schema is stable, transactions matter, joins are common</td><td>Schema is genuinely flexible, write-heavy, horizontal scale, or a specific data model (documents, graphs, key-value, time-series)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The false binary</div>
+    <div class="concept-box-text"><p>The "SQL vs NoSQL" debate is often a false choice. Real systems mix: PostgreSQL for transactional data, Redis for caching and rate limiting, Elasticsearch for search, a document store for catalogs, a time-series database for metrics. The right question isn't "SQL or NoSQL" but "for <em>this</em> data, with <em>this</em> access pattern, which model fits?"</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-sn-1">
+    <div class="quiz-label">Quick check · 14</div>
+    <div class="quiz-question">A banking system with strict multi-account transfer requirements should use which database?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-sn-1', this, true)"><span class="opt-letter">A</span>Relational (SQL) — ACID transactions across accounts are essential.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-sn-1', this, false)"><span class="opt-letter">B</span>Key-value (NoSQL) — it's the fastest.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-sn-1-feedback"></div>
+    <div class="quiz-explain hidden">Transfers need multi-row atomic updates with strong consistency. That's the definition of what relational databases with ACID exist for. Choosing speed over correctness here would lose money.</div>
+  </div>
+</section>
+
+<!-- ═══ 17 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">17</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked about DBMS theory</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What is a DBMS, and why not just use files?</span></summary><div class="qa-body"><p>A DBMS is the software layer between applications and stored data. Files alone can't handle concurrent access without corruption, don't provide atomicity or recovery after a crash, have no query/index machinery, and can't enforce constraints or access control. The DBMS provides all of these — ACID transactions, indexes, schemas, recovery, and security — as a single trusted layer.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>Explain the three-tier architecture of a DBMS.</span></summary><div class="qa-body"><p>Three levels of abstraction: <b>internal</b> (physical — how bytes are stored, page layout, indexes), <b>conceptual</b> (logical — the tables, columns, relationships, constraints), and <b>external</b> (view — what each user or application sees). The separation lets you change the storage format without breaking applications, and give different users different views without duplicating data.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>What's the difference between a candidate key, primary key, and foreign key?</span></summary><div class="qa-body"><p>A candidate key is a minimal set of columns that uniquely identifies a row. A primary key is the candidate key chosen as the official identifier (unique + not null, one per table). A foreign key is a column that references another table's primary (or unique) key, enforcing referential integrity. Candidate keys are choices; primary is the chosen one; foreign key is the connection.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What is normalization, and why does it matter?</span></summary><div class="qa-body"><p>Restructuring a schema so each fact is stored in exactly one place, eliminating update, insert, and delete anomalies. 1NF requires atomic values, 2NF eliminates partial dependencies, 3NF eliminates transitive dependencies, BCNF is stricter still. It matters because duplicated data drifts out of sync — normalizing makes the database the single source of truth.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>Explain ACID.</span></summary><div class="qa-body"><p><b>Atomicity:</b> all-or-nothing — enforced by the WAL and undo logs. <b>Consistency:</b> constraints hold — enforced by declared constraints and application logic. <b>Isolation:</b> concurrent transactions don't corrupt each other — enforced by locking or MVCC. <b>Durability:</b> committed = permanent — enforced by flushing the log before acknowledging commit.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>What's the difference between a dirty read, non-repeatable read, and phantom read?</span></summary><div class="qa-body"><p>Dirty read: reading uncommitted data. Non-repeatable read: the same row returns different values in one transaction because another transaction committed an update between the two reads. Phantom read: a query returns a different <em>set</em> of rows because another transaction inserted or deleted matching rows between two executions of the same query. Each is progressively harder to prevent, which is why isolation levels exist.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What is two-phase locking, and what problem does it have?</span></summary><div class="qa-body"><p>A protocol where a transaction acquires locks in a growing phase and only releases them in a shrinking phase — no new lock can be acquired after the first release. This guarantees serializability. Its problem is deadlock: two transactions can each hold a lock the other needs, blocking forever. The DBMS detects this with a wait-for graph and aborts one transaction to break the cycle.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>What is MVCC, and what does it trade?</span></summary><div class="qa-body"><p>Multi-Version Concurrency Control — each transaction sees a snapshot of the data as of its start time, using versioned rows. Readers never block writers, writers never block readers. The trade-off is storage: old versions accumulate until a vacuum process reclaims them, and long-running transactions slow that reclamation.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>Why does a B+ tree beat a binary search tree for disk indexes?</span></summary><div class="qa-body"><p>A BST has one key per node, so its height is log₂n — around 24 levels for a crore of keys, meaning ~24 disk reads. A B+ tree packs hundreds of keys per node (one page), so its height is log<sub>f</sub>n — 3–4 levels for the same dataset. Fewer disk reads, and its sorted leaves make range scans efficient too.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>Why is a hash index unsuitable for range queries?</span></summary><div class="qa-body"><p>Hashes destroy ordering. A hash index maps a value to a bucket, which is perfect for equality. But nearby values (18, 19, 20) land in completely unrelated buckets. A range query would have to hash every possible value in the range — practically a full scan. B+ trees keep values sorted, so a range is one contiguous leaf walk.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>What is the write-ahead log (WAL), and why does it exist?</span></summary><div class="qa-body"><p>A sequential log of every change, flushed to disk <em>before</em> the corresponding data pages are modified. It's what makes durability and recovery possible: after a crash, committed changes are redone from the log, uncommitted ones are undone. Sequential writes are much faster than random page writes, which is why the DBMS commits to the log and lets data pages lag.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>Explain the CAP theorem and why "CA" isn't a real option.</span></summary><div class="qa-body"><p>CAP says a distributed system can guarantee at most two of Consistency, Availability, and Partition tolerance. But partitions happen — networks drop. So P isn't a choice. The real choice is: when a partition occurs, refuse writes to stay consistent (CP), or accept writes to stay available (AP). PACELC extends this: even without a partition, coordinating for consistency costs latency.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q13</span><span>What's the difference between replication and sharding?</span></summary><div class="qa-body"><p><b>Replication</b>: the same data on multiple nodes — used for availability (failover) and read scaling. Writes still go through one primary. <b>Sharding</b>: different data on different nodes, split by a shard key — used for write and storage scaling. Cross-shard queries are expensive and resharding is hard. At scale you use both: each shard is itself a replica set.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q14</span><span>When would you choose a NoSQL database over a relational one?</span></summary><div class="qa-body"><p>When the schema is genuinely dynamic (product catalogs with wildly different attributes, user-generated event payloads), when writes dominate and you need horizontal scale from day one, when the access pattern fits a specific model (key-value for sessions/cache, documents for hierarchical entities, graphs for relationship-heavy data, time-series for metrics). Not as a default "because it's newer" — the missing joins, transactional guarantees, and constraints add up fast.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q15</span><span>What is a checkpoint, and why does it matter for recovery?</span></summary><div class="qa-body"><p>A periodic operation that flushes all dirty pages to disk and records in the log that everything up to that point is safely persisted. Recovery only needs to replay the log from the last checkpoint forward — without checkpoints, every restart would replay the entire log from the beginning, which could take hours.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Backend · DBMS Theory</span>
+  <span>Architecture · models · transactions · indexing · storage · distributed</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){ /* no code blocks here, but keep the helper for consistency */ };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>

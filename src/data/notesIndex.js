@@ -223,6 +223,22 @@ export const notes = [
   description: 'motion components, variants, AnimatePresence, gestures, layout animations, scroll effects, springs, and performance — the complete guide.',
   file: '/notes/framer-motion.html',
 },
+{
+  id: 'dbms',
+  title: 'DBMS — the complete conceptual guide',
+  category: 'Backend',
+  color: 'accent',
+  description: 'Architecture, data models, ER, normalization, transactions, ACID, concurrency, indexing, storage, recovery, distributed DBs, NoSQL — concepts only, no SQL syntax.',
+  file: '/notes/dbms.html',
+},
+{
+  id: 'sql',
+  title: 'SQL — the complete guide',
+  category: 'Backend',
+  color: 'accent',
+  description: 'SELECT, joins, aggregates, subqueries, CTEs, window functions, DDL, DML, indexes, transactions, and tuning — the practical SQL companion to the DBMS theory note.',
+  file: '/notes/sql.html',
+},
 ];
 
 export function getNoteById(id) {

@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL — the complete guide · Sheryians</title>
+<meta name="description" content="SQL from first principles — SELECT, WHERE, JOINs, subqueries, CTEs, window functions, DDL, DML, indexes, transactions, and tuning.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:18ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.tbl-demo{width:100%;border-collapse:collapse;font-size:12.5px;font-family:'IBM Plex Mono',monospace}
+.tbl-demo th,.tbl-demo td{border:1px solid var(--rule);padding:6px 10px;text-align:left}
+.tbl-demo th{background:var(--paper3);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tbl-demo tr.hl td{background:rgba(200,75,31,.08)}
+.tbl-demo tr.hl2 td{background:rgba(26,107,74,.08)}
+.tbl-demo tr.skip td{opacity:.35}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.toc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:24px 0 40px}
+.toc a{display:block;padding:10px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--paper2);text-decoration:none;color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;transition:border-color .2s,color .2s}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+.toc a .n{color:var(--accent);font-weight:600;margin-right:6px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols,.toc{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Backend · Database · SQL</div>
+  <h1><em>SQL</em> — the language of data</h1>
+  <p class="hero-desc">From <code>SELECT *</code> to window functions and query tuning. Every statement type, every clause, every operator, and the exact mental model of how a query executes. This is the practical companion to the DBMS theory note.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">SELECT → window functions</span>
+    <span class="hero-tag">JOINs &amp; subqueries</span>
+    <span class="hero-tag">Aggregates &amp; HAVING</span>
+    <span class="hero-tag">DDL &amp; DML</span>
+    <span class="hero-tag">Indexes &amp; transactions</span>
+    <span class="hero-tag">EXPLAIN</span>
+    <span class="hero-tag">Interview questions</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#what"><span class="n">01</span>What SQL is</a>
+  <a href="#select"><span class="n">02</span>SELECT &amp; clauses</a>
+  <a href="#where"><span class="n">03</span>WHERE &amp; operators</a>
+  <a href="#functions"><span class="n">04</span>Functions</a>
+  <a href="#agg"><span class="n">05</span>Aggregates &amp; GROUP BY</a>
+  <a href="#joins"><span class="n">06</span>Joins</a>
+  <a href="#subqueries"><span class="n">07</span>Subqueries</a>
+  <a href="#cte"><span class="n">08</span>CTEs</a>
+  <a href="#window"><span class="n">09</span>Window functions</a>
+  <a href="#ddl"><span class="n">10</span>DDL — tables &amp; constraints</a>
+  <a href="#dml"><span class="n">11</span>DML — insert, update, delete</a>
+  <a href="#indexes"><span class="n">12</span>Indexes &amp; EXPLAIN</a>
+  <a href="#transactions"><span class="n">13</span>Transactions</a>
+  <a href="#views"><span class="n">14</span>Views, triggers, procedures</a>
+  <a href="#tips"><span class="n">15</span>Common mistakes</a>
+  <a href="#interview"><span class="n">16</span>Interview questions</a>
+</nav>
+
+<!-- ═══ 01 · WHAT ═══ -->
+<section class="section-block" id="what">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">What SQL is</h2>
+      <p class="section-subtitle">declarative language · categories of SQL · how to read a query</p>
+    </div>
+  </div>
+
+  <p class="lead">SQL is a <b>declarative</b> language for querying relational databases. You don't tell the database <em>how</em> to find the data — you describe <em>what</em> you want, and the query optimizer figures out the fastest way to get it.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Category</th><th>Statements</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><b>DDL</b> — Data Definition</td><td><code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>, <code>TRUNCATE</code></td><td>Define and modify schema (tables, indexes, constraints)</td></tr>
+        <tr><td><b>DML</b> — Data Manipulation</td><td><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td><td>Insert, modify, remove rows</td></tr>
+        <tr><td><b>DQL</b> — Data Query</td><td><code>SELECT</code></td><td>Read data</td></tr>
+        <tr><td><b>DCL</b> — Data Control</td><td><code>GRANT</code>, <code>REVOKE</code></td><td>Permissions and roles</td></tr>
+        <tr><td><b>TCL</b> — Transaction Control</td><td><code>BEGIN</code>, <code>COMMIT</code>, <code>ROLLBACK</code></td><td>Group operations into atomic units</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">How to read a SELECT</div>
+    <div class="concept-box-text"><p>You <b>write</b> a query in one order, but the database <b>executes</b> it in another. Understanding this internal order is the single biggest jump in SQL competence. See the animated stepper in the next section.</p></div>
+  </div>
+</section>
+
+<!-- ═══ 02 · SELECT ═══ -->
+<section class="section-block" id="select">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">SELECT &amp; its clauses</h2>
+      <p class="section-subtitle">execution order · FROM · WHERE · GROUP BY · HAVING · SELECT · ORDER BY · LIMIT</p>
+    </div>
+  </div>
+
+  <div class="stepper" data-stepper="exec" data-steps="7">
+    <div class="stepper-head"><span class="stepper-title">The real execution order of a SELECT</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">execution order</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">1</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">FROM / JOIN</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">2</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">WHERE</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">3</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">GROUP BY</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">4</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">HAVING</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">5</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">SELECT (aliases)</div></div>
+            <div class="stat" data-show="6"><div class="stat-label">6</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">ORDER BY</div></div>
+            <div class="stat" data-show="7"><div class="stat-label">7</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">LIMIT / OFFSET</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">what happens at each step</div>
+          <div class="stat-row" style="flex-direction:column;align-items:stretch">
+            <div class="stat" data-show="1"><div class="stat-label">from</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">build the working set of rows</div></div>
+            <div class="stat" data-show="2"><div class="stat-label">filter</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">drop rows that fail the condition</div></div>
+            <div class="stat" data-show="3"><div class="stat-label">group</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">collapse into one row per group</div></div>
+            <div class="stat" data-show="4"><div class="stat-label">filter groups</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">drop groups that fail</div></div>
+            <div class="stat" data-show="5"><div class="stat-label">compute</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">evaluate expressions, apply aliases</div></div>
+            <div class="stat" data-show="6"><div class="stat-label">sort</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">sort the surviving rows</div></div>
+            <div class="stat" data-show="7"><div class="stat-label">limit</div><div class="stat-value" style="font-size:13px;font-family:'DM Sans',sans-serif">trim to the requested slice</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li><b>FROM / JOIN</b> runs first. It defines the source rows — one table, or multiple joined together. Nothing else can happen until the source is defined.</li>
+      <li><b>WHERE</b> filters individual rows. Any row failing the condition is gone. This is where you can't reference aggregates — they don't exist yet.</li>
+      <li><b>GROUP BY</b> collapses rows that share grouped columns into one row per group. Aggregates (<code>COUNT</code>, <code>SUM</code>) then operate on each group.</li>
+      <li><b>HAVING</b> filters groups, not rows. <code>HAVING COUNT(*) &gt; 5</code> works; <code>WHERE COUNT(*) &gt; 5</code> does not.</li>
+      <li><b>SELECT</b> computes expressions and applies aliases. This is the first point where aliases exist — which is why <code>ORDER BY alias</code> works but <code>WHERE alias</code> doesn't.</li>
+      <li><b>ORDER BY</b> sorts the result. Aliases from SELECT are available here.</li>
+      <li><b>LIMIT / OFFSET</b> returns a slice of the sorted result. Deep offsets are slow because the query still computes rows 1..offset internally.</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 7</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">select.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- all columns, all rows</span>
+<span class="tok-cmd">SELECT</span> * <span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- specific columns</span>
+<span class="tok-cmd">SELECT</span> id, name, email <span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- with alias</span>
+<span class="tok-cmd">SELECT</span> name <span class="tok-key">AS</span> full_name, age * <span class="tok-num">12</span> <span class="tok-key">AS</span> age_months <span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- filtered</span>
+<span class="tok-cmd">SELECT</span> * <span class="tok-cmd">FROM</span> users <span class="tok-cmd">WHERE</span> age &gt;= <span class="tok-num">18</span> <span class="tok-cmd">AND</span> city = <span class="tok-str">'Pune'</span>;
+
+<span class="tok-com">-- sorted, paginated</span>
+<span class="tok-cmd">SELECT</span> * <span class="tok-cmd">FROM</span> users <span class="tok-cmd">ORDER BY</span> created_at <span class="tok-key">DESC</span> <span class="tok-cmd">LIMIT</span> <span class="tok-num">10</span> <span class="tok-cmd">OFFSET</span> <span class="tok-num">20</span>;
+
+<span class="tok-com">-- distinct values</span>
+<span class="tok-cmd">SELECT DISTINCT</span> city <span class="tok-cmd">FROM</span> users;</code></pre>
+  </div>
+
+  <div class="quiz-box" id="q-sel-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">Why can you use a column alias in <code>ORDER BY</code> but not in <code>WHERE</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-sel-1', this, true)"><span class="opt-letter">A</span><code>WHERE</code> runs before <code>SELECT</code> — the alias doesn't exist yet. <code>ORDER BY</code> runs after.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-sel-1', this, false)"><span class="opt-letter">B</span>Aliases only work in string contexts.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-sel-1-feedback"></div>
+    <div class="quiz-explain hidden">Execution order: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT. Aliases are created in SELECT, so they're not available in WHERE or HAVING, but they are in ORDER BY.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · WHERE ═══ -->
+<section class="section-block" id="where">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">WHERE &amp; operators</h2>
+      <p class="section-subtitle">comparison · logical · range · set · pattern · NULL handling</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">where.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- comparison</span>
+<span class="tok-cmd">WHERE</span> age = <span class="tok-num">22</span>
+<span class="tok-cmd">WHERE</span> age &lt;&gt; <span class="tok-num">22</span>            <span class="tok-com">-- also !=</span>
+<span class="tok-cmd">WHERE</span> age &gt; <span class="tok-num">18</span> <span class="tok-cmd">AND</span> age &lt; <span class="tok-num">30</span>
+
+<span class="tok-com">-- range (inclusive)</span>
+<span class="tok-cmd">WHERE</span> age <span class="tok-key">BETWEEN</span> <span class="tok-num">18</span> <span class="tok-key">AND</span> <span class="tok-num">30</span>
+
+<span class="tok-com">-- set membership</span>
+<span class="tok-cmd">WHERE</span> city <span class="tok-key">IN</span> (<span class="tok-str">'Pune'</span>, <span class="tok-str">'Mumbai'</span>, <span class="tok-str">'Delhi'</span>)
+<span class="tok-cmd">WHERE</span> city <span class="tok-key">NOT IN</span> (<span class="tok-str">'Test'</span>, <span class="tok-str">'Deleted'</span>)
+
+<span class="tok-com">-- pattern (LIKE) — % = any string, _ = single char</span>
+<span class="tok-cmd">WHERE</span> name <span class="tok-key">LIKE</span> <span class="tok-str">'A%'</span>          <span class="tok-com">-- starts with A</span>
+<span class="tok-cmd">WHERE</span> name <span class="tok-key">LIKE</span> <span class="tok-str">'%singh'</span>      <span class="tok-com">-- ends with singh</span>
+<span class="tok-cmd">WHERE</span> name <span class="tok-key">LIKE</span> <span class="tok-str">'%singh%'</span>     <span class="tok-com">-- contains singh</span>
+<span class="tok-cmd">WHERE</span> name <span class="tok-key">LIKE</span> <span class="tok-str">'_arav'</span>       <span class="tok-com">-- 5 chars, ends in 'arav'</span>
+
+<span class="tok-com">-- NULL: must use IS / IS NOT, never =</span>
+<span class="tok-cmd">WHERE</span> age <span class="tok-key">IS NULL</span>
+<span class="tok-cmd">WHERE</span> age <span class="tok-key">IS NOT NULL</span>
+
+<span class="tok-com">-- logical operators</span>
+<span class="tok-cmd">WHERE</span> age &gt;= <span class="tok-num">18</span> <span class="tok-cmd">AND</span> (city = <span class="tok-str">'Pune'</span> <span class="tok-cmd">OR</span> city = <span class="tok-str">'Mumbai'</span>)
+<span class="tok-cmd">WHERE NOT</span> active</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>NULL</code> is not <code>0</code>, not <code>''</code>, not <code>false</code>.</strong> <code>NULL</code> means "unknown". Any comparison with <code>NULL</code> returns <code>NULL</code> (which <code>WHERE</code> treats as false). So <code>age = NULL</code> is never true — not even for rows where age is null. Always use <code>IS NULL</code> / <code>IS NOT NULL</code>. And be careful with <code>NOT IN (list_with_null)</code> — the whole predicate becomes unknown, so no rows match.</div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Operator</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>=</code>, <code>&lt;&gt;</code>, <code>!=</code></td><td>Equality / inequality</td></tr>
+        <tr><td><code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></td><td>Comparison</td></tr>
+        <tr><td><code>BETWEEN a AND b</code></td><td>Inclusive range</td></tr>
+        <tr><td><code>IN (...)</code></td><td>Set membership</td></tr>
+        <tr><td><code>LIKE</code> / <code>ILIKE</code> (Postgres)</td><td>Pattern matching (case-insensitive in ILIKE)</td></tr>
+        <tr><td><code>IS NULL</code> / <code>IS NOT NULL</code></td><td>Null checks</td></tr>
+        <tr><td><code>AND</code>, <code>OR</code>, <code>NOT</code></td><td>Boolean logic</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="quiz-box" id="q-where-1">
+    <div class="quiz-label">Quick check · 02</div>
+    <div class="quiz-question">Why does <code>WHERE age = NULL</code> return zero rows?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-where-1', this, false)"><span class="opt-letter">A</span>Because no row has <code>age</code> equal to null.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-where-1', this, true)"><span class="opt-letter">B</span>Because <code>age = NULL</code> evaluates to <code>NULL</code> (unknown), which <code>WHERE</code> treats as not-true. Use <code>IS NULL</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-where-1-feedback"></div>
+    <div class="quiz-explain hidden"><code>NULL</code> is not a value — it's the absence of a value. Any comparison with it returns <code>NULL</code>, and <code>WHERE</code> only keeps rows where the condition is true. <code>IS NULL</code> is the correct null test.</div>
+  </div>
+</section>
+
+<!-- ═══ 04 · FUNCTIONS ═══ -->
+<section class="section-block" id="functions">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Built-in functions</h2>
+      <p class="section-subtitle">string · numeric · date · null · cast · conditional</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Category</th><th>Functions</th></tr></thead>
+      <tbody>
+        <tr><td><b>String</b></td><td><code>UPPER</code>, <code>LOWER</code>, <code>TRIM</code>, <code>LENGTH</code>, <code>SUBSTRING</code>, <code>REPLACE</code>, <code>CONCAT</code>, <code>||</code></td></tr>
+        <tr><td><b>Numeric</b></td><td><code>ROUND</code>, <code>CEIL</code>, <code>FLOOR</code>, <code>ABS</code>, <code>MOD</code>, <code>POWER</code></td></tr>
+        <tr><td><b>Date</b></td><td><code>NOW()</code>, <code>CURRENT_DATE</code>, <code>EXTRACT</code>, <code>DATE_TRUNC</code>, <code>AGE</code>, <code>DATE_ADD/SUB</code></td></tr>
+        <tr><td><b>Null</b></td><td><code>COALESCE(a, b, ...)</code>, <code>NULLIF(a, b)</code></td></tr>
+        <tr><td><b>Cast</b></td><td><code>CAST(x AS TYPE)</code>, <code>x::TYPE</code> (Postgres)</td></tr>
+        <tr><td><b>Conditional</b></td><td><code>CASE WHEN ... THEN ... ELSE ... END</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">functions.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- string</span>
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">UPPER</span>(name), <span class="tok-cmd">LENGTH</span>(name) <span class="tok-cmd">FROM</span> users;
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">CONCAT</span>(first_name, <span class="tok-str">' '</span>, last_name) <span class="tok-cmd">FROM</span> users;
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">SUBSTRING</span>(email <span class="tok-key">FROM</span> <span class="tok-num">1</span> <span class="tok-key">FOR</span> <span class="tok-cmd">POSITION</span>(<span class="tok-str">'@'</span> <span class="tok-key">IN</span> email) - <span class="tok-num">1</span>) <span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- numeric</span>
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">ROUND</span>(salary, <span class="tok-num">2</span>), <span class="tok-cmd">ABS</span>(balance) <span class="tok-cmd">FROM</span> accounts;
+
+<span class="tok-com">-- dates</span>
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">EXTRACT</span>(<span class="tok-key">YEAR</span> <span class="tok-key">FROM</span> created_at) <span class="tok-key">AS</span> yr <span class="tok-cmd">FROM</span> orders;
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">DATE_TRUNC</span>(<span class="tok-str">'month'</span>, created_at) <span class="tok-key">AS</span> month, <span class="tok-cmd">SUM</span>(amount) <span class="tok-cmd">FROM</span> orders <span class="tok-cmd">GROUP BY</span> <span class="tok-num">1</span>;
+
+<span class="tok-com">-- null handling — replace null with a default</span>
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">COALESCE</span>(nickname, name, <span class="tok-str">'Anonymous'</span>) <span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- cast</span>
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">CAST</span>(<span class="tok-str">'42'</span> <span class="tok-key">AS INT</span>), <span class="tok-str">'42'</span>::<span class="tok-key">INT</span>;
+
+<span class="tok-com">-- CASE — the SQL if/else</span>
+<span class="tok-cmd">SELECT</span> name,
+  <span class="tok-key">CASE</span>
+    <span class="tok-key">WHEN</span> age &lt; <span class="tok-num">18</span> <span class="tok-key">THEN</span> <span class="tok-str">'minor'</span>
+    <span class="tok-key">WHEN</span> age &lt; <span class="tok-num">65</span> <span class="tok-key">THEN</span> <span class="tok-str">'adult'</span>
+    <span class="tok-key">ELSE</span> <span class="tok-str">'senior'</span>
+  <span class="tok-key">END</span> <span class="tok-key">AS</span> age_group
+<span class="tok-cmd">FROM</span> users;</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong><code>CASE</code> is the query builder's workhorse.</strong> Most "conditional column" logic in dashboards, reports, and data pipelines is <code>CASE WHEN ... THEN ... END</code>. Combined with aggregates, it lets you do multiple conditional sums in one query — e.g. <code>SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END)</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · AGGREGATES ═══ -->
+<section class="section-block" id="agg">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Aggregates &amp; GROUP BY</h2>
+      <p class="section-subtitle">COUNT · SUM · AVG · MIN · MAX · grouping · HAVING · conditional aggregates</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">aggregates.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- single aggregate</span>
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">COUNT</span>(*), <span class="tok-cmd">AVG</span>(age), <span class="tok-cmd">MIN</span>(age), <span class="tok-cmd">MAX</span>(age) <span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- COUNT(*) counts rows; COUNT(col) counts non-null values</span>
+<span class="tok-cmd">SELECT</span> <span class="tok-cmd">COUNT</span>(*) <span class="tok-key">AS</span> total,
+       <span class="tok-cmd">COUNT</span>(phone) <span class="tok-key">AS</span> with_phone
+<span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- GROUP BY: one output row per group</span>
+<span class="tok-cmd">SELECT</span> city, <span class="tok-cmd">COUNT</span>(*) <span class="tok-key">AS</span> total_users
+<span class="tok-cmd">FROM</span> users
+<span class="tok-cmd">GROUP BY</span> city;
+
+<span class="tok-com">-- HAVING filters groups (WHERE can't — aggregates don't exist yet)</span>
+<span class="tok-cmd">SELECT</span> city, <span class="tok-cmd">COUNT</span>(*) <span class="tok-key">AS</span> total_users
+<span class="tok-cmd">FROM</span> users
+<span class="tok-cmd">GROUP BY</span> city
+<span class="tok-key">HAVING</span> <span class="tok-cmd">COUNT</span>(*) &gt; <span class="tok-num">10</span>;
+
+<span class="tok-com">-- Conditional aggregates — multiple counts in one pass</span>
+<span class="tok-cmd">SELECT</span>
+  <span class="tok-cmd">COUNT</span>(*) <span class="tok-key">FILTER</span> (<span class="tok-cmd">WHERE</span> active)     <span class="tok-key">AS</span> active_users,
+  <span class="tok-cmd">COUNT</span>(*) <span class="tok-key">FILTER</span> (<span class="tok-cmd">WHERE NOT</span> active) <span class="tok-key">AS</span> inactive_users
+<span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- Same with CASE (works in any database)</span>
+<span class="tok-cmd">SELECT</span>
+  <span class="tok-cmd">SUM</span>(<span class="tok-key">CASE WHEN</span> status = <span class="tok-str">'paid'</span>    <span class="tok-key">THEN</span> amount <span class="tok-key">ELSE</span> <span class="tok-num">0</span> <span class="tok-key">END</span>) <span class="tok-key">AS</span> paid_total,
+  <span class="tok-cmd">SUM</span>(<span class="tok-key">CASE WHEN</span> status = <span class="tok-str">'pending'</span> <span class="tok-key">THEN</span> amount <span class="tok-key">ELSE</span> <span class="tok-num">0</span> <span class="tok-key">END</span>) <span class="tok-key">AS</span> pending_total
+<span class="tok-cmd">FROM</span> orders;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Function</th><th>Returns</th></tr></thead>
+      <tbody>
+        <tr><td><code>COUNT(*)</code></td><td>Number of rows (includes nulls)</td></tr>
+        <tr><td><code>COUNT(col)</code></td><td>Number of non-null values</td></tr>
+        <tr><td><code>COUNT(DISTINCT col)</code></td><td>Number of distinct non-null values</td></tr>
+        <tr><td><code>SUM(col)</code></td><td>Sum (null if all null)</td></tr>
+        <tr><td><code>AVG(col)</code></td><td>Average of non-null values</td></tr>
+        <tr><td><code>MIN(col)</code> / <code>MAX(col)</code></td><td>Smallest / largest value</td></tr>
+        <tr><td><code>STRING_AGG(col, ',')</code></td><td>Concatenate values across rows</td></tr>
+        <tr><td><code>ARRAY_AGG(col)</code></td><td>Collect values into an array</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Every non-aggregated column in SELECT must be in GROUP BY.</strong> <code>SELECT name, COUNT(*) FROM users GROUP BY city</code> fails because <code>name</code> isn't grouped — the database doesn't know which name to pick for each city. MySQL used to allow this (picking a random row); Postgres and most modern databases reject it, which is correct.</div>
+  </div>
+
+  <div class="quiz-box" id="q-agg-1">
+    <div class="quiz-label">Quick check · 03</div>
+    <div class="quiz-question">What's the difference between <code>COUNT(*)</code> and <code>COUNT(phone)</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-agg-1', this, false)"><span class="opt-letter">A</span>They're the same — both count rows.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-agg-1', this, true)"><span class="opt-letter">B</span><code>COUNT(*)</code> counts all rows; <code>COUNT(phone)</code> counts only rows where <code>phone</code> is not null.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-agg-1-feedback"></div>
+    <div class="quiz-explain hidden">This is the difference between "how many users" and "how many users have a phone number". The first is row count; the second is non-null count for a specific column.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · JOINS ═══ -->
+<section class="section-block" id="joins">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Joins</h2>
+      <p class="section-subtitle">INNER · LEFT · RIGHT · FULL · CROSS · self-join · the ON vs WHERE trap</p>
+    </div>
+  </div>
+
+  <div class="stepper" data-stepper="joins" data-steps="6">
+    <div class="stepper-head"><span class="stepper-title">The four join types, visually</span><span class="stepper-hint">← → keys also work</span></div>
+    <div class="stepper-stage">
+      <div class="demo-cols">
+        <div>
+          <div class="demo-label">users</div>
+          <table class="tbl-demo">
+            <thead><tr><th>id</th><th>name</th></tr></thead>
+            <tbody>
+              <tr data-cls='{"2":"hl","3":"hl","4":"hl","5":"hl","6":"hl"}'><td>1</td><td>Aarav</td></tr>
+              <tr data-cls='{"2":"hl","3":"hl","4":"hl","5":"hl","6":"hl"}'><td>2</td><td>Priya</td></tr>
+              <tr data-cls='{"4":"hl","5":"hl"}'><td>3</td><td>Neha</td></tr>
+              <tr data-cls='{"5":"hl"}'><td>4</td><td>Rahul</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="demo-label">orders</div>
+          <table class="tbl-demo">
+            <thead><tr><th>id</th><th>user_id</th><th>total</th></tr></thead>
+            <tbody>
+              <tr data-cls='{"2":"hl","3":"hl","4":"hl","6":"hl"}'><td>100</td><td>1</td><td>999</td></tr>
+              <tr data-cls='{"2":"hl","3":"hl","4":"hl","6":"hl"}'><td>101</td><td>2</td><td>499</td></tr>
+              <tr data-cls='{"4":"hl","5":"hl"}'><td>102</td><td>3</td><td>1200</td></tr>
+              <tr data-cls='{"6":"hl"}'><td>103</td><td>99</td><td>50</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <ol class="stepper-caps stepper-script">
+      <li>Two tables. Users have ids 1–4. Orders reference users via <code>user_id</code>. Order 103 references <code>99</code>, which doesn't exist. User 4 has no orders.</li>
+      <li><b>INNER JOIN</b> — only rows with a match on both sides. Users 1, 2, 3 joined with their orders. User 4 and order 103 are excluded. Result: 3 rows.</li>
+      <li><b>LEFT JOIN</b> — all rows from the left side, <code>NULL</code> on the right when there's no match. User 4 appears with <code>NULL</code> order columns. Order 103 is still excluded (it's on the right). Result: 4 rows.</li>
+      <li><b>RIGHT JOIN</b> — mirror of LEFT. Order 103 appears with <code>NULL</code> user columns. User 4 is excluded. Result: 4 rows.</li>
+      <li><b>FULL OUTER JOIN</b> — keeps both sides. User 4 appears with nulls, order 103 appears with nulls. Result: 5 rows.</li>
+      <li><b>CROSS JOIN</b> — every row of the left with every row of the right. 4 users × 4 orders = 16 rows. Rarely what you want, but occasionally exactly right (generating combinations).</li>
+    </ol>
+    <div class="stepper-caption"></div>
+    <div class="stepper-controls">
+      <button type="button" class="step-btn secondary" data-prev>← Back</button>
+      <div class="step-meta"><span class="step-counter">Step 1 / 6</span><div class="step-dots"></div></div>
+      <button type="button" class="step-btn" data-next>Forward →</button>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">joins.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- INNER: only matched rows</span>
+<span class="tok-cmd">SELECT</span> u.name, o.total
+<span class="tok-cmd">FROM</span> users u
+<span class="tok-key">INNER JOIN</span> orders o <span class="tok-key">ON</span> o.user_id = u.id;
+
+<span class="tok-com">-- LEFT: all users + their orders (null if none)</span>
+<span class="tok-cmd">SELECT</span> u.name, o.total
+<span class="tok-cmd">FROM</span> users u
+<span class="tok-key">LEFT JOIN</span> orders o <span class="tok-key">ON</span> o.user_id = u.id;
+
+<span class="tok-com">-- Users who have NOT placed an order: LEFT JOIN + IS NULL</span>
+<span class="tok-cmd">SELECT</span> u.name
+<span class="tok-cmd">FROM</span> users u
+<span class="tok-key">LEFT JOIN</span> orders o <span class="tok-key">ON</span> o.user_id = u.id
+<span class="tok-cmd">WHERE</span> o.id <span class="tok-key">IS NULL</span>;
+
+<span class="tok-com">-- Self-join: employees and their managers</span>
+<span class="tok-cmd">SELECT</span> e.name <span class="tok-key">AS</span> employee, m.name <span class="tok-key">AS</span> manager
+<span class="tok-cmd">FROM</span> employees e
+<span class="tok-key">LEFT JOIN</span> employees m <span class="tok-key">ON</span> e.manager_id = m.id;
+
+<span class="tok-com">-- Multiple joins</span>
+<span class="tok-cmd">SELECT</span> u.name, o.id <span class="tok-key">AS</span> order_id, p.name <span class="tok-key">AS</span> product
+<span class="tok-cmd">FROM</span> users u
+<span class="tok-key">JOIN</span> orders o <span class="tok-key">ON</span> o.user_id = u.id
+<span class="tok-key">JOIN</span> order_items oi <span class="tok-key">ON</span> oi.order_id = o.id
+<span class="tok-key">JOIN</span> products p <span class="tok-key">ON</span> p.id = oi.product_id;</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Filter on the right table belongs in <code>ON</code>, not <code>WHERE</code>, for a LEFT JOIN.</strong> <code>LEFT JOIN orders o ON o.user_id = u.id WHERE o.status = 'paid'</code> turns into an INNER JOIN — users with no orders have <code>status = NULL</code>, and <code>NULL = 'paid'</code> is false, so they get filtered out. Move the condition to the <code>ON</code> clause and the LEFT JOIN keeps its "keep all left rows" semantics.</div>
+  </div>
+
+  <div class="quiz-box" id="q-join-1">
+    <div class="quiz-label">Quick check · 04</div>
+    <div class="quiz-question">"Find all users who have never placed an order." Which pattern?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-join-1', this, true)"><span class="opt-letter">A</span><code>LEFT JOIN</code> orders + <code>WHERE orders.id IS NULL</code>.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-join-1', this, false)"><span class="opt-letter">B</span><code>INNER JOIN</code> orders + <code>WHERE orders.id IS NULL</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-join-1-feedback"></div>
+    <div class="quiz-explain hidden">INNER JOIN drops users without orders entirely. LEFT JOIN keeps them with NULL columns on the right, and <code>IS NULL</code> isolates exactly those users.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · SUBQUERIES ═══ -->
+<section class="section-block" id="subqueries">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Subqueries</h2>
+      <p class="section-subtitle">scalar · IN · EXISTS · correlated · IN vs EXISTS vs JOIN</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">subqueries.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- Scalar subquery (returns one value)</span>
+<span class="tok-cmd">SELECT</span> name <span class="tok-cmd">FROM</span> users
+<span class="tok-cmd">WHERE</span> age = (<span class="tok-cmd">SELECT</span> <span class="tok-cmd">MAX</span>(age) <span class="tok-cmd">FROM</span> users);
+
+<span class="tok-com">-- IN subquery</span>
+<span class="tok-cmd">SELECT</span> name <span class="tok-cmd">FROM</span> users
+<span class="tok-cmd">WHERE</span> id <span class="tok-key">IN</span> (<span class="tok-cmd">SELECT</span> user_id <span class="tok-cmd">FROM</span> orders);
+
+<span class="tok-com">-- EXISTS subquery — stops at first match</span>
+<span class="tok-cmd">SELECT</span> u.name <span class="tok-cmd">FROM</span> users u
+<span class="tok-cmd">WHERE</span> <span class="tok-key">EXISTS</span> (
+  <span class="tok-cmd">SELECT</span> <span class="tok-num">1</span> <span class="tok-cmd">FROM</span> orders o <span class="tok-cmd">WHERE</span> o.user_id = u.id
+);
+
+<span class="tok-com">-- Correlated: inner references outer (potentially slow)</span>
+<span class="tok-cmd">SELECT</span> u.name,
+  (<span class="tok-cmd">SELECT</span> <span class="tok-cmd">COUNT</span>(*) <span class="tok-cmd">FROM</span> orders o <span class="tok-cmd">WHERE</span> o.user_id = u.id) <span class="tok-key">AS</span> order_count
+<span class="tok-cmd">FROM</span> users u;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>Use when</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><b>IN</b></td><td>Small sub-result set, "value is in this list"</td><td>Materialises the inner result</td></tr>
+        <tr><td><b>EXISTS</b></td><td>"Does at least one matching row exist"</td><td>Short-circuits on first match</td></tr>
+        <tr><td><b>JOIN</b></td><td>You need columns from both tables</td><td>Usually the fastest if indexed</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>The triple-nested query is a warning sign.</strong> If you find yourself writing <code>SELECT ... WHERE x IN (SELECT ... WHERE y IN (SELECT ...))</code>, a CTE or a JOIN is almost always more readable and often faster. The optimizer <em>can</em> rewrite some of these, but not all — help it by writing the shape you want.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · CTE ═══ -->
+<section class="section-block" id="cte">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">CTEs — the <code>WITH</code> clause</h2>
+      <p class="section-subtitle">readable pipelines · recursive CTEs · materialization</p>
+    </div>
+  </div>
+
+  <p>A CTE (<b>Common Table Expression</b>) is a named subquery you can reference later. It exists to make complex queries readable.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">cte.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- Chain of stages, each readable</span>
+<span class="tok-key">WITH</span> active_users <span class="tok-key">AS</span> (
+  <span class="tok-cmd">SELECT</span> * <span class="tok-cmd">FROM</span> users <span class="tok-cmd">WHERE</span> active = <span class="tok-key">TRUE</span>
+),
+user_order_counts <span class="tok-key">AS</span> (
+  <span class="tok-cmd">SELECT</span> user_id, <span class="tok-cmd">COUNT</span>(*) <span class="tok-key">AS</span> order_count
+  <span class="tok-cmd">FROM</span> orders
+  <span class="tok-cmd">GROUP BY</span> user_id
+)
+<span class="tok-cmd">SELECT</span> u.name, <span class="tok-cmd">COALESCE</span>(c.order_count, <span class="tok-num">0</span>) <span class="tok-key">AS</span> orders
+<span class="tok-cmd">FROM</span> active_users u
+<span class="tok-key">LEFT JOIN</span> user_order_counts c <span class="tok-key">ON</span> c.user_id = u.id;</code></pre>
+  </div>
+
+  <h3>Recursive CTEs</h3>
+  <p>A recursive CTE has a base case, <code>UNION ALL</code>, and a recursive step that references itself. Used for hierarchies: org charts, category trees, comment threads, graphs.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">recursive.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- All employees under a manager, at any depth</span>
+<span class="tok-key">WITH RECURSIVE</span> reports <span class="tok-key">AS</span> (
+  <span class="tok-com">-- base: the starting employee</span>
+  <span class="tok-cmd">SELECT</span> id, name, manager_id
+  <span class="tok-cmd">FROM</span> employees
+  <span class="tok-cmd">WHERE</span> id = <span class="tok-num">1</span>
+
+  <span class="tok-key">UNION ALL</span>
+
+  <span class="tok-com">-- recursive step: children of everyone found so far</span>
+  <span class="tok-cmd">SELECT</span> e.id, e.name, e.manager_id
+  <span class="tok-cmd">FROM</span> employees e
+  <span class="tok-key">JOIN</span> reports r <span class="tok-key">ON</span> e.manager_id = r.id
+)
+<span class="tok-cmd">SELECT</span> * <span class="tok-cmd">FROM</span> reports;</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>CTE ≠ faster.</strong> In Postgres 12+, non-recursive CTEs are inlined like subqueries. If you want them computed once and reused, write <code>WITH name AS MATERIALIZED (...)</code>. This matters when the CTE is expensive and referenced multiple times.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · WINDOW ═══ -->
+<section class="section-block" id="window">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Window functions</h2>
+      <p class="section-subtitle">OVER · PARTITION BY · ROW_NUMBER · RANK · LAG · running totals · top-N per group</p>
+    </div>
+  </div>
+
+  <p>Window functions compute across a set of related rows <em>without collapsing them</em> into one row per group like <code>GROUP BY</code> does. This is the biggest single step from intermediate to advanced SQL.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">window.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- Rank users by age within each city</span>
+<span class="tok-cmd">SELECT</span>
+  name, city, age,
+  <span class="tok-cmd">RANK</span>() <span class="tok-key">OVER</span> (<span class="tok-key">PARTITION BY</span> city <span class="tok-cmd">ORDER BY</span> age <span class="tok-key">DESC</span>) <span class="tok-key">AS</span> rank_in_city
+<span class="tok-cmd">FROM</span> users;
+
+<span class="tok-com">-- Running total of amount by day</span>
+<span class="tok-cmd">SELECT</span>
+  day, amount,
+  <span class="tok-cmd">SUM</span>(amount) <span class="tok-key">OVER</span> (<span class="tok-cmd">ORDER BY</span> day) <span class="tok-key">AS</span> running_total
+<span class="tok-cmd">FROM</span> daily_sales;
+
+<span class="tok-com">-- Change from previous day (LAG)</span>
+<span class="tok-cmd">SELECT</span>
+  day, amount,
+  amount - <span class="tok-cmd">LAG</span>(amount) <span class="tok-key">OVER</span> (<span class="tok-cmd">ORDER BY</span> day) <span class="tok-key">AS</span> day_over_day
+<span class="tok-cmd">FROM</span> daily_sales;
+
+<span class="tok-com">-- Top 2 highest-paid employees per department</span>
+<span class="tok-cmd">SELECT</span> * <span class="tok-cmd">FROM</span> (
+  <span class="tok-cmd">SELECT</span> name, department, salary,
+    <span class="tok-cmd">ROW_NUMBER</span>() <span class="tok-key">OVER</span> (<span class="tok-key">PARTITION BY</span> department <span class="tok-cmd">ORDER BY</span> salary <span class="tok-key">DESC</span>) <span class="tok-key">AS</span> rn
+  <span class="tok-cmd">FROM</span> employees
+) t
+<span class="tok-cmd">WHERE</span> rn &lt;= <span class="tok-num">2</span>;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Function</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>ROW_NUMBER()</code></td><td>1, 2, 3 — never ties</td></tr>
+        <tr><td><code>RANK()</code></td><td>1, 2, 2, 4 — ties share rank, then jump</td></tr>
+        <tr><td><code>DENSE_RANK()</code></td><td>1, 2, 2, 3 — ties share rank, no jump</td></tr>
+        <tr><td><code>LAG(col, n)</code> / <code>LEAD(col, n)</code></td><td>Value from n rows before / after</td></tr>
+        <tr><td><code>FIRST_VALUE()</code> / <code>LAST_VALUE()</code></td><td>First / last value in the window</td></tr>
+        <tr><td><code>NTILE(n)</code></td><td>Split into n roughly-equal buckets</td></tr>
+        <tr><td><code>SUM / AVG / COUNT OVER (...)</code></td><td>Aggregate without collapsing rows</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">GROUP BY vs PARTITION BY</div>
+    <div class="concept-box-text"><p><code>GROUP BY city</code> → one row per city. <code>PARTITION BY city</code> inside <code>OVER</code> → every row kept, with an extra column that describes the row relative to its city. Use <code>GROUP BY</code> for summaries; use <code>PARTITION BY</code> for "each row annotated with its rank / running total / previous value".</div>
+  </div>
+
+  <div class="quiz-box" id="q-win-1">
+    <div class="quiz-label">Quick check · 05</div>
+    <div class="quiz-question">You need the top 3 orders (by amount) per customer. Which approach works?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-win-1', this, false)"><span class="opt-letter">A</span><code>GROUP BY customer_id</code> and pick the top 3 in each group.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-win-1', this, true)"><span class="opt-letter">B</span><code>ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC)</code>, then filter <code>rn &lt;= 3</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-win-1-feedback"></div>
+    <div class="quiz-explain hidden">This is the classic top-N-per-group query. <code>GROUP BY</code> collapses rows and can't return 3 rows per group. Window functions keep all rows and rank them, so the outer filter can pick the top N per partition.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · DDL ═══ -->
+<section class="section-block" id="ddl">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">DDL — schema</h2>
+      <p class="section-subtitle">CREATE · types · constraints · ALTER · DROP · TRUNCATE</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">ddl.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-cmd">CREATE TABLE</span> users (
+  id         <span class="tok-key">SERIAL PRIMARY KEY</span>,
+  email      <span class="tok-key">TEXT UNIQUE NOT NULL</span>,
+  name       <span class="tok-key">TEXT NOT NULL</span>,
+  age        <span class="tok-key">INT CHECK</span> (age &gt;= <span class="tok-num">0</span>),
+  active     <span class="tok-key">BOOLEAN NOT NULL DEFAULT</span> <span class="tok-key">TRUE</span>,
+  created_at <span class="tok-key">TIMESTAMPTZ NOT NULL DEFAULT NOW</span>()
+);
+
+<span class="tok-cmd">CREATE TABLE</span> orders (
+  id         <span class="tok-key">BIGSERIAL PRIMARY KEY</span>,
+  user_id    <span class="tok-key">INT NOT NULL</span>,
+  total      <span class="tok-key">NUMERIC(10,2) NOT NULL</span>,
+  created_at <span class="tok-key">TIMESTAMPTZ NOT NULL DEFAULT NOW</span>(),
+  <span class="tok-key">FOREIGN KEY</span> (user_id) <span class="tok-key">REFERENCES</span> users(id) <span class="tok-key">ON DELETE CASCADE</span>
+);
+
+<span class="tok-com">-- Add a column</span>
+<span class="tok-cmd">ALTER TABLE</span> users <span class="tok-cmd">ADD COLUMN</span> phone <span class="tok-key">TEXT</span>;
+
+<span class="tok-com">-- Change column type</span>
+<span class="tok-cmd">ALTER TABLE</span> users <span class="tok-cmd">ALTER COLUMN</span> age <span class="tok-cmd">TYPE BIGINT</span>;
+
+<span class="tok-com">-- Add a constraint</span>
+<span class="tok-cmd">ALTER TABLE</span> users <span class="tok-cmd">ADD CONSTRAINT</span> chk_age <span class="tok-cmd">CHECK</span> (age &lt; <span class="tok-num">150</span>);
+
+<span class="tok-com">-- Drop a table entirely</span>
+<span class="tok-cmd">DROP TABLE</span> orders;
+
+<span class="tok-com">-- Remove all rows but keep the table structure (faster than DELETE for full clears)</span>
+<span class="tok-cmd">TRUNCATE TABLE</span> users <span class="tok-key">CASCADE</span>;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Type</th><th>For</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>INT</code> / <code>BIGINT</code></td><td>Whole numbers</td><td><code>BIGINT</code> for values over ~2 billion</td></tr>
+        <tr><td><code>NUMERIC(p,s)</code></td><td>Exact decimals</td><td>Use for money. Never <code>FLOAT</code>.</td></tr>
+        <tr><td><code>TEXT</code></td><td>Strings of any length</td><td><code>VARCHAR(n)</code> only if you want the length check</td></tr>
+        <tr><td><code>TIMESTAMPTZ</code></td><td>Timestamp with timezone</td><td>Almost always prefer this</td></tr>
+        <tr><td><code>DATE</code></td><td>Calendar date</td><td>No time component</td></tr>
+        <tr><td><code>BOOLEAN</code></td><td>true / false / null</td><td>Native</td></tr>
+        <tr><td><code>JSONB</code></td><td>Semi-structured</td><td>Postgres — indexable, fast</td></tr>
+        <tr><td><code>UUID</code></td><td>Opaque IDs</td><td><code>gen_random_uuid()</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Never use <code>FLOAT</code> for money.</strong> Floating point can't represent <code>0.10</code> exactly — you'll end up off by a paisa. Use <code>NUMERIC(10,2)</code> or store in paise/cents as integers.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · DML ═══ -->
+<section class="section-block" id="dml">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">DML — write data</h2>
+      <p class="section-subtitle">INSERT · UPDATE · DELETE · RETURNING · UPSERT</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">dml.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- INSERT one row</span>
+<span class="tok-cmd">INSERT INTO</span> users (email, name, age)
+<span class="tok-cmd">VALUES</span> (<span class="tok-str">'aarav@x.com'</span>, <span class="tok-str">'Aarav'</span>, <span class="tok-num">22</span>);
+
+<span class="tok-com">-- INSERT many</span>
+<span class="tok-cmd">INSERT INTO</span> users (email, name, age) <span class="tok-cmd">VALUES</span>
+  (<span class="tok-str">'priya@x.com'</span>, <span class="tok-str">'Priya'</span>, <span class="tok-num">20</span>),
+  (<span class="tok-str">'neha@x.com'</span>,  <span class="tok-str">'Neha'</span>,  <span class="tok-num">24</span>);
+
+<span class="tok-com">-- RETURNING: get the generated id back in the same statement</span>
+<span class="tok-cmd">INSERT INTO</span> users (email, name)
+<span class="tok-cmd">VALUES</span> (<span class="tok-str">'karan@x.com'</span>, <span class="tok-str">'Karan'</span>)
+<span class="tok-cmd">RETURNING</span> id, created_at;
+
+<span class="tok-com">-- UPDATE — always scope with WHERE</span>
+<span class="tok-cmd">UPDATE</span> users <span class="tok-cmd">SET</span> age = age + <span class="tok-num">1</span> <span class="tok-cmd">WHERE</span> city = <span class="tok-str">'Pune'</span>;
+
+<span class="tok-com">-- UPDATE with RETURNING</span>
+<span class="tok-cmd">UPDATE</span> users
+<span class="tok-cmd">SET</span> active = <span class="tok-key">FALSE</span>
+<span class="tok-cmd">WHERE</span> created_at &lt; <span class="tok-cmd">NOW</span>() - <span class="tok-key">INTERVAL</span> <span class="tok-str">'1 year'</span>
+<span class="tok-cmd">RETURNING</span> id, email;
+
+<span class="tok-com">-- DELETE</span>
+<span class="tok-cmd">DELETE FROM</span> users <span class="tok-cmd">WHERE</span> active = <span class="tok-key">FALSE</span>;
+
+<span class="tok-com">-- UPSERT: insert, or update if the unique key already exists</span>
+<span class="tok-cmd">INSERT INTO</span> users (email, name, age)
+<span class="tok-cmd">VALUES</span> (<span class="tok-str">'aarav@x.com'</span>, <span class="tok-str">'Aarav S'</span>, <span class="tok-num">23</span>)
+<span class="tok-cmd">ON CONFLICT</span> (email)
+<span class="tok-cmd">DO UPDATE SET</span> name = <span class="tok-key">EXCLUDED</span>.name, age = <span class="tok-key">EXCLUDED</span>.age;</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>UPDATE</code> and <code>DELETE</code> without <code>WHERE</code> touch every row.</strong> Before a destructive write, run the equivalent <code>SELECT</code> with the same <code>WHERE</code> and confirm the row count. Or wrap in a transaction, inspect, then <code>COMMIT</code> or <code>ROLLBACK</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 12 · INDEXES ═══ -->
+<section class="section-block" id="indexes">
+  <div class="section-header">
+    <div class="section-num-big">12</div>
+    <div>
+      <h2 class="section-title">Indexes &amp; EXPLAIN</h2>
+      <p class="section-subtitle">B-tree · composite · partial · covering · reading a query plan</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">indexes.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- single-column B-tree</span>
+<span class="tok-cmd">CREATE INDEX</span> idx_users_email <span class="tok-key">ON</span> users (email);
+
+<span class="tok-com">-- composite — column order matters</span>
+<span class="tok-cmd">CREATE INDEX</span> idx_users_city_age <span class="tok-key">ON</span> users (city, age);
+
+<span class="tok-com">-- unique</span>
+<span class="tok-cmd">CREATE UNIQUE INDEX</span> idx_users_email_unique <span class="tok-key">ON</span> users (email);
+
+<span class="tok-com">-- partial — index only the rows that matter</span>
+<span class="tok-cmd">CREATE INDEX</span> idx_users_active <span class="tok-key">ON</span> users (city) <span class="tok-cmd">WHERE</span> active = <span class="tok-key">TRUE</span>;
+
+<span class="tok-com">-- expression index</span>
+<span class="tok-cmd">CREATE INDEX</span> idx_users_lower_email <span class="tok-key">ON</span> users (<span class="tok-cmd">LOWER</span>(email));
+
+<span class="tok-com">-- read the query plan</span>
+<span class="tok-cmd">EXPLAIN ANALYZE</span>
+<span class="tok-cmd">SELECT</span> * <span class="tok-cmd">FROM</span> users <span class="tok-cmd">WHERE</span> email = <span class="tok-str">'aarav@x.com'</span>;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Plan node</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td><b>Seq Scan</b></td><td>Full table read. Fine for small tables, suspect for large.</td></tr>
+        <tr><td><b>Index Scan</b></td><td>Uses an index to find rows, then fetches them from the table.</td></tr>
+        <tr><td><b>Index Only Scan</b></td><td>Everything needed is in the index — no table fetch. Best case.</td></tr>
+        <tr><td><b>Bitmap Heap Scan</b></td><td>Index found many pages; fetches them in physical order.</td></tr>
+        <tr><td><b>Hash Join / Nested Loop / Merge Join</b></td><td>How the join was executed. Nested Loop for small outer sets; Hash for large equality joins.</td></tr>
+        <tr><td><b>Sort</b></td><td>An in-memory sort. Watch for high cost — usually fixable with an index.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Composite index order matters</div>
+    <div class="concept-box-text"><p><code>(city, age)</code> helps queries filtering by <code>city</code>, or by <code>city AND age</code>. It does <b>not</b> help a query filtering only by <code>age</code>. Left-prefix rule — same as MongoDB compound indexes. Order the columns by equality first, then range, then sort, matching the queries that actually run.</p></div>
+  </div>
+
+  <div class="quiz-box" id="q-idx-1">
+    <div class="quiz-label">Quick check · 06</div>
+    <div class="quiz-question">You query <code>WHERE city = 'Pune' AND age &gt; 25</code>. Which composite index is more effective?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-idx-1', this, true)"><span class="opt-letter">A</span><code>(city, age)</code> — equality column first, range after.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-idx-1', this, false)"><span class="opt-letter">B</span><code>(age, city)</code> — same thing.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-idx-1-feedback"></div>
+    <div class="quiz-explain hidden">With <code>(city, age)</code>, the index seeks to <code>Pune</code>, then range-scans by age within the block. With <code>(age, city)</code>, the age values are scattered across cities — much less efficient, and useless for a query filtering only by city.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · TRANSACTIONS ═══ -->
+<section class="section-block" id="transactions">
+  <div class="section-header">
+    <div class="section-num-big">13</div>
+    <div>
+      <h2 class="section-title">Transactions</h2>
+      <p class="section-subtitle">BEGIN / COMMIT / ROLLBACK · isolation levels</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">transaction.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">BEGIN</span>;
+
+<span class="tok-cmd">UPDATE</span> accounts <span class="tok-cmd">SET</span> balance = balance - <span class="tok-num">100</span> <span class="tok-cmd">WHERE</span> id = <span class="tok-num">1</span>;
+<span class="tok-cmd">UPDATE</span> accounts <span class="tok-cmd">SET</span> balance = balance + <span class="tok-num">100</span> <span class="tok-cmd">WHERE</span> id = <span class="tok-num">2</span>;
+
+<span class="tok-key">COMMIT</span>;   <span class="tok-com">-- or ROLLBACK to undo both</span>
+
+<span class="tok-com">-- Set isolation for one transaction</span>
+<span class="tok-key">BEGIN</span> <span class="tok-cmd">ISOLATION LEVEL</span> <span class="tok-key">REPEATABLE READ</span>;
+<span class="tok-com">-- ...</span>
+<span class="tok-key">COMMIT</span>;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Level</th><th>Prevents</th></tr></thead>
+      <tbody>
+        <tr><td><code>READ UNCOMMITTED</code></td><td>Nothing (rarely supported)</td></tr>
+        <tr><td><code>READ COMMITTED</code> (default)</td><td>Dirty reads</td></tr>
+        <tr><td><code>REPEATABLE READ</code></td><td>Dirty + non-repeatable reads</td></tr>
+        <tr><td><code>SERIALIZABLE</code></td><td>All three (including phantoms)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>For a deeper treatment of what each anomaly means and how Postgres implements them, see the DBMS note — transactions are conceptual there, transactional SQL is here.</p>
+</section>
+
+<!-- ═══ 14 · VIEWS ═══ -->
+<section class="section-block" id="views">
+  <div class="section-header">
+    <div class="section-num-big">14</div>
+    <div>
+      <h2 class="section-title">Views, triggers &amp; procedures</h2>
+      <p class="section-subtitle">saved queries · automatic functions · callable procedures</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">views.sql</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">-- View: a saved SELECT</span>
+<span class="tok-cmd">CREATE VIEW</span> active_users <span class="tok-key">AS</span>
+<span class="tok-cmd">SELECT</span> id, name, email <span class="tok-cmd">FROM</span> users <span class="tok-cmd">WHERE</span> active = <span class="tok-key">TRUE</span>;
+
+<span class="tok-com">-- Materialized view: physically stored, needs manual refresh</span>
+<span class="tok-cmd">CREATE MATERIALIZED VIEW</span> user_order_counts <span class="tok-key">AS</span>
+<span class="tok-cmd">SELECT</span> u.id, <span class="tok-cmd">COUNT</span>(o.id) <span class="tok-key">AS</span> orders
+<span class="tok-cmd">FROM</span> users u
+<span class="tok-key">LEFT JOIN</span> orders o <span class="tok-key">ON</span> o.user_id = u.id
+<span class="tok-cmd">GROUP BY</span> u.id;
+
+<span class="tok-cmd">REFRESH MATERIALIZED VIEW</span> user_order_counts;
+
+<span class="tok-com">-- Trigger: a function that runs automatically on data changes</span>
+<span class="tok-cmd">CREATE OR REPLACE FUNCTION</span> set_updated_at()
+<span class="tok-cmd">RETURNS TRIGGER AS</span> $$
+<span class="tok-key">BEGIN</span>
+  <span class="tok-key">NEW</span>.updated_at = <span class="tok-cmd">NOW</span>();
+  <span class="tok-key">RETURN NEW</span>;
+<span class="tok-key">END</span>;
+$$ <span class="tok-cmd">LANGUAGE</span> plpgsql;
+
+<span class="tok-cmd">CREATE TRIGGER</span> trg_users_updated_at
+<span class="tok-cmd">BEFORE UPDATE ON</span> users
+<span class="tok-cmd">FOR EACH ROW</span>
+<span class="tok-cmd">EXECUTE FUNCTION</span> set_updated_at();
+
+<span class="tok-com">-- Stored procedure: callable with CALL</span>
+<span class="tok-cmd">CREATE PROCEDURE</span> deactivate_old_users(<span class="tok-key">IN</span> cutoff <span class="tok-key">INT</span>)
+<span class="tok-cmd">LANGUAGE</span> sql
+<span class="tok-key">AS</span> $$
+  <span class="tok-cmd">UPDATE</span> users <span class="tok-cmd">SET</span> active = <span class="tok-key">FALSE</span> <span class="tok-cmd">WHERE</span> age &gt; cutoff;
+$$;
+
+<span class="tok-cmd">CALL</span> deactivate_old_users(<span class="tok-num">65</span>);</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>View</th><th>Materialized view</th><th>Trigger</th><th>Procedure</th></tr></thead>
+      <tbody>
+        <tr><td>Stored?</td><td>No — query runs on select</td><td>Yes — result stored</td><td>N/A</td><td>Yes — logic stored</td></tr>
+        <tr><td>Runs when?</td><td>On query</td><td>On query (from cache)</td><td>On data change</td><td>On <code>CALL</code></td></tr>
+        <tr><td>Fresh?</td><td>Always</td><td>Needs <code>REFRESH</code></td><td>Always</td><td>Always</td></tr>
+        <tr><td>Use for</td><td>Simplify query surface</td><td>Expensive aggregates, dashboards</td><td>Auto-update timestamps, audit log</td><td>Batch jobs, administrative logic</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 15 · TIPS ═══ -->
+<section class="section-block" id="tips">
+  <div class="section-header">
+    <div class="section-num-big">15</div>
+    <div>
+      <h2 class="section-title">Common mistakes</h2>
+      <p class="section-subtitle">the ones that bite in real projects</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Mistake</th><th>What happens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>WHERE col = NULL</code></td><td>Always returns zero rows</td><td><code>IS NULL</code> / <code>IS NOT NULL</code></td></tr>
+        <tr><td><code>NOT IN (list_with_null)</code></td><td>Predicate becomes unknown → no rows</td><td>Filter nulls first, or use <code>NOT EXISTS</code></td></tr>
+        <tr><td><code>SELECT *</code> in production queries</td><td>Reads extra columns, breaks when schema changes, prevents covering indexes</td><td>Select only the columns you need</td></tr>
+        <tr><td>No <code>WHERE</code> on <code>UPDATE</code>/<code>DELETE</code></td><td>Updates/deletes every row</td><td>Always scope</td></tr>
+        <tr><td>Aggregate in <code>WHERE</code></td><td>Syntax error</td><td>Use <code>HAVING</code></td></tr>
+        <tr><td>Filter on the right table in <code>WHERE</code> after a <code>LEFT JOIN</code></td><td>Turns it into an INNER JOIN</td><td>Put the condition in <code>ON</code></td></tr>
+        <tr><td>Composite index wrong order</td><td>Queries filtering on the second column don't use it</td><td>Equality columns first, range/sort after</td></tr>
+        <tr><td>Comparing strings case-sensitively</td><td>Users miss matches</td><td><code>ILIKE</code> or <code>LOWER(col) = LOWER(?)</code>, or a case-insensitive collation</td></tr>
+        <tr><td>Unanchored <code>LIKE '%foo%'</code> on a big table</td><td>Can't use a B-tree index — full scan</td><td>Full-text search, trigram index, or Atlas-style search</td></tr>
+        <tr><td>Deep <code>LIMIT/OFFSET</code> pagination</td><td>Slow at page 1000 — rows 1..offset computed anyway</td><td>Keyset pagination: <code>WHERE created_at &lt; $last LIMIT 20</code></td></tr>
+        <tr><td>Money in <code>FLOAT</code></td><td>Off-by-a-paisa errors</td><td><code>NUMERIC</code> or integer cents</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ 16 · INTERVIEW ═══ -->
+<section class="section-block" id="interview">
+  <div class="section-header">
+    <div class="section-num-big">16</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">what you'll actually be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What's the difference between WHERE and HAVING?</span></summary><div class="qa-body"><p><code>WHERE</code> filters individual rows before grouping. <code>HAVING</code> filters groups after grouping — that's why aggregates work in <code>HAVING</code> but not in <code>WHERE</code>. If you don't have a <code>GROUP BY</code>, use <code>WHERE</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>INNER JOIN vs LEFT JOIN — what's the difference?</span></summary><div class="qa-body"><p>INNER JOIN returns only rows that match on both sides. LEFT JOIN returns all rows from the left, with <code>NULL</code> on the right when there's no match. "Find users with no orders" is <code>LEFT JOIN ... WHERE orders.id IS NULL</code> — a pattern that catches people who try INNER + IS NULL.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>Why does <code>WHERE x = NULL</code> return no rows?</span></summary><div class="qa-body"><p>Because <code>NULL</code> means "unknown", and any comparison with <code>NULL</code> returns <code>NULL</code> — which <code>WHERE</code> treats as not-true. Use <code>IS NULL</code>. Even <code>NULL = NULL</code> is <code>NULL</code>, not true.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What's the difference between COUNT(*), COUNT(col), and COUNT(DISTINCT col)?</span></summary><div class="qa-body"><p><code>COUNT(*)</code> counts rows. <code>COUNT(col)</code> counts non-null values in that column. <code>COUNT(DISTINCT col)</code> counts distinct non-null values. This is how you answer "how many users", "how many users have a phone", and "how many distinct cities users are in" — three different aggregates on the same table.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>What's a window function, and how is it different from GROUP BY?</span></summary><div class="qa-body"><p>A window function computes across a set of related rows <em>without collapsing them</em>. <code>GROUP BY city</code> gives one row per city; <code>PARTITION BY city</code> inside <code>OVER()</code> gives every row with an extra column that describes the row relative to its city (rank, running total, previous value). The classic example: top-N-per-group requires a window function because GROUP BY can't return 3 rows per group.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>Explain ROW_NUMBER vs RANK vs DENSE_RANK.</span></summary><div class="qa-body"><p>For values 10, 20, 20, 30: <code>ROW_NUMBER</code> → 1, 2, 3, 4 (no ties, arbitrary order). <code>RANK</code> → 1, 2, 2, 4 (ties share, then jump). <code>DENSE_RANK</code> → 1, 2, 2, 3 (ties share, no jump). Use ROW_NUMBER for "pick one row per group"; RANK or DENSE_RANK when you want tied items to share a position.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>What's a CTE, and when would you use one over a subquery?</span></summary><div class="qa-body"><p>A Common Table Expression (<code>WITH name AS (...)</code>) is a named subquery. Use it when a query has multiple stages and readability matters, or when you need recursion. In Postgres 12+, non-recursive CTEs are inlined like subqueries, so performance is generally the same — the win is clarity and reusability.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>Why can't you use an alias defined in SELECT inside WHERE?</span></summary><div class="qa-body"><p>Because <code>WHERE</code> runs before <code>SELECT</code> in the execution order (FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT). Aliases don't exist yet when <code>WHERE</code> is evaluated. <code>ORDER BY</code> runs after <code>SELECT</code>, so aliases work there.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>What's the difference between UNION and UNION ALL?</span></summary><div class="qa-body"><p><code>UNION</code> removes duplicates — it sorts both result sets and merges. <code>UNION ALL</code> keeps everything, including duplicates. <code>UNION ALL</code> is faster because it skips the dedup step. Use <code>UNION ALL</code> unless you actually need duplicates removed.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>What does EXPLAIN ANALYZE do?</span></summary><div class="qa-body"><p><code>EXPLAIN</code> shows the query plan the optimizer chose. <code>EXPLAIN ANALYZE</code> actually runs the query and shows real timing and row counts. Read: (1) node types — Seq Scan on a large table is usually the problem; (2) estimated vs actual rows — big gaps mean stale statistics; (3) buffers to see cache hits vs disk reads; (4) loops for Nested Loop joins — the inner plan runs once per outer row.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>When should you use a composite index instead of two single-column indexes?</span></summary><div class="qa-body"><p>When your query filters on both columns together (or filters on the first and sorts by the second). A composite index on <code>(a, b)</code> allows one combined seek and gives pre-sorted results by <code>b</code> within <code>a</code>. Two separate indexes force a bitmap intersection, which is usually slower. Order matters: equality first, then range or sort. Composite <code>(a, b)</code> also covers queries on <code>a</code> alone — but not on <code>b</code> alone.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>How do you find the second-highest salary?</span></summary><div class="qa-body"><p>Three common answers. (1) Window function: <code>SELECT salary FROM (SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS r FROM employees) t WHERE r = 2</code>. (2) Subquery: <code>SELECT MAX(salary) FROM employees WHERE salary &lt; (SELECT MAX(salary) FROM employees)</code>. (3) Offset: <code>SELECT DISTINCT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 1</code>. The window function is the most flexible (works for "Nth highest"), the OFFSET version is the shortest.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q13</span><span>What's the difference between DELETE, TRUNCATE, and DROP?</span></summary><div class="qa-body"><p><code>DELETE</code> removes rows (can filter with <code>WHERE</code>), is transactional (can roll back), fires triggers, and is slowest. <code>TRUNCATE</code> removes all rows quickly (no <code>WHERE</code>), and is transactional in Postgres. <code>DROP</code> removes the table entirely — structure and data both gone. DELETE for selective removal, TRUNCATE for a full clear, DROP when you never want the table again.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q14</span><span>What is an UPSERT, and how do you do one?</span></summary><div class="qa-body"><p>Insert a row, or update it if a unique key already exists. In Postgres: <code>INSERT ... ON CONFLICT (unique_col) DO UPDATE SET ...</code>. In MySQL: <code>INSERT ... ON DUPLICATE KEY UPDATE ...</code>. It avoids the race condition in "select, if exists update else insert", which can lose data under concurrent writes.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q15</span><span>How would you paginate efficiently on a large table?</span></summary><div class="qa-body"><p><code>LIMIT/OFFSET</code> is easy but scales badly — offsetting 100,000 rows still computes rows 1–100,000 first. Use <b>keyset pagination</b>: <code>WHERE created_at &lt; $lastSeen ORDER BY created_at DESC LIMIT 20</code>. With an index on <code>created_at</code>, each page is a single index seek. The trade-off is you can't jump to page 500 directly — fine for infinite scroll, not for a "page 3 of 20" UI.</p></div></details>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Backend · SQL</span>
+  <span>SELECT · joins · aggregates · windows · DDL · DML · indexes</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>
