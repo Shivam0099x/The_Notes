@@ -239,6 +239,14 @@ export const notes = [
   description: 'SELECT, joins, aggregates, subqueries, CTEs, window functions, DDL, DML, indexes, transactions, and tuning — the practical SQL companion to the DBMS theory note.',
   file: '/notes/sql.html',
 },
+{
+  id: 'typescript-in-depth',
+  title: 'TypeScript — the complete course',
+  category: 'Language',
+  color: 'gold',
+  description: 'All 30 topics — basic types, narrowing, generics, utility types, OOP, React/Node integration, plus a 20-question quiz.',
+  file: '/notes/typescript-in-depth.html',
+},
 ];
 
 export function getNoteById(id) {

@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TypeScript — the complete course · Sheryians</title>
+<meta name="description" content="TypeScript from basics to advanced — every type, narrowing, generics, utility types, decorators, OOP, React, Node, and a 20-question quiz.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0F14; --paper:#F5F2EB; --paper2:#EDE9DF; --paper3:#E4DFD3; --rule:#D4CEBC;
+  --muted:#6B6455; --accent:#C84B1F; --accent2:#1A6B4A; --accent3:#1B4587; --gold:#B8860B;
+  --code-bg:#1A1C24; --code-text:#E2DCCC;
+  --text-body:#2A2720;
+  --note-bg:#FEF9EC; --note-border:#EDD97A; --note-text:#5C4A00; --note-strong:#3D3000;
+  --warn-bg:#FEF2F2; --warn-border:#FCA5A5; --warn-text:#7F1D1D;
+  --surface-ink:#0E0F14; --on-ink:#F5F2EB;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+    --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+    --text-body:#D6D0C3;
+    --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+    --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+    --surface-ink:#0A0B0F; --on-ink:#15161C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECE7DB; --paper:#15161C; --paper2:#1C1E26; --paper3:#262833; --rule:#343644;
+  --muted:#A39C8C; --accent:#E0663A; --accent2:#43B083; --accent3:#7BA3EA; --gold:#D9A93F;
+  --text-body:#D6D0C3;
+  --note-bg:#2A2511; --note-border:#5E4F1B; --note-text:#EBDDA4; --note-strong:#F8EBBE;
+  --warn-bg:#2B1616; --warn-border:#733030; --warn-text:#F4BDBD;
+  --surface-ink:#0A0B0F; --on-ink:#15161C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(200,75,31,.15)}
+
+.container{max-width:960px;margin:0 auto;padding:56px 40px 120px}
+
+.hero{margin-bottom:56px;padding-bottom:36px;border-bottom:1px solid var(--rule);position:relative}
+.hero::after{content:'';position:absolute;left:0;bottom:-1px;width:64px;height:2px;background:var(--accent)}
+.hero-eyebrow{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:18ch}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--muted);max-width:620px;margin:0 0 24px;line-height:1.55}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.hero-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 12px;color:var(--muted)}
+
+.section-block{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--rule);position:relative}
+.section-header::after{content:'';position:absolute;left:0;bottom:-1px;width:48px;height:2px;background:var(--accent)}
+.section-num-big{font-family:'Fraunces',Georgia,serif;font-size:52px;font-weight:900;color:var(--rule);line-height:1;user-select:none;flex-shrink:0;min-width:64px}
+.section-title{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:700;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+.section-subtitle{font-size:13px;color:var(--muted);margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+h3{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;margin:28px 0 12px;line-height:1.3}
+h4{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:22px 0 10px;font-weight:600}
+p{font-family:'DM Sans',system-ui,sans-serif;font-size:14.5px;color:var(--text-body);line-height:1.7;margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{font-size:14.5px;color:var(--text-body);max-width:76ch;margin-bottom:6px}
+code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent);background:var(--paper3);border:1px solid var(--rule);border-radius:4px;padding:2px 5px;word-break:break-word}
+strong{font-weight:600;color:var(--ink)}
+.lead{font-size:15.5px}
+
+.concept-box{background:var(--paper2);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+.concept-box-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:600}
+.concept-box-text{font-size:14px;line-height:1.65;color:var(--text-body)}
+.concept-box-text p{font-size:14px;margin:0 0 8px}
+.concept-box-text p:last-child{margin:0}
+
+.note-box{background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.note-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.note-box-text{font-size:13px;color:var(--note-text);line-height:1.6}
+.note-box-text strong{color:var(--note-strong)}
+.note-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.warning-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;padding:14px 16px;display:flex;gap:12px;margin:16px 0}
+.warning-box-icon{font-size:18px;line-height:1.3;flex-shrink:0}
+.warning-box-text{font-size:13px;color:var(--warn-text);line-height:1.6}
+.warning-box-text strong{color:var(--warn-text)}
+.warning-box-text code{background:rgba(255,255,255,.35);border-color:transparent;color:inherit}
+
+.table-wrap{overflow-x:auto;margin:16px 0}
+.flag-table{width:100%;border-collapse:collapse;font-size:13px}
+.flag-table th{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--paper3);border:1px solid var(--rule);padding:8px 12px;text-align:left;color:var(--muted);font-weight:600}
+.flag-table td{border:1px solid var(--rule);padding:9px 12px;vertical-align:top;color:var(--text-body);line-height:1.55}
+.flag-table tr:hover td{background:var(--paper2)}
+.flag-name{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--accent3);white-space:nowrap}
+
+.code-block{border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 0 0 1px var(--rule)}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:#13141A;padding:8px 16px;gap:12px}
+.code-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.42)}
+.code-copy-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.6);background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px 10px;cursor:pointer;transition:color .2s,border-color .2s}
+.code-copy-btn:hover{color:#fff;border-color:var(--accent)}
+.code-pre{margin:0;background:var(--code-bg);color:var(--code-text);font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:16px 20px;overflow-x:auto;tab-size:2}
+.code-pre code{all:unset;font:inherit;white-space:pre}
+.tok-cmd{color:#87CEEB;font-weight:600}
+.tok-str{color:#98C379}
+.tok-num{color:#F4A261}
+.tok-com{color:rgba(255,255,255,.32);font-style:italic}
+.tok-key{color:#C678DD}
+.tok-op{color:#E5C07B}
+.tok-type{color:#E5C07B;font-weight:500}
+
+.stepper{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:24px 0;overflow:hidden}
+.stepper-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--paper2);flex-wrap:wrap}
+.stepper-title{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.stepper-hint{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+.stepper-stage{padding:20px;overflow-x:auto}
+.stepper-caption{padding:14px 18px;border-top:1px solid var(--rule);font-size:14px;line-height:1.6;min-height:78px;color:var(--text-body);background:var(--paper)}
+.stepper-caption b,.stepper-caption strong{color:var(--ink);font-weight:600}
+.stepper-caption code{font-size:11.5px}
+.stepper-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--rule);background:var(--paper2)}
+.step-btn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:600;padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--on-ink);cursor:pointer;transition:opacity .2s}
+.step-btn.secondary{background:transparent;color:var(--ink)}
+.step-btn:disabled{opacity:.32;cursor:not-allowed}
+.step-meta{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.step-counter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .25s,transform .25s}
+.step-dot.done{background:var(--muted)}
+.step-dot.on{background:var(--accent);transform:scale(1.35)}
+.stepper-script{display:none}
+[data-show],[data-cls]{transition:opacity .35s ease,visibility 0s linear 0s,background-color .3s,border-color .3s,color .3s}
+.is-off{opacity:0!important;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+
+.demo-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.demo-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stat{flex:1 1 120px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--paper2);min-width:0}
+.stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stat-value{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);line-height:1.25;display:inline-block}
+
+.quiz-box{background:var(--surface-ink);border-radius:12px;padding:24px;margin:32px 0}
+.quiz-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.quiz-question{font-family:'DM Sans',system-ui,sans-serif;font-size:15px;color:#fff;font-weight:500;margin-bottom:16px;line-height:1.55}
+.quiz-question code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 16px;color:rgba(255,255,255,.86);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .2s,background .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option:disabled{cursor:default}
+.quiz-option code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261;font-size:11.5px}
+.quiz-option .opt-letter{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(255,255,255,.45);margin-right:8px}
+.quiz-option.correct{border-color:#1A6B4A;background:rgba(26,107,74,.35)}
+.quiz-option.incorrect{border-color:#C84B1F;background:rgba(200,75,31,.28)}
+.quiz-option.reveal{border-color:rgba(95,209,155,.7);border-style:dashed}
+.quiz-feedback{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.quiz-feedback.is-right{color:#5FD19B}
+.quiz-feedback.is-wrong{color:#F0916B}
+.quiz-explain{font-size:13px;color:rgba(255,255,255,.72);margin-top:8px;line-height:1.6}
+.quiz-explain code{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#F4A261}
+.quiz-reset{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:4px;padding:2px 8px;cursor:pointer}
+.hidden{display:none!important}
+
+.qa{border:1px solid var(--rule);border-radius:8px;background:var(--paper);margin:10px 0}
+.qa summary{cursor:pointer;padding:12px 16px;font-weight:500;font-size:14.5px;color:var(--ink);list-style:none;display:flex;gap:12px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .qn{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.qa summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+.qa[open] summary::after{content:'−'}
+.qa .qa-body{padding:0 16px 14px 44px}
+.qa .qa-body p{font-size:14px}
+
+.toc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:24px 0 40px}
+.toc a{display:block;padding:10px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--paper2);text-decoration:none;color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12px;transition:border-color .2s,color .2s}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+.toc a .n{color:var(--accent);font-weight:600;margin-right:6px}
+
+.site-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:20px;margin-top:64px;letter-spacing:.04em}
+
+@media (max-width:720px){
+  .container{padding:40px 20px 80px}
+  .demo-cols,.toc{grid-template-columns:1fr}
+  .section-num-big{font-size:40px;min-width:48px}
+  .section-title{font-size:22px}
+  .step-btn{padding:8px 10px}
+  .step-dots{display:none}
+  .qa .qa-body{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<header class="hero">
+  <div class="hero-eyebrow">Language · Type System · OOP</div>
+  <h1><em>TypeScript</em> — the complete course</h1>
+  <p class="hero-desc">All thirty topics in one note. Every type, every narrowing pattern, every OOP concept, every utility, and the gotchas that catch people in real code. Ends with a 20-question quiz.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Basics → advanced</span>
+    <span class="hero-tag">Type narrowing</span>
+    <span class="hero-tag">Generics</span>
+    <span class="hero-tag">Utility types</span>
+    <span class="hero-tag">OOP in depth</span>
+    <span class="hero-tag">React &amp; Node</span>
+    <span class="hero-tag">Quiz</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#t1"><span class="n">01</span>What is TypeScript</a>
+  <a href="#t2"><span class="n">02</span>Why TypeScript</a>
+  <a href="#t3"><span class="n">03</span>TS vs JS</a>
+  <a href="#t4"><span class="n">04</span>Setup &amp; how it works</a>
+  <a href="#t5"><span class="n">05</span>Basic types</a>
+  <a href="#t6"><span class="n">06</span>Inference &amp; assertions</a>
+  <a href="#t7"><span class="n">07</span>Union types</a>
+  <a href="#t8"><span class="n">08</span>Narrowing</a>
+  <a href="#t9"><span class="n">09</span>Interfaces &amp; types</a>
+  <a href="#t10"><span class="n">10</span>Optional fields</a>
+  <a href="#t11"><span class="n">11</span>Functions</a>
+  <a href="#t12"><span class="n">12</span>Practice (4)</a>
+  <a href="#t13"><span class="n">13</span>Classes &amp; modifiers</a>
+  <a href="#t14"><span class="n">14</span>Practice (2)</a>
+  <a href="#t15"><span class="n">15</span>Generics</a>
+  <a href="#t16"><span class="n">16</span>Literal types</a>
+  <a href="#t17"><span class="n">17</span>Type guards</a>
+  <a href="#t18"><span class="n">18</span>keyof</a>
+  <a href="#t19"><span class="n">19</span>Index signatures</a>
+  <a href="#t20"><span class="n">20</span>Utility types</a>
+  <a href="#t21"><span class="n">21</span>Modules &amp; namespaces</a>
+  <a href="#t22"><span class="n">22</span>Decorators</a>
+  <a href="#t23"><span class="n">23</span>Async</a>
+  <a href="#t24"><span class="n">24</span>Non-null assertion</a>
+  <a href="#t25"><span class="n">25</span>Interview questions</a>
+  <a href="#t26"><span class="n">26</span>With React</a>
+  <a href="#t27"><span class="n">27</span>With Node</a>
+  <a href="#t28"><span class="n">28</span>OOP in depth</a>
+  <a href="#t29"><span class="n">29</span>Miscellaneous</a>
+  <a href="#quiz"><span class="n">30</span>Quiz</a>
+</nav>
+
+<!-- ═══ 01 · WHAT ═══ -->
+<section class="section-block" id="t1">
+  <div class="section-header">
+    <div class="section-num-big">01</div>
+    <div>
+      <h2 class="section-title">What TypeScript is</h2>
+      <p class="section-subtitle">a superset · compiled, not interpreted · erased</p>
+    </div>
+  </div>
+
+  <ul>
+    <li><b>TypeScript = JavaScript + a static type system</b>. Every valid JS file is already valid TS.</li>
+    <li>You write <code>.ts</code> (or <code>.tsx</code> for JSX), the TypeScript compiler (<code>tsc</code>) checks it, then produces plain <code>.js</code>.</li>
+    <li>The compiler strips out types — the browser never sees them. Types are a <b>compile-time</b> tool, not a runtime one.</li>
+    <li>TypeScript is developed by Microsoft, first released in 2012, and is now the default for serious JS projects and the entire React/Next/Node ecosystem.</li>
+    <li>Everything runs in the JS runtime (V8, Node, Deno, Bun). TS itself is not a runtime.</li>
+  </ul>
+
+  <div class="concept-box">
+    <div class="concept-box-label">The one sentence</div>
+    <div class="concept-box-text"><p>TypeScript is JavaScript with types — you get the compiler to <em>check</em> your code before it runs, and the browser gets plain JavaScript after it's done.</p></div>
+  </div>
+</section>
+
+<!-- ═══ 02 · WHY ═══ -->
+<section class="section-block" id="t2">
+  <div class="section-header">
+    <div class="section-num-big">02</div>
+    <div>
+      <h2 class="section-title">Why TypeScript</h2>
+      <p class="section-subtitle">the problems it actually solves</p>
+    </div>
+  </div>
+
+  <ul>
+    <li><b>Catch bugs at compile time.</b> <code>user.nmae</code> (typo) → error before you ship. <code>user.name.toUpperCase()</code> when name is null → error before you ship.</li>
+    <li><b>Autocomplete and refactoring.</b> The editor knows the shape of every object, so it can suggest methods, rename safely, and jump to definitions across a monorepo.</li>
+    <li><b>Self-documenting code.</b> A typed function signature tells you what goes in and what comes out — without reading its body.</li>
+    <li><b>Confident refactoring.</b> Rename a function parameter; the compiler finds every caller that breaks. Without types you'd find out at runtime.</li>
+    <li><b>Team safety.</b> When you change an API contract, TS rejects every consumer that hasn't been updated.</li>
+    <li><b>Runtime-safe data.</b> Pair with Zod and you can validate external input, then trust the resulting type.</li>
+  </ul>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>TypeScript does not fix runtime data.</strong> If the API returns the wrong shape, TS can't know — it trusts you. That's why runtime validation (Zod, io-ts) exists at the boundary. TS prevents <em>you</em> from making type mistakes; it doesn't prevent <em>the world</em> from sending garbage.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 · TS vs JS ═══ -->
+<section class="section-block" id="t3">
+  <div class="section-header">
+    <div class="section-num-big">03</div>
+    <div>
+      <h2 class="section-title">TypeScript vs JavaScript</h2>
+      <p class="section-subtitle">what changes, what doesn't</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th>JavaScript</th><th>TypeScript</th></tr></thead>
+      <tbody>
+        <tr><td>Typing</td><td>Dynamic — types known at runtime</td><td>Static — types checked at compile time</td></tr>
+        <tr><td>Errors</td><td>Discovered when the code runs</td><td>Discovered while you type</td></tr>
+        <tr><td>Interfaces/Generics</td><td>None</td><td>First-class</td></tr>
+        <tr><td>Build step</td><td>None (browser runs it as-is)</td><td>Required — <code>tsc</code> or a bundler</td></tr>
+        <tr><td>Tooling</td><td>Autocomplete based on heuristics</td><td>Autocomplete based on actual types</td></tr>
+        <tr><td>Learning curve</td><td>Lower</td><td>Higher — but the investment pays off in large projects</td></tr>
+        <tr><td>Runtime</td><td>Browser / Node</td><td>Same — TS is erased to JS</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>TypeScript is not a separate language to learn from scratch. It's JavaScript plus a type annotation layer. Anything you know in JS — functions, closures, promises, classes — works exactly the same way.</p>
+</section>
+
+<!-- ═══ 04 · SETUP ═══ -->
+<section class="section-block" id="t4">
+  <div class="section-header">
+    <div class="section-num-big">04</div>
+    <div>
+      <h2 class="section-title">Set-up &amp; how it works</h2>
+      <p class="section-subtitle">install · tsconfig · tsc · dev workflow</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com"># global install</span>
+npm install -g typescript
+tsc --version
+
+<span class="tok-com"># per-project</span>
+npm install -D typescript
+
+<span class="tok-com"># create a tsconfig.json</span>
+npx tsc --init
+
+<span class="tok-com"># compile once</span>
+npx tsc
+
+<span class="tok-com"># watch mode</span>
+npx tsc --watch</code></pre>
+  </div>
+
+  <h3>The tsconfig you want</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">tsconfig.json</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>{
+  <span class="tok-str">"compilerOptions"</span>: {
+    <span class="tok-str">"target"</span>: <span class="tok-str">"ES2022"</span>,
+    <span class="tok-str">"module"</span>: <span class="tok-str">"ESNext"</span>,
+    <span class="tok-str">"moduleResolution"</span>: <span class="tok-str">"bundler"</span>,
+    <span class="tok-str">"strict"</span>: <span class="tok-key">true</span>,
+    <span class="tok-str">"noUncheckedIndexedAccess"</span>: <span class="tok-key">true</span>,
+    <span class="tok-str">"noImplicitOverride"</span>: <span class="tok-key">true</span>,
+    <span class="tok-str">"esModuleInterop"</span>: <span class="tok-key">true</span>,
+    <span class="tok-str">"skipLibCheck"</span>: <span class="tok-key">true</span>,
+    <span class="tok-str">"outDir"</span>: <span class="tok-str">"./dist"</span>
+  },
+  <span class="tok-str">"include"</span>: [<span class="tok-str">"src"</span>]
+}</code></pre>
+  </div>
+
+  <h3>How the compiler works</h3>
+  <ol>
+    <li><b>Parse</b> — turn <code>.ts</code> into an AST (abstract syntax tree).</li>
+    <li><b>Type-check</b> — walk the AST, resolve types, and report errors. This is where <code>tsc</code> spends its time.</li>
+    <li><b>Emit</b> — strip types, transform some modern syntax, and write <code>.js</code> output.</li>
+  </ol>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>In real projects, Vite/webpack/Next handle the build.</strong> They use <code>esbuild</code> or <code>swc</code> to transpile TS without type-checking (fast), and run <code>tsc --noEmit</code> in CI for the actual type check (thorough). Best of both: fast dev loop, complete type safety at build time.</div>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Turn on <code>strict</code> on day one.</strong> Enabling it later on an existing codebase is a wall of <code>possibly undefined</code> errors. <code>strict</code> enables <code>strictNullChecks</code>, <code>noImplicitAny</code>, and several other checks that make TS behave the way most people expect.</div>
+  </div>
+</section>
+
+<!-- ═══ 05 · BASIC TYPES ═══ -->
+<section class="section-block" id="t5">
+  <div class="section-header">
+    <div class="section-num-big">05</div>
+    <div>
+      <h2 class="section-title">Basic types</h2>
+      <p class="section-subtitle">string · number · boolean · bigint · symbol · undefined · null · void · any · unknown · never · enums · arrays · tuples</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">basics.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">let</span> name: <span class="tok-type">string</span>     = <span class="tok-str">'Aarav'</span>;
+<span class="tok-key">let</span> age: <span class="tok-type">number</span>      = <span class="tok-num">22</span>;
+<span class="tok-key">let</span> active: <span class="tok-type">boolean</span>  = <span class="tok-key">true</span>;
+<span class="tok-key">let</span> big: <span class="tok-type">bigint</span>      = <span class="tok-num">123n</span>;
+<span class="tok-key">let</span> sym: <span class="tok-type">symbol</span>      = <span class="tok-cmd">Symbol</span>(<span class="tok-str">'id'</span>);
+<span class="tok-key">let</span> u: <span class="tok-type">undefined</span>   = <span class="tok-key">undefined</span>;
+<span class="tok-key">let</span> n: <span class="tok-type">null</span>        = <span class="tok-key">null</span>;
+
+<span class="tok-com">// void — used as a function return type when there's nothing to return</span>
+<span class="tok-key">function</span> <span class="tok-cmd">log</span>(msg: <span class="tok-type">string</span>): <span class="tok-type">void</span> {
+  console.<span class="tok-cmd">log</span>(msg);
+}
+
+<span class="tok-com">// any — disables the type checker</span>
+<span class="tok-key">let</span> anything: <span class="tok-type">any</span> = <span class="tok-str">'text'</span>;
+anything.<span class="tok-cmd">toUpperCase</span>();    <span class="tok-com">// no check</span>
+anything.<span class="tok-cmd">nonExistent</span>();    <span class="tok-com">// no check — will crash at runtime</span>
+
+<span class="tok-com">// unknown — the safe version of any</span>
+<span class="tok-key">let</span> unknownValue: <span class="tok-type">unknown</span> = <span class="tok-str">'text'</span>;
+<span class="tok-key">if</span> (<span class="tok-key">typeof</span> unknownValue === <span class="tok-str">'string'</span>) {
+  unknownValue.<span class="tok-cmd">toUpperCase</span>();   <span class="tok-com">// now allowed — narrowed</span>
+}
+
+<span class="tok-com">// never — this value can never exist</span>
+<span class="tok-key">function</span> <span class="tok-cmd">fail</span>(msg: <span class="tok-type">string</span>): <span class="tok-type">never</span> {
+  <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(msg);
+}
+
+<span class="tok-com">// arrays</span>
+<span class="tok-key">let</span> nums: <span class="tok-type">number</span>[]              = [<span class="tok-num">1</span>, <span class="tok-num">2</span>, <span class="tok-num">3</span>];
+<span class="tok-key">let</span> names: <span class="tok-type">Array</span>&lt;<span class="tok-type">string</span>&gt;        = [<span class="tok-str">'Aarav'</span>];
+
+<span class="tok-com">// tuples — fixed length, fixed types per position</span>
+<span class="tok-key">let</span> point: [<span class="tok-type">number</span>, <span class="tok-type">number</span>] = [<span class="tok-num">10</span>, <span class="tok-num">20</span>];
+
+<span class="tok-com">// enums</span>
+<span class="tok-key">enum</span> <span class="tok-type">Role</span> { Admin = <span class="tok-str">'ADMIN'</span>, User = <span class="tok-str">'USER'</span> }
+<span class="tok-key">let</span> r: <span class="tok-type">Role</span> = <span class="tok-type">Role</span>.Admin;
+
+<span class="tok-com">// literal union — often better than enums</span>
+<span class="tok-key">type</span> <span class="tok-type">Status</span> = <span class="tok-str">'pending'</span> | <span class="tok-str">'active'</span> | <span class="tok-str">'deleted'</span>;</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Type</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td><code>any</code></td><td>"Trust me" — disables checks on this value</td></tr>
+        <tr><td><code>unknown</code></td><td>"Could be anything, narrow before use" — the safe <code>any</code></td></tr>
+        <tr><td><code>never</code></td><td>"This value can never happen" — used for exhaustive checks, functions that throw</td></tr>
+        <tr><td><code>void</code></td><td>Return type of a function that returns nothing</td></tr>
+        <tr><td><code>undefined</code></td><td>The absence of a value (variable never assigned, function returned nothing)</td></tr>
+        <tr><td><code>null</code></td><td>The intentional absence of a value</td></tr>
+        <tr><td><code>bigint</code></td><td>Arbitrary-precision integers — <code>123n</code></td></tr>
+        <tr><td><code>symbol</code></td><td>Unique identifier — <code>Symbol('id')</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>any</code> vs <code>unknown</code>.</strong> Prefer <code>unknown</code> for external data (fetch responses, JSON.parse, catch clauses). <code>any</code> turns off the checker everywhere it flows; <code>unknown</code> forces you to narrow it. In a real codebase, <code>any</code> should be rare — the linter rule <code>@typescript-eslint/no-explicit-any</code> exists for a reason.</div>
+  </div>
+
+  <div class="quiz-box" id="q-basics-1">
+    <div class="quiz-label">Quick check · 01</div>
+    <div class="quiz-question">What type should <code>catch (err)</code> have in strict mode?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('q-basics-1', this, false)"><span class="opt-letter">A</span><code>Error</code> — it's always an error.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('q-basics-1', this, true)"><span class="opt-letter">B</span><code>unknown</code> — anything can be thrown in JS, not just Errors.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="q-basics-1-feedback"></div>
+    <div class="quiz-explain hidden">In JS, <code>throw</code> can throw anything — a string, a number, an object. <code>unknown</code> forces you to check <code>err instanceof Error</code> before accessing <code>.message</code>. In TS 4.4+, <code>catch</code> clauses default to <code>unknown</code> in strict mode.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 · INFERENCE & ASSERTION ═══ -->
+<section class="section-block" id="t6">
+  <div class="section-header">
+    <div class="section-num-big">06</div>
+    <div>
+      <h2 class="section-title">Type inference &amp; type assertions</h2>
+      <p class="section-subtitle">what TS figures out · <code>as</code> · <code>satisfies</code></p>
+    </div>
+  </div>
+
+  <ul>
+    <li><b>Inference</b> — TS guesses the type from the value. <code>let x = 10</code> → <code>number</code>. <code>const y = 'hi'</code> → <code>'hi'</code> (literal). <code>const arr = [1, 2, 3]</code> → <code>number[]</code>.</li>
+    <li><b>Best practice:</b> annotate function parameters and exported return types. Let TS infer local variables.</li>
+    <li><b>Assertion (<code>as</code>)</b> — tell TS "trust me, this is what the type is" without changing the runtime value.</li>
+    <li><b><code>satisfies</code></b> (TS 4.9+) — checks the value against a type <em>without</em> changing its inferred type.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">inference.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">let</span> a = <span class="tok-str">'hello'</span>;         <span class="tok-com">// inferred: string</span>
+<span class="tok-key">const</span> b = <span class="tok-str">'hello'</span>;       <span class="tok-com">// inferred: 'hello' (literal)</span>
+<span class="tok-key">let</span> c = [<span class="tok-num">1</span>, <span class="tok-num">2</span>, <span class="tok-num">3</span>];     <span class="tok-com">// inferred: number[]</span>
+<span class="tok-key">let</span> d = { name: <span class="tok-str">'A'</span> };    <span class="tok-com">// inferred: { name: string }</span>
+
+<span class="tok-com">// Type assertion</span>
+<span class="tok-key">const</span> input = document.<span class="tok-cmd">getElementById</span>(<span class="tok-str">'email'</span>) <span class="tok-key">as</span> <span class="tok-type">HTMLInputElement</span>;
+input.value;   <span class="tok-com">// now has .value</span>
+
+<span class="tok-com">// satisfies — check the shape WITHOUT widening the type</span>
+<span class="tok-key">type</span> <span class="tok-type">Config</span> = { port: <span class="tok-type">number</span>; host: <span class="tok-type">string</span> };
+
+<span class="tok-key">const</span> config = {
+  port: <span class="tok-num">3000</span>,
+  host: <span class="tok-str">'localhost'</span>,
+} <span class="tok-key">satisfies</span> <span class="tok-type">Config</span>;
+<span class="tok-com">// type of config.port is STILL 3000, not number — but it was validated</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Assertions are the last resort.</strong> <code>x as SomeType</code> silences the checker. If the value wasn't actually SomeType, the bug is still there — just hidden. Use assertions for cases where you truly know more than the compiler (DOM, external libs), not as a way to make errors go away. Prefer <code>satisfies</code> when you want to check without changing the type.</div>
+  </div>
+</section>
+
+<!-- ═══ 07 · UNIONS ═══ -->
+<section class="section-block" id="t7">
+  <div class="section-header">
+    <div class="section-num-big">07</div>
+    <div>
+      <h2 class="section-title">Union types</h2>
+      <p class="section-subtitle">A | B · optional interaction with nullable</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">unions.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// a value that could be any one of these types</span>
+<span class="tok-key">let</span> id: <span class="tok-type">string</span> | <span class="tok-type">number</span>;
+id = <span class="tok-str">'abc'</span>;    <span class="tok-com">// ok</span>
+id = <span class="tok-num">42</span>;       <span class="tok-com">// ok</span>
+<span class="tok-com">// id = true;  ❌ not allowed</span>
+
+<span class="tok-com">// union with null — extremely common</span>
+<span class="tok-key">function</span> <span class="tok-cmd">greet</span>(name: <span class="tok-type">string</span> | <span class="tok-key">null</span>) {
+  <span class="tok-key">if</span> (name === <span class="tok-key">null</span>) <span class="tok-key">return</span> <span class="tok-str">'Hello, guest'</span>;
+  <span class="tok-key">return</span> <span class="tok-str">`Hello, ${name}`</span>;    <span class="tok-com">// TS knows name is string here</span>
+}
+
+<span class="tok-com">// union of literals</span>
+<span class="tok-key">type</span> <span class="tok-type">Status</span> = <span class="tok-str">'pending'</span> | <span class="tok-str">'active'</span> | <span class="tok-str">'deleted'</span>;
+
+<span class="tok-com">// union of objects</span>
+<span class="tok-key">type</span> <span class="tok-type">Shape</span> = { kind: <span class="tok-str">'circle'</span>; r: <span class="tok-type">number</span> } | { kind: <span class="tok-str">'square'</span>; side: <span class="tok-type">number</span> };</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>You can only use operations that are valid on every member of the union.</strong> <code>string | number</code> has <code>.toUpperCase()</code> on strings and <code>.toFixed()</code> on numbers — neither works on both, so neither is allowed until you narrow. That's the point: a union is a promise that you'll check before doing anything type-specific.</div>
+  </div>
+</section>
+
+<!-- ═══ 08 · NARROWING ═══ -->
+<section class="section-block" id="t8">
+  <div class="section-header">
+    <div class="section-num-big">08</div>
+    <div>
+      <h2 class="section-title">Type narrowing</h2>
+      <p class="section-subtitle">typeof · instanceof · in · discriminated unions · exhaustiveness</p>
+    </div>
+  </div>
+
+  <ul>
+    <li><b><code>typeof</code></b> — narrows primitives. <code>typeof x === 'string'</code> → <code>string</code>.</li>
+    <li><b><code>instanceof</code></b> — narrows class instances.</li>
+    <li><b><code>in</code></b> — narrows by checking a property exists.</li>
+    <li><b>Equality</b> — <code>x === 'error'</code> narrows a union of literals.</li>
+    <li><b>Truthiness</b> — <code>if (x)</code> removes <code>null</code>, <code>undefined</code>, <code>''</code>, <code>0</code>, <code>false</code>.</li>
+    <li><b>Discriminated unions</b> — objects with a shared literal field. Checking it narrows the whole shape.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">narrowing.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// typeof</span>
+<span class="tok-key">function</span> <span class="tok-cmd">fmt</span>(x: <span class="tok-type">string</span> | <span class="tok-type">number</span>) {
+  <span class="tok-key">if</span> (<span class="tok-key">typeof</span> x === <span class="tok-str">'string'</span>) <span class="tok-key">return</span> x.<span class="tok-cmd">toUpperCase</span>();   <span class="tok-com">// x: string</span>
+  <span class="tok-key">return</span> x.<span class="tok-cmd">toFixed</span>(<span class="tok-num">2</span>);                              <span class="tok-com">// x: number</span>
+}
+
+<span class="tok-com">// instanceof</span>
+<span class="tok-key">function</span> <span class="tok-cmd">fmtDate</span>(x: <span class="tok-type">Date</span> | <span class="tok-type">string</span>) {
+  <span class="tok-key">if</span> (x <span class="tok-key">instanceof</span> <span class="tok-type">Date</span>) <span class="tok-key">return</span> x.<span class="tok-cmd">toISOString</span>();
+  <span class="tok-key">return</span> x.<span class="tok-cmd">toUpperCase</span>();
+}
+
+<span class="tok-com">// discriminated union — the killer pattern</span>
+<span class="tok-key">type</span> <span class="tok-type">Result</span> =
+  | { status: <span class="tok-str">'loading'</span> }
+  | { status: <span class="tok-str">'success'</span>; data: <span class="tok-type">string</span> }
+  | { status: <span class="tok-str">'error'</span>; message: <span class="tok-type">string</span> };
+
+<span class="tok-key">function</span> <span class="tok-cmd">render</span>(r: <span class="tok-type">Result</span>) {
+  <span class="tok-key">switch</span> (r.status) {
+    <span class="tok-key">case</span> <span class="tok-str">'loading'</span>: <span class="tok-key">return</span> <span class="tok-str">'…'</span>;
+    <span class="tok-key">case</span> <span class="tok-str">'success'</span>: <span class="tok-key">return</span> r.data;      <span class="tok-com">// r has .data here</span>
+    <span class="tok-key">case</span> <span class="tok-str">'error'</span>:   <span class="tok-key">return</span> r.message;   <span class="tok-com">// r has .message here</span>
+  }
+}
+
+<span class="tok-com">// exhaustiveness — the compiler flags missing cases</span>
+<span class="tok-key">function</span> <span class="tok-cmd">assertNever</span>(x: <span class="tok-type">never</span>): <span class="tok-type">never</span> {
+  <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">`Unhandled: ${x}`</span>);
+}</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>The <code>assertNever</code> trick.</strong> Adding a new member to a union should break every <code>switch</code> that forgets it. Put <code>assertNever(x)</code> in the <code>default</code> branch and the compiler enforces exhaustiveness for free.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 · INTERFACES & TYPES ═══ -->
+<section class="section-block" id="t9">
+  <div class="section-header">
+    <div class="section-num-big">09</div>
+    <div>
+      <h2 class="section-title">Interfaces &amp; type aliases</h2>
+      <p class="section-subtitle">when to use which · intersection types</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">interfaces.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// interface — object shape</span>
+<span class="tok-key">interface</span> <span class="tok-type">User</span> {
+  id: <span class="tok-type">number</span>;
+  name: <span class="tok-type">string</span>;
+  email?: <span class="tok-type">string</span>;         <span class="tok-com">// optional</span>
+}
+
+<span class="tok-com">// interface can extend</span>
+<span class="tok-key">interface</span> <span class="tok-type">Admin</span> <span class="tok-key">extends</span> <span class="tok-type">User</span> {
+  permissions: <span class="tok-type">string</span>[];
+}
+
+<span class="tok-com">// type alias — any type, not just objects</span>
+<span class="tok-key">type</span> <span class="tok-type">Status</span> = <span class="tok-str">'pending'</span> | <span class="tok-str">'active'</span> | <span class="tok-str">'deleted'</span>;
+<span class="tok-key">type</span> <span class="tok-type">Id</span>     = <span class="tok-type">string</span> | <span class="tok-type">number</span>;
+<span class="tok-key">type</span> <span class="tok-type">Mapper</span> = (x: <span class="tok-type">number</span>) =&gt; <span class="tok-type">string</span>;
+
+<span class="tok-com">// intersection — combine types with &amp;</span>
+<span class="tok-key">type</span> <span class="tok-type">Admin2</span> = <span class="tok-type">User</span> &amp; { permissions: <span class="tok-type">string</span>[] };</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th></th><th><code>interface</code></th><th><code>type</code></th></tr></thead>
+      <tbody>
+        <tr><td>Object shape</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Union / intersection</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Primitives, tuples, mapped types</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Declaration merging</td><td>Yes (same name, multiple declarations)</td><td>No</td></tr>
+        <tr><td>Extend</td><td><code>extends</code></td><td><code>&amp;</code> intersection</td></tr>
+        <tr><td>Implements (by a class)</td><td>Yes</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-box">
+    <div class="concept-box-label">Rule of thumb</div>
+    <div class="concept-box-text"><p>Use <b><code>interface</code></b> for object-shaped contracts you might extend or augment (public APIs, service shapes, model schemas). Use <b><code>type</code></b> for everything else — unions, intersections, function types, tuples, mapped types. Both work day to day; the difference shows up in declaration merging and library extension.</p></div>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Intersection is not "or".</strong> <code>A &amp; B</code> means the value must satisfy <em>both</em> A and B — combining their properties. If <code>A</code> has <code>name: string</code> and <code>B</code> has <code>name: number</code>, <code>A &amp; B</code> requires a value where <code>name</code> is both — impossible. For "one or the other", use a union <code>|</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · OPTIONAL ═══ -->
+<section class="section-block" id="t10">
+  <div class="section-header">
+    <div class="section-num-big">10</div>
+    <div>
+      <h2 class="section-title">Optional fields</h2>
+      <p class="section-subtitle">? · undefined vs null · readonly</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">optional.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">interface</span> <span class="tok-type">User</span> {
+  id: <span class="tok-type">number</span>;
+  name: <span class="tok-type">string</span>;
+  email?: <span class="tok-type">string</span>;         <span class="tok-com">// optional — may be undefined or missing</span>
+  <span class="tok-key">readonly</span> createdAt: <span class="tok-type">Date</span>; <span class="tok-com">// cannot be reassigned after creation</span>
+}
+
+<span class="tok-key">const</span> u: <span class="tok-type">User</span> = { id: <span class="tok-num">1</span>, name: <span class="tok-str">'Aarav'</span>, createdAt: <span class="tok-key">new</span> <span class="tok-type">Date</span>() };
+
+<span class="tok-com">// Optional fields need checking before use</span>
+u.email.<span class="tok-cmd">toUpperCase</span>();             <span class="tok-com">❌ possibly undefined</span>
+u.email?.<span class="tok-cmd">toUpperCase</span>();            <span class="tok-com">✓ optional chaining</span>
+u.email?.<span class="tok-cmd">toUpperCase</span>() ?? <span class="tok-str">'none'</span>; <span class="tok-com">✓ fallback</span>
+
+<span class="tok-com">// readonly is a compile-time guarantee, not runtime immutability</span>
+u.createdAt = <span class="tok-key">new</span> <span class="tok-type">Date</span>();       <span class="tok-com">❌ compile error</span>
+<span class="tok-com">// but (u as any).createdAt = ...</span>
+<span class="tok-com">//     would still work at runtime</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>?</code> means <code>undefined</code>, not <code>null</code>.</strong> An optional field is <code>T | undefined</code>. If the API may return <code>null</code>, write <code>email?: string | null</code>. Don't conflate them — <code>email?.toUpperCase()</code> handles <code>undefined</code> but would still throw on <code>null</code>.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · FUNCTIONS ═══ -->
+<section class="section-block" id="t11">
+  <div class="section-header">
+    <div class="section-num-big">11</div>
+    <div>
+      <h2 class="section-title">Functions</h2>
+      <p class="section-subtitle">declarations · arrows · optional/default/rest · function types · interfaces for functions · callbacks</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">functions.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// function declaration</span>
+<span class="tok-key">function</span> <span class="tok-cmd">add</span>(a: <span class="tok-type">number</span>, b: <span class="tok-type">number</span>): <span class="tok-type">number</span> {
+  <span class="tok-key">return</span> a + b;
+}
+
+<span class="tok-com">// arrow function — expression</span>
+<span class="tok-key">const</span> <span class="tok-cmd">double</span> = (n: <span class="tok-type">number</span>): <span class="tok-type">number</span> =&gt; n * <span class="tok-num">2</span>;
+
+<span class="tok-com">// arrow function — statement block</span>
+<span class="tok-key">const</span> <span class="tok-cmd">greet</span> = (name: <span class="tok-type">string</span>): <span class="tok-type">string</span> =&gt; {
+  <span class="tok-key">const</span> msg = <span class="tok-str">`Hi ${name}`</span>;
+  <span class="tok-key">return</span> msg;
+};
+
+<span class="tok-com">// optional, default, rest parameters</span>
+<span class="tok-key">function</span> <span class="tok-cmd">describe</span>(
+  name: <span class="tok-type">string</span>,
+  title?: <span class="tok-type">string</span>,             <span class="tok-com">// optional</span>
+  age: <span class="tok-type">number</span> = <span class="tok-num">0</span>,             <span class="tok-com">// default</span>
+  ...tags: <span class="tok-type">string</span>[]           <span class="tok-com">// rest</span>
+): <span class="tok-type">string</span> {
+  <span class="tok-key">return</span> <span class="tok-str">`${title ?? ''} ${name}, ${age}, ${tags.join(',')}`</span>.<span class="tok-cmd">trim</span>();
+}
+
+<span class="tok-com">// function type</span>
+<span class="tok-key">type</span> <span class="tok-type">Adder</span> = (a: <span class="tok-type">number</span>, b: <span class="tok-type">number</span>) =&gt; <span class="tok-type">number</span>;
+<span class="tok-key">const</span> <span class="tok-cmd">sum</span>: <span class="tok-type">Adder</span> = (a, b) =&gt; a + b;
+
+<span class="tok-com">// interface for an object with methods</span>
+<span class="tok-key">interface</span> <span class="tok-type">Calculator</span> {
+  add(a: <span class="tok-type">number</span>, b: <span class="tok-type">number</span>): <span class="tok-type">number</span>;
+  subtract(a: <span class="tok-type">number</span>, b: <span class="tok-type">number</span>): <span class="tok-type">number</span>;
+}
+
+<span class="tok-key">const</span> calc: <span class="tok-type">Calculator</span> = {
+  <span class="tok-cmd">add</span>: (a, b) =&gt; a + b,
+  <span class="tok-cmd">subtract</span>: (a, b) =&gt; a - b,
+};
+
+<span class="tok-com">// callback types</span>
+<span class="tok-key">function</span> <span class="tok-cmd">process</span>(items: <span class="tok-type">number</span>[], cb: (n: <span class="tok-type">number</span>) =&gt; <span class="tok-type">void</span>) {
+  items.<span class="tok-cmd">forEach</span>(cb);
+}</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Return types are optional but recommended on exported functions.</strong> TS infers the return type from the body, but if you later change the body, the inferred return type changes silently. Annotating the return type makes the intent explicit and catches accidental changes.</div>
+  </div>
+</section>
+
+<!-- ═══ 12 · PRACTICE 1 ═══ -->
+<section class="section-block" id="t12">
+  <div class="section-header">
+    <div class="section-num-big">12</div>
+    <div>
+      <h2 class="section-title">Practice — foundations</h2>
+      <p class="section-subtitle">4 problems to lock in what you've learnt</p>
+    </div>
+  </div>
+
+  <h3>Problem 1 — Type a User object with optional fields</h3>
+  <p>Write an interface for a user with <code>id</code> (number), <code>name</code> (string), <code>email</code> (optional string), and <code>createdAt</code> (readonly Date).</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">solution</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">interface</span> <span class="tok-type">User</span> {
+  id: <span class="tok-type">number</span>;
+  name: <span class="tok-type">string</span>;
+  email?: <span class="tok-type">string</span>;
+  <span class="tok-key">readonly</span> createdAt: <span class="tok-type">Date</span>;
+}</code></pre>
+  </div>
+
+  <h3>Problem 2 — Function that returns the first element or null</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">solution</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">first</span>&lt;T&gt;(arr: T[]): T | <span class="tok-key">null</span> {
+  <span class="tok-key">return</span> arr.length &gt; <span class="tok-num">0</span> ? arr[<span class="tok-num">0</span>] : <span class="tok-key">null</span>;
+}</code></pre>
+  </div>
+
+  <h3>Problem 3 — Narrow a string|number to print differently</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">solution</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">function</span> <span class="tok-cmd">show</span>(value: <span class="tok-type">string</span> | <span class="tok-type">number</span>): <span class="tok-type">string</span> {
+  <span class="tok-key">if</span> (<span class="tok-key">typeof</span> value === <span class="tok-str">'string'</span>) {
+    <span class="tok-key">return</span> <span class="tok-str">`Length: ${value.length}`</span>;
+  }
+  <span class="tok-key">return</span> <span class="tok-str">`Value × 2: ${value * 2}`</span>;
+}</code></pre>
+  </div>
+
+  <h3>Problem 4 — Type a discriminated union for a payment method</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">solution</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">type</span> <span class="tok-type">Payment</span> =
+  | { method: <span class="tok-str">'card'</span>; cardNumber: <span class="tok-type">string</span>; cvv: <span class="tok-type">string</span> }
+  | { method: <span class="tok-str">'upi'</span>; upiId: <span class="tok-type">string</span> };
+
+<span class="tok-key">function</span> <span class="tok-cmd">pay</span>(p: <span class="tok-type">Payment</span>) {
+  <span class="tok-key">if</span> (p.method === <span class="tok-str">'card'</span>) <span class="tok-key">return</span> p.cardNumber;
+  <span class="tok-key">return</span> p.upiId;
+}</code></pre>
+  </div>
+</section>
+
+<!-- ═══ 13 · CLASSES ═══ -->
+<section class="section-block" id="t13">
+  <div class="section-header">
+    <div class="section-num-big">13</div>
+    <div>
+      <h2 class="section-title">Classes &amp; access modifiers</h2>
+      <p class="section-subtitle">fields · constructor · public/private/protected/readonly · parameter properties · static</p>
+    </div>
+  </div>
+
+  <ul>
+    <li><b><code>public</code></b> (default) — accessible anywhere.</li>
+    <li><b><code>private</code></b> — only inside the class. Compile-time only.</li>
+    <li><b><code>protected</code></b> — inside the class and its subclasses.</li>
+    <li><b><code>readonly</code></b> — can be assigned at declaration or in constructor, never after.</li>
+    <li><b>Parameter properties</b> — TS shorthand: <code>constructor(public name: string)</code> creates a field and assigns it automatically.</li>
+    <li><b>#field</b> — real JS privacy, enforced at runtime.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">class.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">class</span> <span class="tok-type">Account</span> {
+  <span class="tok-key">static</span> count = <span class="tok-num">0</span>;              <span class="tok-com">// shared across instances</span>
+  <span class="tok-key">readonly</span> id: <span class="tok-type">string</span>;             <span class="tok-com">// set once, then locked</span>
+  <span class="tok-key">private</span> balance = <span class="tok-num">0</span>;            <span class="tok-com">// compile-time private</span>
+  #pin: <span class="tok-type">string</span>;                    <span class="tok-com">// runtime-private</span>
+
+  <span class="tok-key">constructor</span>(<span class="tok-key">public</span> owner: <span class="tok-type">string</span>, pin: <span class="tok-type">string</span>) {
+    <span class="tok-key">this</span>.id = crypto.<span class="tok-cmd">randomUUID</span>();
+    <span class="tok-key">this</span>.#pin = pin;
+    <span class="tok-type">Account</span>.count++;
+  }
+
+  <span class="tok-cmd">deposit</span>(amount: <span class="tok-type">number</span>) {
+    <span class="tok-key">if</span> (amount &lt;= <span class="tok-num">0</span>) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Must be positive'</span>);
+    <span class="tok-key">this</span>.balance += amount;
+  }
+
+  <span class="tok-cmd">getBalance</span>(): <span class="tok-type">number</span> {
+    <span class="tok-key">return</span> <span class="tok-key">this</span>.balance;
+  }
+
+  <span class="tok-key">static</span> <span class="tok-cmd">createEmpty</span>(): <span class="tok-type">Account</span> {
+    <span class="tok-key">return new</span> <span class="tok-type">Account</span>(<span class="tok-str">'guest'</span>, <span class="tok-str">'0000'</span>);
+  }
+}
+
+<span class="tok-key">const</span> acc = <span class="tok-key">new</span> <span class="tok-type">Account</span>(<span class="tok-str">'Aarav'</span>, <span class="tok-str">'1234'</span>);
+acc.<span class="tok-cmd">deposit</span>(<span class="tok-num">100</span>);
+console.<span class="tok-cmd">log</span>(acc.owner);                 <span class="tok-com">// from parameter property</span>
+<span class="tok-com">// acc.balance;   ❌ private</span>
+<span class="tok-com">// acc.#pin;      ❌ syntax error</span>
+console.<span class="tok-cmd">log</span>(<span class="tok-type">Account</span>.count);            <span class="tok-com">// static access</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong><code>private</code> is compile-time only.</strong> At runtime the field still exists on the object and can be reached with <code>(obj as any).balance</code> or reflection. Use <code>#balance</code> for genuine runtime privacy — the engine itself enforces it.</div>
+  </div>
+</section>
+
+<!-- ═══ 14 · PRACTICE 2 ═══ -->
+<section class="section-block" id="t14">
+  <div class="section-header">
+    <div class="section-num-big">14</div>
+    <div>
+      <h2 class="section-title">Practice — classes</h2>
+      <p class="section-subtitle">2 problems</p>
+    </div>
+  </div>
+
+  <h3>Problem 1 — A Book class with private fields and a getter</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">solution</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">class</span> <span class="tok-type">Book</span> {
+  <span class="tok-key">private</span> _pagesRead = <span class="tok-num">0</span>;
+
+  <span class="tok-key">constructor</span>(
+    <span class="tok-key">public</span> <span class="tok-key">readonly</span> title: <span class="tok-type">string</span>,
+    <span class="tok-key">public</span> <span class="tok-key">readonly</span> totalPages: <span class="tok-type">number</span>,
+  ) {}
+
+  <span class="tok-cmd">read</span>(pages: <span class="tok-type">number</span>) {
+    <span class="tok-key">this</span>._pagesRead = Math.<span class="tok-cmd">min</span>(<span class="tok-key">this</span>._pagesRead + pages, <span class="tok-key">this</span>.totalPages);
+  }
+
+  <span class="tok-key">get</span> <span class="tok-cmd">progress</span>(): <span class="tok-type">number</span> {
+    <span class="tok-key">return</span> (<span class="tok-key">this</span>._pagesRead / <span class="tok-key">this</span>.totalPages) * <span class="tok-num">100</span>;
+  }
+}</code></pre>
+  </div>
+
+  <h3>Problem 2 — A logger with a static counter</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">solution</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">class</span> <span class="tok-type">Logger</span> {
+  <span class="tok-key">static</span> messages = <span class="tok-num">0</span>;
+
+  <span class="tok-key">static</span> <span class="tok-cmd">log</span>(msg: <span class="tok-type">string</span>): <span class="tok-type">void</span> {
+    console.<span class="tok-cmd">log</span>(<span class="tok-str">`[${Logger.messages++}] ${msg}`</span>);
+  }
+}</code></pre>
+  </div>
+</section>
+
+<!-- ═══ 15 · GENERICS ═══ -->
+<section class="section-block" id="t15">
+  <div class="section-header">
+    <div class="section-num-big">15</div>
+    <div>
+      <h2 class="section-title">Generics</h2>
+      <p class="section-subtitle">type parameters · constraints · defaults · generic classes and interfaces</p>
+    </div>
+  </div>
+
+  <ul>
+    <li>Generics let you write code that works for <em>any</em> type while preserving the relationship between input and output.</li>
+    <li><code>function identity&lt;T&gt;(x: T): T</code> — the returned value has the same type as the argument, whatever that was.</li>
+    <li><b>Constraints</b> (<code>T extends { length: number }</code>) force T to have a certain shape.</li>
+    <li><b>Defaults</b> (<code>T = string</code>) provide a fallback when the type isn't given.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">generics.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// basic generic</span>
+<span class="tok-key">function</span> <span class="tok-cmd">first</span>&lt;T&gt;(arr: T[]): T | <span class="tok-key">undefined</span> {
+  <span class="tok-key">return</span> arr[<span class="tok-num">0</span>];
+}
+
+<span class="tok-com">// multiple type parameters</span>
+<span class="tok-key">function</span> <span class="tok-cmd">pair</span>&lt;A, B&gt;(a: A, b: B): [A, B] {
+  <span class="tok-key">return</span> [a, b];
+}
+
+<span class="tok-com">// constraint</span>
+<span class="tok-key">function</span> <span class="tok-cmd">longest</span>&lt;T <span class="tok-key">extends</span> { length: <span class="tok-type">number</span> }&gt;(a: T, b: T): T {
+  <span class="tok-key">return</span> a.length &gt;= b.length ? a : b;
+}
+
+<span class="tok-com">// default type parameter</span>
+<span class="tok-key">interface</span> <span class="tok-type">ApiResponse</span>&lt;T = <span class="tok-type">unknown</span>&gt; {
+  data: T;
+  ok: <span class="tok-type">boolean</span>;
+}
+
+<span class="tok-com">// generic class</span>
+<span class="tok-key">class</span> <span class="tok-type">Repo</span>&lt;T <span class="tok-key">extends</span> { id: <span class="tok-type">string</span> }&gt; {
+  <span class="tok-key">private</span> items: <span class="tok-type">Map</span>&lt;<span class="tok-type">string</span>, T&gt; = <span class="tok-key">new</span> <span class="tok-type">Map</span>();
+
+  <span class="tok-cmd">save</span>(item: T) { <span class="tok-key">this</span>.items.<span class="tok-cmd">set</span>(item.id, item); }
+  <span class="tok-cmd">find</span>(id: <span class="tok-type">string</span>): T | <span class="tok-key">undefined</span> { <span class="tok-key">return</span> <span class="tok-key">this</span>.items.<span class="tok-cmd">get</span>(id); }
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Don't over-genericize.</strong> If a function only ever works for strings, don't make it <code>&lt;T&gt;</code>. Generics add complexity; they earn it only when the type relationship actually matters. <code>function map&lt;T, U&gt;(arr: T[], fn: (x: T) =&gt; U): U[]</code> earns it — the output element type depends on the callback.</div>
+  </div>
+</section>
+
+<!-- ═══ 16 · LITERAL ═══ -->
+<section class="section-block" id="t16">
+  <div class="section-header">
+    <div class="section-num-big">16</div>
+    <div>
+      <h2 class="section-title">Literal types</h2>
+      <p class="section-subtitle">exact values as types · <code>as const</code></p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">literals.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">let</span> direction: <span class="tok-str">'up'</span> | <span class="tok-str">'down'</span> | <span class="tok-str">'left'</span> | <span class="tok-str">'right'</span>;
+direction = <span class="tok-str">'up'</span>;        <span class="tok-com">// ok</span>
+<span class="tok-com">// direction = 'forward';  ❌</span>
+
+<span class="tok-com">// as const — freeze the literal types</span>
+<span class="tok-key">const</span> config = {
+  method: <span class="tok-str">'POST'</span>,
+  retries: <span class="tok-num">3</span>,
+} <span class="tok-key">as const</span>;
+<span class="tok-com">// type of config.method is now 'POST', not string</span>
+
+<span class="tok-com">// classic: a roles array as a const tuple</span>
+<span class="tok-key">const</span> ROLES = [<span class="tok-str">'admin'</span>, <span class="tok-str">'user'</span>, <span class="tok-str">'guest'</span>] <span class="tok-key">as const</span>;
+<span class="tok-key">type</span> <span class="tok-type">Role</span> = <span class="tok-key">typeof</span> ROLES[<span class="tok-type">number</span>];    <span class="tok-com">// 'admin' | 'user' | 'guest'</span></code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Literal types are how you build real domain types.</strong> A <code>Status</code>, a <code>Role</code>, an <code>HTTPMethod</code> — all better expressed as literal unions than as loose strings. They give you autocomplete, exhaustive switch checks, and compile-time rejection of invalid values.</div>
+  </div>
+</section>
+
+<!-- ═══ 17 · TYPE GUARDS ═══ -->
+<section class="section-block" id="t17">
+  <div class="section-header">
+    <div class="section-num-big">17</div>
+    <div>
+      <h2 class="section-title">Type guards</h2>
+      <p class="section-subtitle">custom guards · user-defined <code>is</code> predicates · <code>asserts</code></p>
+    </div>
+  </div>
+
+  <ul>
+    <li>A type guard is a function whose return type is a <b>type predicate</b>: <code>x is T</code>.</li>
+    <li>When it returns true, TS narrows the argument's type inside the calling scope.</li>
+    <li><code>asserts x is T</code> — an assertion function. It either throws or narrows.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">guards.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">interface</span> <span class="tok-type">Cat</span> { meow(): <span class="tok-type">void</span>; whiskers: <span class="tok-type">number</span> }
+<span class="tok-key">interface</span> <span class="tok-type">Dog</span> { bark(): <span class="tok-type">void</span>; breed: <span class="tok-type">string</span> }
+
+<span class="tok-com">// type predicate</span>
+<span class="tok-key">function</span> <span class="tok-cmd">isCat</span>(x: <span class="tok-type">Cat</span> | <span class="tok-type">Dog</span>): x <span class="tok-key">is</span> <span class="tok-type">Cat</span> {
+  <span class="tok-key">return</span> <span class="tok-str">'meow'</span> <span class="tok-key">in</span> x;
+}
+
+<span class="tok-key">function</span> <span class="tok-cmd">handle</span>(pet: <span class="tok-type">Cat</span> | <span class="tok-type">Dog</span>) {
+  <span class="tok-key">if</span> (<span class="tok-cmd">isCat</span>(pet)) pet.<span class="tok-cmd">meow</span>();       <span class="tok-com">// pet: Cat</span>
+  <span class="tok-key">else</span> pet.<span class="tok-cmd">bark</span>();                    <span class="tok-com">// pet: Dog</span>
+}
+
+<span class="tok-com">// assertion function — narrows or throws</span>
+<span class="tok-key">function</span> <span class="tok-cmd">assertIsString</span>(x: <span class="tok-type">unknown</span>): <span class="tok-key">asserts</span> x <span class="tok-key">is</span> <span class="tok-type">string</span> {
+  <span class="tok-key">if</span> (<span class="tok-key">typeof</span> x !== <span class="tok-str">'string'</span>) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Not a string'</span>);
+}
+
+<span class="tok-key">function</span> <span class="tok-cmd">upper</span>(x: <span class="tok-type">unknown</span>) {
+  <span class="tok-cmd">assertIsString</span>(x);
+  <span class="tok-key">return</span> x.<span class="tok-cmd">toUpperCase</span>();             <span class="tok-com">// x is now string</span>
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>A type guard is only as good as its logic.</strong> If your predicate says <code>x is User</code> but only checks <code>x != null</code>, TS will narrow — but at runtime x might not be a User. Guards must actually verify the shape. This is why runtime validation (Zod) pairs so well: it can produce a real guard that also validates.</div>
+  </div>
+</section>
+
+<!-- ═══ 18 · KEYOF ═══ -->
+<section class="section-block" id="t18">
+  <div class="section-header">
+    <div class="section-num-big">18</div>
+    <div>
+      <h2 class="section-title">The <code>keyof</code> operator</h2>
+      <p class="section-subtitle">keys as types · indexed access · safe accessors</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">keyof.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">interface</span> <span class="tok-type">User</span> { id: <span class="tok-type">number</span>; name: <span class="tok-type">string</span>; email: <span class="tok-type">string</span> }
+
+<span class="tok-key">type</span> <span class="tok-type">UserKey</span> = <span class="tok-key">keyof</span> <span class="tok-type">User</span>;             <span class="tok-com">// 'id' | 'name' | 'email'</span>
+
+<span class="tok-com">// safe property accessor</span>
+<span class="tok-key">function</span> <span class="tok-cmd">get</span>&lt;T, K <span class="tok-key">extends</span> <span class="tok-key">keyof</span> T&gt;(obj: T, key: K): T[K] {
+  <span class="tok-key">return</span> obj[key];
+}
+
+<span class="tok-key">const</span> u: <span class="tok-type">User</span> = { id: <span class="tok-num">1</span>, name: <span class="tok-str">'Aarav'</span>, email: <span class="tok-str">'a@x.com'</span> };
+<span class="tok-key">const</span> n = <span class="tok-cmd">get</span>(u, <span class="tok-str">'name'</span>);              <span class="tok-com">// inferred: string</span>
+<span class="tok-com">// get(u, 'age');    ❌ 'age' is not a key of User</span>
+
+<span class="tok-com">// keyof + typeof — get keys from a runtime object's type</span>
+<span class="tok-key">const</span> config = { host: <span class="tok-str">'localhost'</span>, port: <span class="tok-num">3000</span> };
+<span class="tok-key">type</span> <span class="tok-type">ConfigKey</span> = <span class="tok-key">keyof typeof</span> config;   <span class="tok-com">// 'host' | 'port'</span>
+
+<span class="tok-com">// mapped type — transform every key</span>
+<span class="tok-key">type</span> <span class="tok-type">Nullable</span>&lt;T&gt; = { [K <span class="tok-key">in</span> <span class="tok-key">keyof</span> T]: T[K] | <span class="tok-key">null</span> };</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong><code>keyof</code> + generics is the pattern behind every safe library.</strong> Type-safe object pickers, sort-by-field helpers, form libraries — they all use <code>K extends keyof T</code> so that invalid field names are caught at compile time.</div>
+  </div>
+</section>
+
+<!-- ═══ 19 · INDEX SIGNATURES ═══ -->
+<section class="section-block" id="t19">
+  <div class="section-header">
+    <div class="section-num-big">19</div>
+    <div>
+      <h2 class="section-title">Index signatures</h2>
+      <p class="section-subtitle">dynamic keys · combining fixed and dynamic fields</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">index-signatures.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// an object whose keys you don't know at compile time</span>
+<span class="tok-key">interface</span> <span class="tok-type">Scoreboard</span> {
+  [player: <span class="tok-type">string</span>]: <span class="tok-type">number</span>;
+}
+
+<span class="tok-key">const</span> scores: <span class="tok-type">Scoreboard</span> = {
+  aarav: <span class="tok-num">10</span>,
+  priya: <span class="tok-num">20</span>,
+  neha:  <span class="tok-num">30</span>,
+};
+
+<span class="tok-com">// Records do the same thing but cleaner</span>
+<span class="tok-key">type</span> <span class="tok-type">Scoreboard2</span> = <span class="tok-type">Record</span>&lt;<span class="tok-type">string</span>, <span class="tok-type">number</span>&gt;;
+
+<span class="tok-com">// Fixed keys + dynamic keys — index signature must accept the fixed ones too</span>
+<span class="tok-key">interface</span> <span class="tok-type">WithMeta</span> {
+  id: <span class="tok-type">string</span>;
+  [key: <span class="tok-type">string</span>]: <span class="tok-type">string</span>;   <span class="tok-com">// id must be a string, other keys are string→string</span>
+}
+
+<span class="tok-com">// Constrain key names with a pattern (TS 4.4+)</span>
+<span class="tok-key">interface</span> <span class="tok-type">Strict</span> {
+  [k: <span class="tok-str">`data-${string}`</span>]: <span class="tok-type">string</span>;
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Index signatures silently allow any key.</strong> <code>scores['nonexistent']</code> is typed as <code>number</code> even though the key isn't there. Enable <code>noUncheckedIndexedAccess</code> in tsconfig to force <code>number | undefined</code> — the correct behaviour for anything not statically known.</div>
+  </div>
+</section>
+
+<!-- ═══ 20 · UTILITY TYPES ═══ -->
+<section class="section-block" id="t20">
+  <div class="section-header">
+    <div class="section-num-big">20</div>
+    <div>
+      <h2 class="section-title">Utility types</h2>
+      <p class="section-subtitle">Partial · Required · Pick · Omit · Record · Readonly · ReturnType · Parameters · Awaited</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">utility.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">interface</span> <span class="tok-type">User</span> {
+  id: <span class="tok-type">number</span>;
+  name: <span class="tok-type">string</span>;
+  email: <span class="tok-type">string</span>;
+  password: <span class="tok-type">string</span>;
+}
+
+<span class="tok-type">Partial</span>&lt;<span class="tok-type">User</span>&gt;                   <span class="tok-com">// all fields optional — for update payloads</span>
+<span class="tok-type">Required</span>&lt;<span class="tok-type">User</span>&gt;                  <span class="tok-com">// all fields required</span>
+<span class="tok-type">Pick</span>&lt;<span class="tok-type">User</span>, <span class="tok-str">'id'</span> | <span class="tok-str">'name'</span>&gt;     <span class="tok-com">// only those fields</span>
+<span class="tok-type">Omit</span>&lt;<span class="tok-type">User</span>, <span class="tok-str">'password'</span>&gt;        <span class="tok-com">// everything except password (for API responses)</span>
+<span class="tok-type">Record</span>&lt;<span class="tok-type">string</span>, <span class="tok-type">User</span>&gt;           <span class="tok-com">// { [key: string]: User }</span>
+<span class="tok-type">Readonly</span>&lt;<span class="tok-type">User</span>&gt;                <span class="tok-com">// all fields readonly</span>
+<span class="tok-type">NonNullable</span>&lt;<span class="tok-type">string</span> | <span class="tok-key">null</span>&gt;      <span class="tok-com">// string</span>
+<span class="tok-type">ReturnType</span>&lt;<span class="tok-key">typeof</span> fn&gt;          <span class="tok-com">// the return type of fn</span>
+<span class="tok-type">Parameters</span>&lt;<span class="tok-key">typeof</span> fn&gt;          <span class="tok-com">// tuple of fn's parameter types</span>
+<span class="tok-type">Awaited</span>&lt;<span class="tok-type">Promise</span>&lt;<span class="tok-type">string</span>&gt;&gt;         <span class="tok-com">// string</span>
+<span class="tok-type">Exclude</span>&lt;<span class="tok-str">'a'</span> | <span class="tok-str">'b'</span> | <span class="tok-str">'c'</span>, <span class="tok-str">'b'</span>&gt; <span class="tok-com">// 'a' | 'c'</span>
+<span class="tok-type">Extract</span>&lt;<span class="tok-str">'a'</span> | <span class="tok-str">'b'</span> | <span class="tok-num">1</span>, <span class="tok-type">string</span>&gt; <span class="tok-com">// 'a' | 'b'</span></code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Utility</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>Partial&lt;T&gt;</code></td><td>All fields optional</td></tr>
+        <tr><td><code>Required&lt;T&gt;</code></td><td>All fields required</td></tr>
+        <tr><td><code>Readonly&lt;T&gt;</code></td><td>All fields readonly</td></tr>
+        <tr><td><code>Pick&lt;T, K&gt;</code></td><td>Keep only the listed keys</td></tr>
+        <tr><td><code>Omit&lt;T, K&gt;</code></td><td>Remove the listed keys</td></tr>
+        <tr><td><code>Record&lt;K, V&gt;</code></td><td>Object with keys K and values V</td></tr>
+        <tr><td><code>Exclude&lt;T, U&gt;</code></td><td>Remove U from union T</td></tr>
+        <tr><td><code>Extract&lt;T, U&gt;</code></td><td>Keep only union members that extend U</td></tr>
+        <tr><td><code>NonNullable&lt;T&gt;</code></td><td>Remove null and undefined</td></tr>
+        <tr><td><code>ReturnType&lt;F&gt;</code></td><td>Return type of a function type</td></tr>
+        <tr><td><code>Parameters&lt;F&gt;</code></td><td>Tuple of parameter types</td></tr>
+        <tr><td><code>Awaited&lt;T&gt;</code></td><td>Unwrap Promise types recursively</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Never redeclare what a utility can derive.</strong> If <code>PublicUser</code> is <code>User</code> without password, write <code>Omit&lt;User, 'password'&gt;</code>. When <code>User</code> gains a field, <code>PublicUser</code> automatically gains it — no drift.</div>
+  </div>
+</section>
+
+<!-- ═══ 21 · MODULES & NAMESPACES ═══ -->
+<section class="section-block" id="t21">
+  <div class="section-header">
+    <div class="section-num-big">21</div>
+    <div>
+      <h2 class="section-title">Modules &amp; namespaces</h2>
+      <p class="section-subtitle">ESM · import type · why namespaces are legacy</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">modules.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// named exports</span>
+<span class="tok-key">export function</span> <span class="tok-cmd">add</span>(a: <span class="tok-type">number</span>, b: <span class="tok-type">number</span>) { <span class="tok-key">return</span> a + b; }
+<span class="tok-key">export const</span> PI = <span class="tok-num">3.14159</span>;
+
+<span class="tok-com">// default export</span>
+<span class="tok-key">export default class</span> <span class="tok-type">Calculator</span> { <span class="tok-com">/* ... */</span> }
+
+<span class="tok-com">// imports</span>
+<span class="tok-key">import</span> { add, PI } <span class="tok-key">from</span> <span class="tok-str">'./math'</span>;
+<span class="tok-key">import</span> Calculator <span class="tok-key">from</span> <span class="tok-str">'./calculator'</span>;
+
+<span class="tok-com">// import type — erased at compile time, no runtime cost</span>
+<span class="tok-key">import type</span> { <span class="tok-type">User</span> } <span class="tok-key">from</span> <span class="tok-str">'./types'</span>;
+
+<span class="tok-com">// re-export</span>
+<span class="tok-key">export</span> * <span class="tok-key">from</span> <span class="tok-str">'./utils'</span>;
+<span class="tok-key">export</span> { add <span class="tok-key">as</span> sum } <span class="tok-key">from</span> <span class="tok-str">'./math'</span>;
+
+<span class="tok-com">// namespace — old way, avoid in new code</span>
+<span class="tok-key">namespace</span> <span class="tok-type">Math</span> {
+  <span class="tok-key">export const</span> PI = <span class="tok-num">3.14159</span>;
+  <span class="tok-key">export function</span> <span class="tok-cmd">add</span>(a: <span class="tok-type">number</span>, b: <span class="tok-type">number</span>) { <span class="tok-key">return</span> a + b; }
+}
+<span class="tok-type">Math</span>.PI;</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Namespaces are legacy.</strong> They predate ES modules. Modern code uses ES <code>import</code>/<code>export</code> exclusively. Namespaces only appear in older code and in <code>d.ts</code> declaration files for legacy global libraries.</div>
+  </div>
+</section>
+
+<!-- ═══ 22 · DECORATORS ═══ -->
+<section class="section-block" id="t22">
+  <div class="section-header">
+    <div class="section-num-big">22</div>
+    <div>
+      <h2 class="section-title">Decorators</h2>
+      <p class="section-subtitle">class · method · property · parameter · legacy vs standard</p>
+    </div>
+  </div>
+
+  <ul>
+    <li>A <b>decorator</b> is a function that wraps a class, method, property, or parameter to modify its behaviour.</li>
+    <li>Common in Angular, NestJS, TypeORM. Less common in React/Express codebases.</li>
+    <li>Two systems exist: <b>legacy</b> (experimental stage-2) and <b>standard</b> (stage-3, TS 5+). They're incompatible. Modern projects should use standard decorators.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">decorators.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// legacy decorator example (experimentalDecorators: true)</span>
+<span class="tok-key">function</span> <span class="tok-cmd">log</span>(target: <span class="tok-type">any</span>, key: <span class="tok-type">string</span>, desc: <span class="tok-type">PropertyDescriptor</span>) {
+  <span class="tok-key">const</span> original = desc.value;
+  desc.value = <span class="tok-key">function</span> (...args: <span class="tok-type">any</span>[]) {
+    console.<span class="tok-cmd">log</span>(<span class="tok-str">`calling ${key}`</span>, args);
+    <span class="tok-key">return</span> original.<span class="tok-cmd">apply</span>(<span class="tok-key">this</span>, args);
+  };
+  <span class="tok-key">return</span> desc;
+}
+
+<span class="tok-key">class</span> <span class="tok-type">Service</span> {
+  @<span class="tok-cmd">log</span>
+  <span class="tok-cmd">fetchUsers</span>(limit: <span class="tok-type">number</span>) { <span class="tok-com">/* ... */</span> }
+}</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>You don't need decorators for React.</strong> They're for framework-heavy backends (NestJS, Angular) and ORMs (TypeORM, MikroORM). In a typical Express or React codebase, you'll go years without writing one. Learn them, but don't force them into places they don't help.</div>
+  </div>
+</section>
+
+<!-- ═══ 23 · ASYNC ═══ -->
+<section class="section-block" id="t23">
+  <div class="section-header">
+    <div class="section-num-big">23</div>
+    <div>
+      <h2 class="section-title">Async programming</h2>
+      <p class="section-subtitle">Promise types · async/await · error typing · parallel vs sequential</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">async.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// async functions always return Promise&lt;T&gt;</span>
+<span class="tok-key">async function</span> <span class="tok-cmd">fetchUser</span>(id: <span class="tok-type">number</span>): <span class="tok-type">Promise</span>&lt;<span class="tok-type">User</span>&gt; {
+  <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-cmd">fetch</span>(<span class="tok-str">`/api/users/${id}`</span>);
+  <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Failed'</span>);
+  <span class="tok-key">return</span> res.<span class="tok-cmd">json</span>();
+}
+
+<span class="tok-com">// catch clauses are unknown by default — narrow before use</span>
+<span class="tok-key">try</span> {
+  <span class="tok-key">await</span> <span class="tok-cmd">fetchUser</span>(<span class="tok-num">1</span>);
+} <span class="tok-key">catch</span> (err) {
+  <span class="tok-key">if</span> (err <span class="tok-key">instanceof</span> <span class="tok-cmd">Error</span>) {
+    console.<span class="tok-cmd">error</span>(err.message);
+  }
+}
+
+<span class="tok-com">// parallel vs sequential</span>
+<span class="tok-key">const</span> [a, b] = <span class="tok-key">await</span> <span class="tok-type">Promise</span>.<span class="tok-cmd">all</span>([<span class="tok-cmd">fetchUser</span>(<span class="tok-num">1</span>), <span class="tok-cmd">fetchUser</span>(<span class="tok-num">2</span>)]);  <span class="tok-com">// parallel</span>
+<span class="tok-key">const</span> c = <span class="tok-key">await</span> <span class="tok-cmd">fetchUser</span>(<span class="tok-num">1</span>);
+<span class="tok-key">const</span> d = <span class="tok-key">await</span> <span class="tok-cmd">fetchUser</span>(<span class="tok-num">2</span>);                    <span class="tok-com">// sequential</span>
+
+<span class="tok-com">// Promise.allSettled for "I don't care about failures"</span>
+<span class="tok-key">const</span> results = <span class="tok-key">await</span> <span class="tok-type">Promise</span>.<span class="tok-cmd">allSettled</span>([
+  <span class="tok-cmd">fetchUser</span>(<span class="tok-num">1</span>),
+  <span class="tok-cmd">fetchUser</span>(<span class="tok-num">2</span>),
+]);
+<span class="tok-com">// results: ({ status: 'fulfilled'; value: User } | { status: 'rejected'; reason: any })[]</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Floating promises.</strong> Calling an async function without awaiting or catching it produces a "floating promise" — errors get swallowed silently. Enable <code>@typescript-eslint/no-floating-promises</code>; it catches this pattern across your codebase.</div>
+  </div>
+</section>
+
+<!-- ═══ 24 · NON-NULL ═══ -->
+<section class="section-block" id="t24">
+  <div class="section-header">
+    <div class="section-num-big">24</div>
+    <div>
+      <h2 class="section-title">Non-null assertion</h2>
+      <p class="section-subtitle">the <code>!</code> operator · when it's OK · why it's dangerous</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">non-null.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">const</span> input = document.<span class="tok-cmd">getElementById</span>(<span class="tok-str">'email'</span>);   <span class="tok-com">// HTMLElement | null</span>
+
+<span class="tok-com">// Assertions</span>
+<span class="tok-key">const</span> input1 = document.<span class="tok-cmd">getElementById</span>(<span class="tok-str">'email'</span>)!;  <span class="tok-com">// HTMLElement — TS trusts you</span>
+input1.value;                                      <span class="tok-com">// runtime crash if element is missing</span>
+
+<span class="tok-com">// Safer — narrow with a guard</span>
+<span class="tok-key">const</span> input2 = document.<span class="tok-cmd">getElementById</span>(<span class="tok-str">'email'</span>);
+<span class="tok-key">if</span> (!input2) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Input not found'</span>);
+input2.value;                                      <span class="tok-com">// HTMLElement, no runtime risk</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>The <code>!</code> operator lies to the compiler.</strong> When you write <code>x!</code>, TS removes <code>null</code> and <code>undefined</code> from the type — but does nothing at runtime. If x was actually null, you get a crash with a stack trace pointing to a line that "couldn't" have been null. Use <code>!</code> only when you have an invariant you can't express otherwise. Prefer optional chaining, guards, or defaulting.</div>
+  </div>
+</section>
+
+<!-- ═══ 25 · INTERVIEW ═══ -->
+<section class="section-block" id="t25">
+  <div class="section-header">
+    <div class="section-num-big">25</div>
+    <div>
+      <h2 class="section-title">Interview questions</h2>
+      <p class="section-subtitle">the type-system ones you'll be asked</p>
+    </div>
+  </div>
+
+  <details class="qa"><summary><span class="qn">Q1</span><span>What's the difference between <code>interface</code> and <code>type</code>?</span></summary><div class="qa-body"><p><code>interface</code> describes object shapes and can be merged (declaration merging). <code>type</code> can describe unions, intersections, tuples, primitives, and mapped types. Use <code>interface</code> for object contracts you might extend; <code>type</code> for everything else.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q2</span><span>Difference between <code>any</code> and <code>unknown</code>?</span></summary><div class="qa-body"><p>Both accept any value. <code>any</code> disables type checking on the value everywhere it flows — you can call methods and access properties without checks. <code>unknown</code> is the safe version: you can <em>assign</em> anything to it, but must <b>narrow</b> before use. Prefer <code>unknown</code> for external data.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q3</span><span>What does <code>never</code> mean, and when do you use it?</span></summary><div class="qa-body"><p>It's the type of "no value". A function returning <code>never</code> never returns (throws or infinite loop). It's used for exhaustive checks (<code>assertNever</code> in a default branch) — adding a new union member makes the compiler flag any switch that forgets it.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q4</span><span>What is a discriminated union?</span></summary><div class="qa-body"><p>A union where every member has a shared literal field (the discriminant). Checking that field narrows the union to one member, so you get that member's fields in the branch. It's the cleanest way to model state, API results, and actions in TypeScript.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q5</span><span>When would you use a type guard?</span></summary><div class="qa-body"><p>When the runtime type isn't obvious from `typeof`/`instanceof` alone — e.g. distinguishing two object shapes. A predicate <code>function isCat(x: Cat | Dog): x is Cat</code> lets TS narrow inside <code>if (isCat(pet))</code>. Assertion functions (<code>asserts x is T</code>) narrow after a throw-check.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q6</span><span>What does <code>keyof</code> do?</span></summary><div class="qa-body"><p>It turns an object type into a union of its keys. <code>keyof User = 'id' | 'name' | 'email'</code>. Combined with generics (<code>K extends keyof T</code>), it makes type-safe property accessors, pickers, and sorters — invalid field names are caught at compile time.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q7</span><span>Difference between <code>readonly</code> and <code>const</code>?</span></summary><div class="qa-body"><p><code>const</code> is for variables — can't be reassigned. <code>readonly</code> is for properties — can't be reassigned after construction. A <code>const</code> object can have mutable properties; a <code>readonly</code> property can exist on a mutable object. Both are compile-time only.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q8</span><span>Difference between <code>private</code> and <code>#private</code>?</span></summary><div class="qa-body"><p><code>private</code> is a TS-only modifier — the field still exists at runtime and can be accessed via <code>as any</code>. <code>#field</code> is JavaScript's real private field — enforced by the engine, inaccessible from outside no matter what. Use <code>#</code> when you need genuine runtime privacy.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q9</span><span>What is a generic constraint?</span></summary><div class="qa-body"><p>A way to say "T can be any type, but it must have this shape". <code>&lt;T extends { length: number }&gt;</code> lets the function body safely read <code>x.length</code>. Without a constraint, T could be a number, and the access would fail to type-check.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q10</span><span>Explain <code>Omit</code> vs <code>Pick</code>.</span></summary><div class="qa-body"><p><code>Pick&lt;T, K&gt;</code> keeps only the keys in K. <code>Omit&lt;T, K&gt;</code> removes the keys in K. <code>Pick&lt;User, 'id' | 'name'&gt;</code> and <code>Omit&lt;User, 'password'&gt;</code> produce similar shapes but different intents — Pick is "keep only these", Omit is "drop these".</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q11</span><span>What is the difference between <code>type A = B &amp; C</code> and <code>type A = B | C</code>?</span></summary><div class="qa-body"><p><code>&amp;</code> is intersection — the value must satisfy both, combining their properties. <code>|</code> is union — the value must satisfy one of them. <code>A &amp; B</code> can be impossible if they contradict; <code>A | B</code> means the value could be A or B, and you need narrowing before type-specific use.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q12</span><span>When is <code>as</code> appropriate?</span></summary><div class="qa-body"><p>When you know the type more precisely than the compiler — typically at the boundary with external code (DOM, third-party libs, JSON.parse that you've validated). <code>as</code> silences the checker; use it only when you're genuinely sure. For "check but don't widen", use <code>satisfies</code>.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q13</span><span>What is <code>strict</code> mode?</span></summary><div class="qa-body"><p>A group of tsconfig checks enabled together, including <code>strictNullChecks</code>, <code>noImplicitAny</code>, <code>strictFunctionTypes</code>, and <code>strictPropertyInitialization</code>. Without <code>strictNullChecks</code> in particular, <code>null</code> and <code>undefined</code> are assignable to every type — which is where a huge class of runtime crashes lives.</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q14</span><span>What's the difference between structural and nominal typing?</span></summary><div class="qa-body"><p>TypeScript is <b>structural</b> — a value's type is determined by its shape, not its name. If an object has the right fields, it's accepted, even if it wasn't declared as that interface. Java and C# are <b>nominal</b> — you must explicitly implement or extend the right types. Structural typing is why you can pass plain objects where a class instance is expected, and why libraries can accept "anything with a <code>.length</code>".</p></div></details>
+
+  <details class="qa"><summary><span class="qn">Q15</span><span>Why doesn't TypeScript protect me from bad API responses?</span></summary><div class="qa-body"><p>Because types are erased at runtime. <code>res.json()</code> returns <code>any</code> — TS trusts whatever you assert about it. If the API sends <code>{ email: 42 }</code>, TS has no way to know. That's why runtime validation with Zod or io-ts is standard: validate the shape at the boundary, then use the inferred type as trusted.</p></div></details>
+</section>
+
+<!-- ═══ 26 · REACT ═══ -->
+<section class="section-block" id="t26">
+  <div class="section-header">
+    <div class="section-num-big">26</div>
+    <div>
+      <h2 class="section-title">TypeScript with React</h2>
+      <p class="section-subtitle">props · hooks · events · generics · context</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Counter.tsx</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> { useState, useEffect, useRef, useContext } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-com">// props</span>
+<span class="tok-key">interface</span> <span class="tok-type">ButtonProps</span> {
+  label: <span class="tok-type">string</span>;
+  onClick: () =&gt; <span class="tok-type">void</span>;
+  variant?: <span class="tok-str">'primary'</span> | <span class="tok-str">'secondary'</span>;
+}
+
+<span class="tok-key">function</span> <span class="tok-cmd">Button</span>({ label, onClick, variant = <span class="tok-str">'primary'</span> }: <span class="tok-type">ButtonProps</span>) {
+  <span class="tok-key">return</span> &lt;button className={variant} onClick={onClick}&gt;{label}&lt;/button&gt;;
+}
+
+<span class="tok-com">// state</span>
+<span class="tok-key">const</span> [count, setCount] = <span class="tok-cmd">useState</span>&lt;<span class="tok-type">number</span>&gt;(<span class="tok-num">0</span>);
+
+<span class="tok-com">// useState with null</span>
+<span class="tok-key">const</span> [user, setUser] = <span class="tok-cmd">useState</span>&lt;<span class="tok-type">User</span> | <span class="tok-key">null</span>&gt;(<span class="tok-key">null</span>);
+
+<span class="tok-com">// ref</span>
+<span class="tok-key">const</span> inputRef = <span class="tok-cmd">useRef</span>&lt;<span class="tok-type">HTMLInputElement</span>&gt;(<span class="tok-key">null</span>);
+
+<span class="tok-com">// event handlers</span>
+<span class="tok-key">function</span> <span class="tok-cmd">handleChange</span>(e: React.<span class="tok-type">ChangeEvent</span>&lt;<span class="tok-type">HTMLInputElement</span>&gt;) {
+  console.<span class="tok-cmd">log</span>(e.target.value);
+}
+
+<span class="tok-com">// context</span>
+<span class="tok-key">const</span> <span class="tok-type">AuthContext</span> = React.<span class="tok-cmd">createContext</span>&lt;{ user: <span class="tok-type">User</span> | <span class="tok-key">null</span> } | <span class="tok-key">null</span>&gt;(<span class="tok-key">null</span>);
+
+<span class="tok-key">function</span> <span class="tok-cmd">useAuth</span>() {
+  <span class="tok-key">const</span> ctx = <span class="tok-cmd">useContext</span>(<span class="tok-type">AuthContext</span>);
+  <span class="tok-key">if</span> (!ctx) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'useAuth outside provider'</span>);
+  <span class="tok-key">return</span> ctx;
+}</code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Type <code>useState</code>'s initial value when it can be null.</strong> <code>useState(null)</code> infers <code>null</code> — nothing else can be set. Write <code>useState&lt;User | null&gt;(null)</code> or <code>useState&lt;User&gt;()</code> when you'll set it later.</div>
+  </div>
+</section>
+
+<!-- ═══ 27 · NODE ═══ -->
+<section class="section-block" id="t27">
+  <div class="section-header">
+    <div class="section-num-big">27</div>
+    <div>
+      <h2 class="section-title">TypeScript with Node.js</h2>
+      <p class="section-subtitle">ts-node · tsx · types packages · Express typing · env vars</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">terminal</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code>npm install -D typescript tsx @types/node
+<span class="tok-com"># run TS directly</span>
+npx tsx src/server.ts
+<span class="tok-com"># or build</span>
+npx tsc &amp;&amp; node dist/server.js</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">server.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">import</span> express, { Request, Response } <span class="tok-key">from</span> <span class="tok-str">'express'</span>;
+
+<span class="tok-key">interface</span> <span class="tok-type">CreateUserBody</span> { name: <span class="tok-type">string</span>; email: <span class="tok-type">string</span> }
+
+<span class="tok-key">const</span> app = <span class="tok-cmd">express</span>();
+app.<span class="tok-cmd">use</span>(express.<span class="tok-cmd">json</span>());
+
+app.<span class="tok-cmd">post</span>(<span class="tok-str">'/users'</span>, (req: Request&lt;{}, {}, <span class="tok-type">CreateUserBody</span>&gt;, res: Response) =&gt; {
+  <span class="tok-key">const</span> { name, email } = req.body;
+  res.<span class="tok-cmd">status</span>(<span class="tok-num">201</span>).<span class="tok-cmd">json</span>({ id: <span class="tok-num">1</span>, name, email });
+});
+
+app.<span class="tok-cmd">listen</span>(<span class="tok-num">3000</span>);</code></pre>
+  </div>
+
+  <div class="note-box">
+    <div class="note-box-icon">💡</div>
+    <div class="note-box-text"><strong>Validate <code>req.body</code> with Zod, then trust the type.</strong> <code>Request&lt;{},{}, CreateUserBody&gt;</code> makes TS <em>believe</em> the body has that shape — but it doesn't check at runtime. Parse with a Zod schema first, then pass the parsed data. That's the only way the type becomes true.</div>
+  </div>
+</section>
+
+<!-- ═══ 28 · OOP ═══ -->
+<section class="section-block" id="t28">
+  <div class="section-header">
+    <div class="section-num-big">28</div>
+    <div>
+      <h2 class="section-title">OOP in depth</h2>
+      <p class="section-subtitle">the four pillars · classes, inheritance, encapsulation, abstraction, polymorphism, static</p>
+    </div>
+  </div>
+
+  <p>OOP is about bundling <b>state</b> (data) with <b>behaviour</b> (methods) into objects, and letting objects interact through well-defined interfaces. TypeScript supports all four pillars natively.</p>
+
+  <div class="table-wrap">
+    <table class="flag-table">
+      <thead><tr><th>Pillar</th><th>Meaning</th><th>In TS</th></tr></thead>
+      <tbody>
+        <tr><td><b>Encapsulation</b></td><td>Hide internal state, expose a controlled interface</td><td><code>private</code>, <code>protected</code>, <code>#field</code>, getters/setters</td></tr>
+        <tr><td><b>Inheritance</b></td><td>Reuse state and behaviour from a base type</td><td><code>extends</code>, <code>super</code>, <code>override</code></td></tr>
+        <tr><td><b>Abstraction</b></td><td>Model only what matters, hide the rest</td><td><code>interface</code>, <code>abstract class</code></td></tr>
+        <tr><td><b>Polymorphism</b></td><td>Same call, different behaviour per type</td><td>Method overriding, interface-based dispatch</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Encapsulation</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">encapsulation.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">class</span> <span class="tok-type">BankAccount</span> {
+  <span class="tok-key">private</span> balance = <span class="tok-num">0</span>;
+
+  <span class="tok-cmd">deposit</span>(amount: <span class="tok-type">number</span>) {
+    <span class="tok-key">if</span> (amount &lt;= <span class="tok-num">0</span>) <span class="tok-key">throw new</span> <span class="tok-cmd">Error</span>(<span class="tok-str">'Must be positive'</span>);
+    <span class="tok-key">this</span>.balance += amount;
+  }
+
+  <span class="tok-key">get</span> <span class="tok-cmd">currentBalance</span>(): <span class="tok-type">number</span> {
+    <span class="tok-key">return</span> <span class="tok-key">this</span>.balance;
+  }
+}</code></pre>
+  </div>
+
+  <h3>Inheritance</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">inheritance.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">class</span> <span class="tok-type">Animal</span> {
+  <span class="tok-key">constructor</span>(<span class="tok-key">public</span> name: <span class="tok-type">string</span>) {}
+  <span class="tok-cmd">speak</span>(): <span class="tok-type">string</span> { <span class="tok-key">return</span> <span class="tok-str">'…'</span>; }
+}
+
+<span class="tok-key">class</span> <span class="tok-type">Dog</span> <span class="tok-key">extends</span> <span class="tok-type">Animal</span> {
+  <span class="tok-key">constructor</span>(name: <span class="tok-type">string</span>, <span class="tok-key">public</span> breed: <span class="tok-type">string</span>) {
+    <span class="tok-key">super</span>(name);      <span class="tok-com">// must call before using `this`</span>
+  }
+
+  <span class="tok-key">override</span> <span class="tok-cmd">speak</span>(): <span class="tok-type">string</span> {
+    <span class="tok-key">return</span> <span class="tok-str">'Woof'</span>;
+  }
+}</code></pre>
+  </div>
+
+  <h3>Abstraction — interfaces and abstract classes</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">abstraction.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-com">// Interface — pure contract</span>
+<span class="tok-key">interface</span> <span class="tok-type">Shape</span> {
+  <span class="tok-cmd">area</span>(): <span class="tok-type">number</span>;
+}
+
+<span class="tok-com">// Abstract class — partial implementation + contract</span>
+<span class="tok-key">abstract class</span> <span class="tok-type">BaseShape</span> {
+  <span class="tok-key">constructor</span>(<span class="tok-key">public</span> name: <span class="tok-type">string</span>) {}
+  <span class="tok-key">abstract</span> <span class="tok-cmd">area</span>(): <span class="tok-type">number</span>;      <span class="tok-com">// must be implemented by subclass</span>
+  <span class="tok-cmd">describe</span>(): <span class="tok-type">string</span> {           <span class="tok-com">// shared implementation</span>
+    <span class="tok-key">return</span> <span class="tok-str">`${this.name}: ${this.area()}`</span>;
+  }
+}
+
+<span class="tok-key">class</span> <span class="tok-type">Circle</span> <span class="tok-key">extends</span> <span class="tok-type">BaseShape</span> {
+  <span class="tok-key">constructor</span>(<span class="tok-key">private</span> r: <span class="tok-type">number</span>) { <span class="tok-key">super</span>(<span class="tok-str">'circle'</span>); }
+  <span class="tok-cmd">area</span>(): <span class="tok-type">number</span> { <span class="tok-key">return</span> Math.PI * <span class="tok-key">this</span>.r ** <span class="tok-num">2</span>; }
+}
+
+<span class="tok-com">// const s = new BaseShape('x');   ❌ abstract cannot be instantiated</span></code></pre>
+  </div>
+
+  <h3>Polymorphism</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">polymorphism.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">class</span> <span class="tok-type">Notification</span> { <span class="tok-cmd">send</span>() { console.<span class="tok-cmd">log</span>(<span class="tok-str">'base'</span>); } }
+<span class="tok-key">class</span> <span class="tok-type">Email</span> <span class="tok-key">extends</span> <span class="tok-type">Notification</span> { <span class="tok-key">override</span> <span class="tok-cmd">send</span>() { console.<span class="tok-cmd">log</span>(<span class="tok-str">'email'</span>); } }
+<span class="tok-key">class</span> <span class="tok-type">SMS</span>   <span class="tok-key">extends</span> <span class="tok-type">Notification</span> { <span class="tok-key">override</span> <span class="tok-cmd">send</span>() { console.<span class="tok-cmd">log</span>(<span class="tok-str">'sms'</span>); } }
+
+<span class="tok-key">const</span> channels: <span class="tok-type">Notification</span>[] = [<span class="tok-key">new</span> <span class="tok-type">Email</span>(), <span class="tok-key">new</span> <span class="tok-type">SMS</span>()];
+channels.<span class="tok-cmd">forEach</span>(c =&gt; c.<span class="tok-cmd">send</span>());   <span class="tok-com">// each calls its own implementation</span></code></pre>
+  </div>
+
+  <h3>Static</h3>
+  <p><code>static</code> members belong to the class, not instances. They're used for factory methods, shared constants, and counters.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">static.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">class</span> <span class="tok-type">User</span> {
+  <span class="tok-key">static</span> count = <span class="tok-num">0</span>;
+
+  <span class="tok-key">constructor</span>(<span class="tok-key">public</span> name: <span class="tok-type">string</span>) {
+    <span class="tok-type">User</span>.count++;
+  }
+
+  <span class="tok-key">static</span> <span class="tok-cmd">createGuest</span>(): <span class="tok-type">User</span> {
+    <span class="tok-key">return new</span> <span class="tok-type">User</span>(<span class="tok-str">'guest'</span>);
+  }
+}
+
+<span class="tok-type">User</span>.count;             <span class="tok-com">// 0</span>
+<span class="tok-key">const</span> u = <span class="tok-type">User</span>.<span class="tok-cmd">createGuest</span>();
+<span class="tok-type">User</span>.count;             <span class="tok-com">// 1</span></code></pre>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-box-icon">⚠️</div>
+    <div class="warning-box-text"><strong>Prefer composition over inheritance.</strong> Inheritance is the tightest coupling in OOP — a change to the base class ripples through every subclass silently. Inherit only for real is-a relationships, and keep hierarchies shallow. "Has-a" (composition) is almost always the safer design.</div>
+  </div>
+</section>
+
+<!-- ═══ 29 · MISC ═══ -->
+<section class="section-block" id="t29">
+  <div class="section-header">
+    <div class="section-num-big">29</div>
+    <div>
+      <h2 class="section-title">Miscellaneous topics</h2>
+      <p class="section-subtitle">things that matter in real code that don't fit elsewhere</p>
+    </div>
+  </div>
+
+  <h3><code>satisfies</code></h3>
+  <p>Checks a value against a type without widening its inferred type. Unlike <code>as</code>, it's safe (fails if the shape doesn't match). Unlike annotation, it preserves literal types.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">satisfies.ts</span><button type="button" class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre class="code-pre"><code><span class="tok-key">type</span> <span class="tok-type">Route</span> = { path: <span class="tok-type">string</span>; auth: <span class="tok-type">boolean</span> };
+
+<span class="tok-key">const</span> routes = {
+  home:   { path: <span class="tok-str">'/'</span>,      auth: <span class="tok-key">false</span> },
+  admin:  { path: <span class="tok-str">'/admin'</span>, auth: <span class="tok-key">true</span> },
+} <span class="tok-key">satisfies</span> <span class="tok-type">Record</span>&lt;<span class="tok-type">string</span>, <span class="tok-type">Route</span>&gt;;
+
+<span class="tok-com">// routes.admin.auth is still `true`, not `boolean` — literal type preserved</span></code></pre>
+  </div>
+
+  <h3>Type-level operators</h3>
+  <ul>
+    <li><b><code>typeof</code></b> — get the type of a value: <code>type X = typeof someVar</code>.</li>
+    <li><b>Indexed access</b> — <code>T['key']</code> for the type at key.</li>
+    <li><b>Mapped types</b> — <code>{ [K in keyof T]: T[K] }</code> transforms every property.</li>
+    <li><b>Conditional types</b> — <code>T extends U ? X : Y</code>.</li>
+    <li><b>Template literal types</b> — <code>\`user-${string}\`</code>.</li>
+    <li><b>Infer</b> — <code>T extends (infer U)[] ? U : never</code> to extract a type from within a type.</li>
+  </ul>
+
+  <h3>Enum vs literal union</h3>
+  <p>Prefer literal unions. Enums emit runtime code (extra bundle size), have confusing reverse-mapping for numeric members, and don't serialise as cleanly. Literal unions (<code>type Status = 'a' | 'b'</code>) are erased, work everywhere, and integrate better with external systems.</p>
+
+  <h3>Unknown vs never in function parameters</h3>
+  <ul>
+    <li><code>function f(x: unknown)</code> — accepts anything, caller can pass any value, function must narrow before use.</li>
+    <li><code>function f(x: never)</code> — impossible to call (no value satisfies never). Used for exhaustiveness checks.</li>
+  </ul>
+</section>
+
+<!-- ═══ 30 · QUIZ ═══ -->
+<section class="section-block" id="quiz">
+  <div class="section-header">
+    <div class="section-num-big">30</div>
+    <div>
+      <h2 class="section-title">Final quiz — 20 questions</h2>
+      <p class="section-subtitle">self-test the whole note</p>
+    </div>
+  </div>
+
+  <div class="quiz-box" id="fq1">
+    <div class="quiz-label">Quiz · 01</div>
+    <div class="quiz-question">What does <code>tsc</code> do with type annotations?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq1', this, true)"><span class="opt-letter">A</span>Erases them and emits plain JavaScript.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq1', this, false)"><span class="opt-letter">B</span>Converts them into runtime checks.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq1-feedback"></div>
+    <div class="quiz-explain hidden">Types are a compile-time only tool. The browser never sees them.</div>
+  </div>
+
+  <div class="quiz-box" id="fq2">
+    <div class="quiz-label">Quiz · 02</div>
+    <div class="quiz-question">Which tsconfig flag should always be on for a new project?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq2', this, true)"><span class="opt-letter">A</span><code>strict</code></button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq2', this, false)"><span class="opt-letter">B</span><code>target: "ES5"</code></button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq2-feedback"></div>
+    <div class="quiz-explain hidden">Without <code>strict</code>, TypeScript behaves much less usefully — no null checks, implicit any allowed.</div>
+  </div>
+
+  <div class="quiz-box" id="fq3">
+    <div class="quiz-label">Quiz · 03</div>
+    <div class="quiz-question">What's the difference between <code>any</code> and <code>unknown</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq3', this, true)"><span class="opt-letter">A</span><code>any</code> disables checks; <code>unknown</code> requires narrowing before use.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq3', this, false)"><span class="opt-letter">B</span>They're identical.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq3-feedback"></div>
+    <div class="quiz-explain hidden"><code>unknown</code> is the safe version of <code>any</code>.</div>
+  </div>
+
+  <div class="quiz-box" id="fq4">
+    <div class="quiz-label">Quiz · 04</div>
+    <div class="quiz-question">Which type means "this value can never happen"?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq4', this, false)"><span class="opt-letter">A</span><code>void</code></button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq4', this, true)"><span class="opt-letter">B</span><code>never</code></button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq4-feedback"></div>
+    <div class="quiz-explain hidden"><code>never</code> — used for exhaustive checks and functions that throw. <code>void</code> is "returns nothing".</div>
+  </div>
+
+  <div class="quiz-box" id="fq5">
+    <div class="quiz-label">Quiz · 05</div>
+    <div class="quiz-question">What's the inferred type of <code>const x = 'hello'</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq5', this, false)"><span class="opt-letter">A</span><code>string</code></button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq5', this, true)"><span class="opt-letter">B</span><code>'hello'</code> (literal)</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq5-feedback"></div>
+    <div class="quiz-explain hidden"><code>const</code> values get literal types because they can't be reassigned. <code>let</code> would widen to <code>string</code>.</div>
+  </div>
+
+  <div class="quiz-box" id="fq6">
+    <div class="quiz-label">Quiz · 06</div>
+    <div class="quiz-question">What's the difference between <code>interface</code> and <code>type</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq6', this, true)"><span class="opt-letter">A</span><code>interface</code> can be merged; <code>type</code> can be unions, tuples, primitives.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq6', this, false)"><span class="opt-letter">B</span>They're interchangeable.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq6-feedback"></div>
+    <div class="quiz-explain hidden">Both describe shapes; <code>type</code> is more flexible; <code>interface</code> supports declaration merging.</div>
+  </div>
+
+  <div class="quiz-box" id="fq7">
+    <div class="quiz-label">Quiz · 07</div>
+    <div class="quiz-question">What does <code>A &amp; B</code> mean?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq7', this, false)"><span class="opt-letter">A</span>A or B (union).</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq7', this, true)"><span class="opt-letter">B</span>Both A and B (intersection).</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq7-feedback"></div>
+    <div class="quiz-explain hidden">Intersection combines the shapes — the value must satisfy both.</div>
+  </div>
+
+  <div class="quiz-box" id="fq8">
+    <div class="quiz-label">Quiz · 08</div>
+    <div class="quiz-question">What does <code>email?: string</code> mean?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq8', this, true)"><span class="opt-letter">A</span>The field may be missing or <code>undefined</code>.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq8', this, false)"><span class="opt-letter">B</span>The field may be <code>null</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq8-feedback"></div>
+    <div class="quiz-explain hidden"><code>?</code> means <code>string | undefined</code>, not <code>string | null</code>.</div>
+  </div>
+
+  <div class="quiz-box" id="fq9">
+    <div class="quiz-label">Quiz · 09</div>
+    <div class="quiz-question">What's the return type of a function that never returns?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq9', this, true)"><span class="opt-letter">A</span><code>never</code></button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq9', this, false)"><span class="opt-letter">B</span><code>void</code></button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq9-feedback"></div>
+    <div class="quiz-explain hidden"><code>never</code> — the function doesn't just return nothing, it never finishes.</div>
+  </div>
+
+  <div class="quiz-box" id="fq10">
+    <div class="quiz-label">Quiz · 10</div>
+    <div class="quiz-question">What's a discriminated union?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq10', this, true)"><span class="opt-letter">A</span>A union where a shared literal field narrows the shape when checked.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq10', this, false)"><span class="opt-letter">B</span>A type that's both A and B.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq10-feedback"></div>
+    <div class="quiz-explain hidden">This is the pattern used for <code>{ status: 'loading' | 'success' | 'error' }</code> style unions.</div>
+  </div>
+
+  <div class="quiz-box" id="fq11">
+    <div class="quiz-label">Quiz · 11</div>
+    <div class="quiz-question">What does <code>keyof User</code> return?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq11', this, true)"><span class="opt-letter">A</span>A union of the keys of <code>User</code>.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq11', this, false)"><span class="opt-letter">B</span>The values of <code>User</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq11-feedback"></div>
+    <div class="quiz-explain hidden">Useful for type-safe property accessors with <code>K extends keyof T</code>.</div>
+  </div>
+
+  <div class="quiz-box" id="fq12">
+    <div class="quiz-label">Quiz · 12</div>
+    <div class="quiz-question">What does <code>Omit&lt;User, 'password'&gt;</code> produce?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq12', this, false)"><span class="opt-letter">A</span>Only the password field.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq12', this, true)"><span class="opt-letter">B</span>All fields except password.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq12-feedback"></div>
+    <div class="quiz-explain hidden">Common pattern for API responses — never send <code>password</code> to the client.</div>
+  </div>
+
+  <div class="quiz-box" id="fq13">
+    <div class="quiz-label">Quiz · 13</div>
+    <div class="quiz-question">What does a generic constraint like <code>&lt;T extends { length: number }&gt;</code> do?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq13', this, true)"><span class="opt-letter">A</span>Restricts T to types that have a numeric <code>length</code> property.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq13', this, false)"><span class="opt-letter">B</span>Makes T optional.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq13-feedback"></div>
+    <div class="quiz-explain hidden">The function body can then safely read <code>x.length</code>.</div>
+  </div>
+
+  <div class="quiz-box" id="fq14">
+    <div class="quiz-label">Quiz · 14</div>
+    <div class="quiz-question">What does <code>as const</code> do?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq14', this, false)"><span class="opt-letter">A</span>Makes a value immutable at runtime.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq14', this, true)"><span class="opt-letter">B</span>Freezes the literal types — <code>'POST'</code> instead of <code>string</code>, <code>[1,2]</code> instead of <code>number[]</code>.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq14-feedback"></div>
+    <div class="quiz-explain hidden">Runtime immutability is a separate concern; <code>as const</code> is a compile-time type tightening.</div>
+  </div>
+
+  <div class="quiz-box" id="fq15">
+    <div class="quiz-label">Quiz · 15</div>
+    <div class="quiz-question">What's a type predicate?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq15', this, true)"><span class="opt-letter">A</span>A return type like <code>x is T</code> that narrows <code>x</code> when the function returns true.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq15', this, false)"><span class="opt-letter">B</span>A predicate function that returns a boolean.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq15-feedback"></div>
+    <div class="quiz-explain hidden">A type guard's return type is a predicate: <code>function isCat(x): x is Cat</code>.</div>
+  </div>
+
+  <div class="quiz-box" id="fq16">
+    <div class="quiz-label">Quiz · 16</div>
+    <div class="quiz-question">Difference between <code>private</code> and <code>#private</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq16', this, true)"><span class="opt-letter">A</span><code>private</code> is compile-time only; <code>#</code> is runtime-enforced.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq16', this, false)"><span class="opt-letter">B</span>They're the same.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq16-feedback"></div>
+    <div class="quiz-explain hidden">With <code>as any</code>, a <code>private</code> field is still accessible. A <code>#field</code> is not.</div>
+  </div>
+
+  <div class="quiz-box" id="fq17">
+    <div class="quiz-label">Quiz · 17</div>
+    <div class="quiz-question">Why can't you instantiate an <code>abstract class</code>?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq17', this, false)"><span class="opt-letter">A</span>Because it has no constructor.</button>
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq17', this, true)"><span class="opt-letter">B</span>Because it may contain unimplemented <code>abstract</code> methods — only subclasses can complete it.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq17-feedback"></div>
+    <div class="quiz-explain hidden">Abstract classes are templates. The subclass fills in the missing pieces, then becomes instantiable.</div>
+  </div>
+
+  <div class="quiz-box" id="fq18">
+    <div class="quiz-label">Quiz · 18</div>
+    <div class="quiz-question">What's the difference between <code>!</code> (non-null assertion) and optional chaining?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq18', this, true)"><span class="opt-letter">A</span><code>!</code> tells TS "trust me, it's not null" — no runtime check. <code>?.</code> actually handles null safely.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq18', this, false)"><span class="opt-letter">B</span>They're the same.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq18-feedback"></div>
+    <div class="quiz-explain hidden"><code>!</code> lies to the compiler; if it's actually null at runtime, you crash. <code>?.</code> is real safety.</div>
+  </div>
+
+  <div class="quiz-box" id="fq19">
+    <div class="quiz-label">Quiz · 19</div>
+    <div class="quiz-question">Why is <code>unknown</code> preferable to <code>any</code> for a <code>catch (err)</code> variable?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq19', this, true)"><span class="opt-letter">A</span>Because in JS anything can be thrown — you must narrow to use it. <code>any</code> would silently allow <code>err.message</code> even when err is a string.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq19', this, false)"><span class="opt-letter">B</span>They're identical.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq19-feedback"></div>
+    <div class="quiz-explain hidden"><code>unknown</code> forces <code>if (err instanceof Error)</code> before accessing <code>.message</code>.</div>
+  </div>
+
+  <div class="quiz-box" id="fq20">
+    <div class="quiz-label">Quiz · 20</div>
+    <div class="quiz-question">What does <code>satisfies</code> give you that <code>as SomeType</code> doesn't?</div>
+    <div class="quiz-options">
+      <button type="button" class="quiz-option" data-correct="1" onclick="answerQuiz('fq20', this, true)"><span class="opt-letter">A</span>A type check without widening the inferred type — the value's specific literal types are preserved.</button>
+      <button type="button" class="quiz-option" data-correct="0" onclick="answerQuiz('fq20', this, false)"><span class="opt-letter">B</span>It's a runtime cast.</button>
+    </div>
+    <div class="quiz-feedback hidden" id="fq20-feedback"></div>
+    <div class="quiz-explain hidden"><code>as</code> asserts and widens; <code>satisfies</code> checks but keeps the narrow inferred type.</div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <span>Sheryians Coding School · Language · TypeScript</span>
+  <span>Types · narrowing · generics · utility types · OOP · quiz</span>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  window.copyCode = function(btn){
+    var pre = btn.closest('.code-block').querySelector('.code-pre');
+    var txt = pre.innerText;
+    function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); done(); }
+  };
+
+  window.answerQuiz = function(quizId, btn, isCorrect){
+    var box = document.getElementById(quizId); if (!box) return;
+    var opts = $$('.quiz-option', box);
+    opts.forEach(function(o){ o.disabled = true; o.style.opacity = '0.6'; });
+    btn.style.opacity = '1';
+    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect) opts.forEach(function(o){ if (o.getAttribute('data-correct') === '1') o.classList.add('reveal'); });
+    var fb = document.getElementById(quizId + '-feedback');
+    fb.classList.remove('hidden', 'is-right', 'is-wrong');
+    fb.classList.add(isCorrect ? 'is-right' : 'is-wrong');
+    fb.innerHTML = '<span>' + (isCorrect ? '✓ Correct!' : '✗ Not quite — try reviewing that section.') + '</span><button type="button" class="quiz-reset" onclick="resetQuiz(\'' + quizId + '\')">Try again</button>';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.remove('hidden');
+  };
+  window.resetQuiz = function(quizId){
+    var box = document.getElementById(quizId); if (!box) return;
+    $$('.quiz-option', box).forEach(function(o){ o.disabled = false; o.style.opacity = ''; o.classList.remove('correct', 'incorrect', 'reveal'); });
+    var fb = document.getElementById(quizId + '-feedback'); fb.classList.add('hidden'); fb.innerHTML = '';
+    var ex = box.querySelector('.quiz-explain'); if (ex) ex.classList.add('hidden');
+  };
+
+  function inRange(spec, step){
+    if (!spec) return true;
+    return spec.split(',').some(function(tok){
+      tok = tok.trim(); if (!tok) return false;
+      if (tok.slice(-1) === '+') return step >= parseInt(tok, 10);
+      var m = tok.split('-');
+      if (m.length === 2) return step >= parseInt(m[0], 10) && step <= parseInt(m[1], 10);
+      return step === parseInt(tok, 10);
+    });
+  }
+  function sticky(mapJson, step){
+    var map; try { map = JSON.parse(mapJson); } catch(e) { return null; }
+    var best = null, bestK = -1;
+    Object.keys(map).forEach(function(k){ var n = parseInt(k, 10); if (n <= step && n > bestK) { bestK = n; best = map[k]; } });
+    return best;
+  }
+  function Stepper(root){
+    this.root = root;
+    this.total = parseInt(root.getAttribute('data-steps'), 10);
+    this.caps = $$('.stepper-caps > li', root).map(function(li){ return li.innerHTML; });
+    if (!this.total) this.total = this.caps.length;
+    this.capEl = root.querySelector('.stepper-caption');
+    this.counter = root.querySelector('.step-counter');
+    this.dots = root.querySelector('.step-dots');
+    this.prev = root.querySelector('[data-prev]');
+    this.next = root.querySelector('[data-next]');
+    this.anim = $$('[data-show],[data-cls]', root);
+    this.step = 1;
+    var self = this;
+    if (this.dots) { for (var i = 0; i < this.total; i++) { var d = document.createElement('span'); d.className = 'step-dot'; this.dots.appendChild(d); } }
+    this.prev.addEventListener('click', function(){ self.go(self.step - 1); });
+    this.next.addEventListener('click', function(){ self.go(self.step + 1); });
+    root.setAttribute('tabindex', '0');
+    root.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { self.go(self.step + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { self.go(self.step - 1); e.preventDefault(); }
+    });
+    this.render();
+  }
+  Stepper.prototype.go = function(n){ if (n < 1 || n > this.total) return; this.step = n; this.render(); };
+  Stepper.prototype.render = function(){
+    var s = this.step;
+    this.anim.forEach(function(el){
+      if (el.hasAttribute('data-show')) el.classList.toggle('is-off', !inRange(el.getAttribute('data-show'), s));
+      if (el.hasAttribute('data-cls')) {
+        var old = el.getAttribute('data-cls-applied');
+        if (old) old.split(' ').forEach(function(c){ if (c) el.classList.remove(c); });
+        var c = sticky(el.getAttribute('data-cls'), s) || '';
+        c.split(' ').forEach(function(k){ if (k) el.classList.add(k); });
+        el.setAttribute('data-cls-applied', c);
+      }
+    });
+    if (this.capEl && this.caps.length) this.capEl.innerHTML = this.caps[s - 1] || '';
+    this.counter.textContent = 'Step ' + s + ' / ' + this.total;
+    this.prev.disabled = s === 1;
+    this.next.disabled = s === this.total;
+    if (this.dots) $$('.step-dot', this.dots).forEach(function(d, i){
+      d.className = 'step-dot' + (i + 1 < s ? ' done' : '') + (i + 1 === s ? ' on' : '');
+    });
+  };
+  $$('.stepper[data-stepper]').forEach(function(r){ new Stepper(r); });
+})();
+</script>
+</body>
+</html>
